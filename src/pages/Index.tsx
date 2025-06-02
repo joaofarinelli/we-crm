@@ -12,6 +12,8 @@ import { Reports } from '@/components/Reports';
 import { RoleManagement } from '@/components/RoleManagement';
 import { Kanban } from '@/components/Kanban';
 import { Scripts } from '@/components/Scripts';
+import { Appointments } from '@/components/Appointments';
+import { CalendarView } from '@/components/Calendar';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -56,6 +58,10 @@ const Index = () => {
         return <Kanban />;
       case 'scripts':
         return <Scripts />;
+      case 'appointments':
+        return <Appointments />;
+      case 'calendar':
+        return <CalendarView />;
       default:
         return <Dashboard />;
     }
