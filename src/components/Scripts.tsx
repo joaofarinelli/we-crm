@@ -19,9 +19,6 @@ export const Scripts = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
 
-  // Check if user is admin (you might need to adjust this based on your role system)
-  const isAdmin = true; // This should be replaced with actual role check
-
   const filteredScripts = scripts.filter(script => {
     const matchesSearch = script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          script.content.toLowerCase().includes(searchTerm.toLowerCase());
@@ -42,6 +39,10 @@ export const Scripts = () => {
     }
   };
 
+  const canEditScript = (script: Script) => {
+    return user && script.created_by === user.id;
+  };
+
   if (isLoading) {
     return (
       <div className="p-8">
@@ -58,12 +59,10 @@ export const Scripts = () => {
             <h1 className="text-3xl font-bold text-gray-900">Scripts</h1>
             <p className="text-gray-600">Gerencie seus scripts de vendas e atendimento</p>
           </div>
-          {isAdmin && (
-            <Button onClick={() => setAddDialogOpen(true)} className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Novo Script
-            </Button>
-          )}
+          <Button onClick={() => setAddDialogOpen(true)} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Novo Script
+          </Button>
         </div>
 
         <div className="flex gap-4 mb-6">
@@ -106,7 +105,7 @@ export const Scripts = () => {
                     <CardDescription>{script.description}</CardDescription>
                   )}
                 </div>
-                {isAdmin && (
+                {canEditScript(script) && (
                   <div className="flex gap-1 ml-2">
                     <Button
                       variant="ghost"
