@@ -6,7 +6,6 @@ import { Sidebar } from '@/components/Sidebar';
 import { Dashboard } from '@/components/Dashboard';
 import { Leads } from '@/components/Leads';
 import { Contacts } from '@/components/Contacts';
-import { Companies } from '@/components/Companies';
 import { Tasks } from '@/components/Tasks';
 import { Reports } from '@/components/Reports';
 import { RoleManagement } from '@/components/RoleManagement';
@@ -46,8 +45,6 @@ const Index = () => {
         return <Leads />;
       case 'contacts':
         return <Contacts />;
-      case 'companies':
-        return <Companies />;
       case 'tasks':
         return <Tasks />;
       case 'reports':
