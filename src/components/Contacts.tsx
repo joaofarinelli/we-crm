@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus, Search, Filter, Edit2, Trash2, Phone, Mail, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -7,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useContacts } from '@/hooks/useContacts';
 import { EditContactDialog } from './EditContactDialog';
+import { AddContactDialog } from './AddContactDialog';
 
 export const Contacts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingContact, setEditingContact] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const { contacts, loading, deleteContact } = useContacts();
 
   const filteredContacts = contacts.filter(contact =>
@@ -55,13 +56,15 @@ export const Contacts = () => {
           <h1 className="text-3xl font-bold text-gray-900">Contatos</h1>
           <p className="text-gray-600 mt-1">Gerencie sua rede de contatos</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => setAddDialogOpen(true)}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Novo Contato
         </Button>
       </div>
 
-      {/* Busca */}
       <Card className="p-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
@@ -82,7 +85,6 @@ export const Contacts = () => {
         </div>
       </Card>
 
-      {/* Grid de Contatos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredContacts.map((contact) => (
           <Card key={contact.id} className="p-6 hover:shadow-lg transition-shadow duration-200">
@@ -180,6 +182,11 @@ export const Contacts = () => {
         contact={editingContact}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+      />
+
+      <AddContactDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
       />
     </div>
   );

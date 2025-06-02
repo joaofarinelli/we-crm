@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +9,7 @@ import { Companies } from '@/components/Companies';
 import { Tasks } from '@/components/Tasks';
 import { Reports } from '@/components/Reports';
 import { RoleManagement } from '@/components/RoleManagement';
+import { Kanban } from '@/components/Kanban';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -50,6 +50,8 @@ const Index = () => {
         return <Reports />;
       case 'settings':
         return <RoleManagement />;
+      case 'kanban':
+        return <Kanban />;
       default:
         return <Dashboard />;
     }

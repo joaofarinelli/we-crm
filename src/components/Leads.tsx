@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus, Search, Filter, Edit2, Trash2, Phone, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -7,12 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useLeads } from '@/hooks/useLeads';
 import { EditLeadDialog } from './EditLeadDialog';
+import { AddLeadDialog } from './AddLeadDialog';
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [editingLead, setEditingLead] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const { leads, loading, deleteLead } = useLeads();
 
   const getStatusColor = (status: string) => {
@@ -73,13 +74,15 @@ export const Leads = () => {
           <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
           <p className="text-gray-600 mt-1">Gerencie seus prospects e oportunidades</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => setAddDialogOpen(true)}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Novo Lead
         </Button>
       </div>
 
-      {/* Filtros */}
       <Card className="p-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
@@ -112,7 +115,6 @@ export const Leads = () => {
         </div>
       </Card>
 
-      {/* Lista de Leads */}
       <div className="grid gap-4">
         {filteredLeads.map((lead) => (
           <Card key={lead.id} className="p-6 hover:shadow-lg transition-shadow duration-200">
@@ -180,6 +182,11 @@ export const Leads = () => {
         lead={editingLead}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+      />
+
+      <AddLeadDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
       />
     </div>
   );
