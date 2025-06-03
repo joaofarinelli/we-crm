@@ -1,20 +1,69 @@
-import { useState } from 'react';
-import { Plus, Search, Filter, Edit2, Trash2, Phone, Mail } from 'lucide-react';
+
+import { useState, useMemo } from 'react';
+import { Plus, Edit2, Trash2, Phone, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useLeads } from '@/hooks/useLeads';
 import { EditLeadDialog } from './EditLeadDialog';
 import { AddLeadDialog } from './AddLeadDialog';
+import { LeadFilters, LeadFilterState } from './LeadFilters';
 
 export const Leads = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('Todos');
   const [editingLead, setEditingLead] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [filters, setFilters] = useState<LeadFilterState>({
+    searchTerm: '',
+    status: 'todos',
+    source: 'todas',
+    valueRange: { min: '', max: '' },
+    dateRange: { from: '', to: '' },
+    company: ''
+  });
+  
   const { leads, loading, deleteLead } = useLeads();
+
+  const filteredLeads = useMemo(() => {
+    return leads.filter(lead => {
+      // Busca por texto (nome, empresa, email)
+      const searchMatch = !filters.searchTerm || 
+        lead.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        (lead.company || '').toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        (lead.email || '').toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+      // Filtro por status
+      const statusMatch = filters.status === 'todos' || lead.status === filters.status;
+
+      // Filtro por origem
+      const sourceMatch = filters.source === 'todas' || lead.source === filters.source;
+
+      // Filtro por empresa
+      const companyMatch = !filters.company || 
+        (lead.company || '').toLowerCase().includes(filters.company.toLowerCase());
+
+      // Filtro por faixa de valor
+      const valueMatch = (() => {
+        const leadValue = lead.value || 0;
+        const minValue = filters.valueRange.min ? parseFloat(filters.valueRange.min) : 0;
+        const maxValue = filters.valueRange.max ? parseFloat(filters.valueRange.max) : Infinity;
+        return leadValue >= minValue && leadValue <= maxValue;
+      })();
+
+      // Filtro por período de criação
+      const dateMatch = (() => {
+        if (!filters.dateRange.from && !filters.dateRange.to) return true;
+        
+        const leadDate = new Date(lead.created_at);
+        const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : new Date('1970-01-01');
+        const toDate = filters.dateRange.to ? new Date(filters.dateRange.to + 'T23:59:59') : new Date();
+        
+        return leadDate >= fromDate && leadDate <= toDate;
+      })();
+
+      return searchMatch && statusMatch && sourceMatch && companyMatch && valueMatch && dateMatch;
+    });
+  }, [leads, filters]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -28,13 +77,6 @@ export const Leads = () => {
         return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
-
-  const filteredLeads = leads.filter(lead => {
-    const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (lead.company || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'Todos' || lead.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
 
   const formatValue = (value: number | null) => {
     if (!value) return 'R$ 0';
@@ -83,37 +125,11 @@ export const Leads = () => {
         </Button>
       </div>
 
-      <Card className="p-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar por nome ou empresa..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Todos">Todos os Status</option>
-              <option value="Quente">Quente</option>
-              <option value="Morno">Morno</option>
-              <option value="Frio">Frio</option>
-            </select>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <LeadFilters 
+        onFiltersChange={setFilters}
+        totalLeads={leads.length}
+        filteredCount={filteredLeads.length}
+      />
 
       <div className="grid gap-4">
         {filteredLeads.map((lead) => (
