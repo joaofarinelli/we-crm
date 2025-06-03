@@ -362,13 +362,80 @@ export type Database = {
         }
         Relationships: []
       }
+      user_invitations: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role_id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role_id: string
+          token?: string
+          used_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role_id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_invitations_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: {
+        Args: { invitation_token: string }
+        Returns: Json
+      }
+      get_current_user_company_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_permission: {
         Args: { user_id: string; permission: string }
+        Returns: boolean
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      mark_invitation_used: {
+        Args: { invitation_token: string; user_id: string }
         Returns: boolean
       }
     }

@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { InviteUserDialog } from '@/components/InviteUserDialog';
+import { InvitationsTable } from '@/components/InvitationsTable';
 
 export const UserManagement = () => {
   const { profiles, loading, updateProfile } = useProfiles();
@@ -85,7 +87,15 @@ export const UserManagement = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
           <p className="text-gray-600 mt-1">Gerencie os usuários e seus cargos na empresa</p>
         </div>
+        
+        {isAdmin && <InviteUserDialog />}
       </div>
+
+      {isAdmin && (
+        <div className="mb-6">
+          <InvitationsTable />
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {profiles.map((profile) => (
