@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,103 +7,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useRoles } from '@/hooks/useRoles';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
-interface Role {
-  id: string;
-  name: string;
-  description: string;
-  permissions: any;
-  is_system_role: boolean;
-  created_at: string;
-}
-
 export const RoleManagement = () => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { roles, loading, createRole, updateRole, deleteRole } = useRoles();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [editingRole, setEditingRole] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
   });
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
-
-  const fetchRoles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('roles')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-      setRoles(data || []);
-    } catch (error: any) {
-      toast({
-        title: 'Erro ao carregar cargos',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       if (editingRole) {
-        // Atualizar cargo existente
-        const { error } = await supabase
-          .from('roles')
-          .update({
-            name: formData.name,
-            description: formData.description,
-          })
-          .eq('id', editingRole.id);
-
-        if (error) throw error;
-        
-        toast({
-          title: 'Cargo atualizado com sucesso!',
+        await updateRole(editingRole.id, {
+          name: formData.name,
+          description: formData.description,
         });
       } else {
-        // Criar novo cargo
-        const { error } = await supabase
-          .from('roles')
-          .insert({
-            name: formData.name,
-            description: formData.description,
-            permissions: {},
-            is_system_role: false,
-          });
-
-        if (error) throw error;
-        
-        toast({
-          title: 'Cargo criado com sucesso!',
+        await createRole({
+          name: formData.name,
+          description: formData.description,
         });
       }
 
       setIsDialogOpen(false);
       setEditingRole(null);
       setFormData({ name: '', description: '' });
-      fetchRoles();
-    } catch (error: any) {
-      toast({
-        title: 'Erro ao salvar cargo',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      // Erro já tratado no hook
     }
   };
 
-  const handleEdit = (role: Role) => {
+  const handleEdit = (role: any) => {
     setEditingRole(role);
     setFormData({
       name: role.name,
@@ -113,7 +53,7 @@ export const RoleManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (role: Role) => {
+  const handleDelete = async (role: any) => {
     if (role.is_system_role) {
       toast({
         title: 'Erro',
@@ -124,26 +64,7 @@ export const RoleManagement = () => {
     }
 
     if (confirm('Tem certeza que deseja excluir este cargo?')) {
-      try {
-        const { error } = await supabase
-          .from('roles')
-          .delete()
-          .eq('id', role.id);
-
-        if (error) throw error;
-        
-        toast({
-          title: 'Cargo excluído com sucesso!',
-        });
-        
-        fetchRoles();
-      } catch (error: any) {
-        toast({
-          title: 'Erro ao excluir cargo',
-          description: error.message,
-          variant: 'destructive',
-        });
-      }
+      await deleteRole(role.id);
     }
   };
 
@@ -151,12 +72,15 @@ export const RoleManagement = () => {
     return <div className="p-6">Carregando cargos...</div>;
   }
 
+  // Filtrar apenas cargos da empresa do usuário (não incluir cargos do sistema)
+  const companyRoles = roles.filter(role => !role.is_system_role);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Gerenciamento de Cargos</h1>
-          <p className="text-gray-600">Gerencie os cargos e permissões do sistema</p>
+          <p className="text-gray-600">Gerencie os cargos da sua empresa</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -176,7 +100,7 @@ export const RoleManagement = () => {
                 {editingRole ? 'Editar Cargo' : 'Novo Cargo'}
               </DialogTitle>
               <DialogDescription>
-                {editingRole ? 'Edite as informações do cargo' : 'Crie um novo cargo personalizado'}
+                {editingRole ? 'Edite as informações do cargo' : 'Crie um novo cargo personalizado para sua empresa'}
               </DialogDescription>
             </DialogHeader>
             
@@ -219,17 +143,12 @@ export const RoleManagement = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {roles.map((role) => (
+        {companyRoles.map((role) => (
           <Card key={role.id}>
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg">{role.name}</CardTitle>
-                  {role.is_system_role && (
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded mt-1 inline-block">
-                      Cargo do Sistema
-                    </span>
-                  )}
                 </div>
                 
                 <div className="flex gap-1">
@@ -241,25 +160,30 @@ export const RoleManagement = () => {
                     <Edit className="w-4 h-4" />
                   </Button>
                   
-                  {!role.is_system_role && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(role)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(role)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </CardHeader>
             
             <CardContent>
-              <CardDescription>{role.description}</CardDescription>
+              <CardDescription>{role.description || 'Sem descrição'}</CardDescription>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {companyRoles.length === 0 && (
+        <Card className="p-12 text-center">
+          <p className="text-gray-500 text-lg">Nenhum cargo personalizado encontrado</p>
+          <p className="text-gray-400 mt-2">Sua empresa já possui os cargos padrão (Admin, SDR, Closer)</p>
+        </Card>
+      )}
     </div>
   );
 };

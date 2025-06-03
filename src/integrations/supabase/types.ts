@@ -124,56 +124,6 @@ export type Database = {
         }
         Relationships: []
       }
-      contacts: {
-        Row: {
-          company_id: string | null
-          created_at: string
-          created_by: string | null
-          email: string | null
-          id: string
-          last_contact: string | null
-          location: string | null
-          name: string
-          phone: string | null
-          position: string | null
-          updated_at: string
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          last_contact?: string | null
-          location?: string | null
-          name: string
-          phone?: string | null
-          position?: string | null
-          updated_at?: string
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          last_contact?: string | null
-          location?: string | null
-          name?: string
-          phone?: string | null
-          position?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       leads: {
         Row: {
           created_at: string
@@ -260,6 +210,7 @@ export type Database = {
       }
       roles: {
         Row: {
+          company_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -269,6 +220,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -278,6 +230,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -286,7 +239,15 @@ export type Database = {
           permissions?: Json | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scripts: {
         Row: {
@@ -422,6 +383,10 @@ export type Database = {
       accept_invitation: {
         Args: { invitation_token: string }
         Returns: Json
+      }
+      create_default_roles_for_company: {
+        Args: { target_company_id: string }
+        Returns: undefined
       }
       get_current_user_company_id: {
         Args: Record<PropertyKey, never>
