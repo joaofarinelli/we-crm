@@ -30,7 +30,6 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'kanban', label: 'Pipeline', icon: Kanban },
     { id: 'appointments', label: 'Agendamentos', icon: Calendar },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },
-    { id: 'contacts', label: 'Contatos', icon: Users },
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'scripts', label: 'Scripts', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
