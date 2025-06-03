@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { Plus, Edit2, Trash2, Phone, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -17,8 +18,7 @@ export const Leads = () => {
     status: 'todos',
     source: 'todas',
     valueRange: { min: '', max: '' },
-    dateRange: { from: '', to: '' },
-    company: ''
+    dateRange: { from: '', to: '' }
   });
   
   const { leads, loading, deleteLead } = useLeads();
