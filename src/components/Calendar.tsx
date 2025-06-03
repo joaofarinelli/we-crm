@@ -17,9 +17,8 @@ interface Appointment {
   time: string;
   duration: number;
   lead_id: string | null;
-  contact_id: string | null;
   scheduled_by: string;
-  assigned_to: string | null;
+  assigned_to: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -27,9 +26,9 @@ interface Appointment {
     name: string;
     company: string | null;
   };
-  contacts?: {
-    name: string;
-    company_id: string | null;
+  assigned_closer?: {
+    full_name: string | null;
+    email: string | null;
   };
 }
 

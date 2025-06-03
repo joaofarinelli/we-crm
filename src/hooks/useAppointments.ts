@@ -68,7 +68,7 @@ export const useAppointments = () => {
             name,
             company
           ),
-          assigned_closer:profiles!assigned_to (
+          assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
             email
           )
@@ -111,7 +111,7 @@ export const useAppointments = () => {
             name,
             company
           ),
-          assigned_closer:profiles!assigned_to (
+          assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
             email
           )
@@ -148,7 +148,7 @@ export const useAppointments = () => {
             name,
             company
           ),
-          assigned_closer:profiles!assigned_to (
+          assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
             email
           )
