@@ -32,6 +32,20 @@ export const useProfiles = () => {
 
   const fetchProfiles = async () => {
     try {
+      // Primeiro obter o company_id do usuário atual
+      const { data: currentUserProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError || !currentUserProfile?.company_id) {
+        console.error('Erro ao buscar company_id do usuário:', profileError);
+        setProfiles([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -47,6 +61,7 @@ export const useProfiles = () => {
             plan
           )
         `)
+        .eq('company_id', currentUserProfile.company_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -100,7 +101,7 @@ export const UserManagement = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
-          <p className="text-gray-600 mt-1">Gerencie os usuários e seus cargos na empresa</p>
+          <p className="text-gray-600 mt-1">Gerencie os usuários e seus cargos na sua empresa</p>
         </div>
         
         {isAdmin && <InviteUserDialog />}
@@ -207,8 +208,8 @@ export const UserManagement = () => {
 
       {profiles.length === 0 && (
         <Card className="p-12 text-center">
-          <p className="text-gray-500 text-lg">Nenhum usuário encontrado</p>
-          <p className="text-gray-400 mt-2">Os usuários aparecerão aqui conforme se cadastram</p>
+          <p className="text-gray-500 text-lg">Nenhum usuário encontrado na sua empresa</p>
+          <p className="text-gray-400 mt-2">Convide novos usuários para sua empresa</p>
         </Card>
       )}
     </div>
