@@ -68,7 +68,7 @@ export const useAppointments = () => {
             name,
             company
           ),
-          profiles!assigned_to (
+          assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
             email
           )
@@ -88,13 +88,7 @@ export const useAppointments = () => {
       if (error) throw error;
       console.log('Agendamentos carregados:', data);
       
-      // Mapear os dados para corresponder à interface
-      const mappedData = data?.map(appointment => ({
-        ...appointment,
-        assigned_closer: appointment.profiles
-      })) || [];
-      
-      setAppointments(mappedData);
+      setAppointments(data || []);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
       toast({
@@ -118,7 +112,7 @@ export const useAppointments = () => {
             name,
             company
           ),
-          profiles!assigned_to (
+          assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
             email
           )
@@ -127,18 +121,12 @@ export const useAppointments = () => {
 
       if (error) throw error;
       
-      // Mapear os dados para corresponder à interface
-      const mappedData = {
-        ...data,
-        assigned_closer: data.profiles
-      };
-      
-      setAppointments(prev => [mappedData, ...prev]);
+      setAppointments(prev => [data, ...prev]);
       toast({
         title: "Sucesso",
         description: "Agendamento criado com sucesso"
       });
-      return mappedData;
+      return data;
     } catch (error) {
       console.error('Erro ao criar agendamento:', error);
       toast({
@@ -162,7 +150,7 @@ export const useAppointments = () => {
             name,
             company
           ),
-          profiles!assigned_to (
+          assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
             email
           )
@@ -171,18 +159,12 @@ export const useAppointments = () => {
 
       if (error) throw error;
       
-      // Mapear os dados para corresponder à interface
-      const mappedData = {
-        ...data,
-        assigned_closer: data.profiles
-      };
-      
-      setAppointments(prev => prev.map(appointment => appointment.id === id ? mappedData : appointment));
+      setAppointments(prev => prev.map(appointment => appointment.id === id ? data : appointment));
       toast({
         title: "Sucesso",
         description: "Agendamento atualizado com sucesso"
       });
-      return mappedData;
+      return data;
     } catch (error) {
       console.error('Erro ao atualizar agendamento:', error);
       toast({
