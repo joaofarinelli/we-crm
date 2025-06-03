@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useProfiles } from '@/hooks/useProfiles';
 
 interface Invitation {
   id: string;
@@ -24,7 +25,12 @@ export const useInvitations = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { profiles } = useProfiles();
   const { toast } = useToast();
+
+  // Obter o company_id do usuário atual
+  const currentUserProfile = profiles.find(p => p.id === user?.id);
+  const userCompanyId = currentUserProfile?.company_id;
 
   const fetchInvitations = async () => {
     try {
@@ -54,13 +60,23 @@ export const useInvitations = () => {
   };
 
   const createInvitation = async (email: string, roleId: string) => {
+    if (!userCompanyId) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível identificar sua empresa",
+        variant: "destructive"
+      });
+      throw new Error('Company ID not found');
+    }
+
     try {
       const { data, error } = await supabase
         .from('user_invitations')
         .insert({
           email,
           role_id: roleId,
-          invited_by: user?.id
+          invited_by: user?.id,
+          company_id: userCompanyId
         })
         .select(`
           *,
@@ -118,10 +134,10 @@ export const useInvitations = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && userCompanyId) {
       fetchInvitations();
     }
-  }, [user]);
+  }, [user, userCompanyId]);
 
   return {
     invitations,
