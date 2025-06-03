@@ -1,15 +1,16 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, BarChart3, Target, CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { CompanyRegistrationDialog } from '@/components/CompanyRegistrationDialog';
 
 export const Landing = () => {
   const [showRegistration, setShowRegistration] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const features = [
     {
@@ -89,12 +90,25 @@ export const Landing = () => {
               <h1 className="text-2xl font-bold text-gray-900">ZestCRM</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" onClick={() => navigate('/auth')}>
-                Entrar
-              </Button>
-              <Button onClick={() => setShowRegistration(true)}>
-                Cadastrar Empresa
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="outline" onClick={() => navigate('/')}>
+                    Dashboard
+                  </Button>
+                  <Button onClick={() => setShowRegistration(true)}>
+                    Cadastrar Empresa
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => navigate('/auth')}>
+                    Entrar
+                  </Button>
+                  <Button onClick={() => setShowRegistration(true)}>
+                    Cadastrar Empresa
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -112,13 +126,27 @@ export const Landing = () => {
             Aumente sua conversão e organize seu time de vendas.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button size="lg" onClick={() => setShowRegistration(true)}>
-              Começar Gratuitamente
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button variant="outline" size="lg" onClick={() => navigate('/auth')}>
-              Ver Demo
-            </Button>
+            {user ? (
+              <>
+                <Button size="lg" onClick={() => navigate('/')}>
+                  Ir para Dashboard
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => setShowRegistration(true)}>
+                  Cadastrar Nova Empresa
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="lg" onClick={() => setShowRegistration(true)}>
+                  Começar Gratuitamente
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => navigate('/auth')}>
+                  Ver Demo
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -213,10 +241,17 @@ export const Landing = () => {
           <p className="text-xl text-blue-100 mb-8">
             Junte-se a centenas de empresas que já aumentaram suas vendas com nossa plataforma
           </p>
-          <Button size="lg" variant="secondary" onClick={() => setShowRegistration(true)}>
-            Começar Agora - É Grátis
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+          {user ? (
+            <Button size="lg" variant="secondary" onClick={() => navigate('/')}>
+              Acessar Dashboard
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          ) : (
+            <Button size="lg" variant="secondary" onClick={() => setShowRegistration(true)}>
+              Começar Agora - É Grátis
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          )}
         </div>
       </section>
 
