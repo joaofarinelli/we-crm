@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,9 +12,8 @@ interface Appointment {
   time: string;
   duration: number;
   lead_id: string | null;
-  contact_id: string | null;
   scheduled_by: string;
-  assigned_to: string | null;
+  assigned_to: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -21,9 +21,9 @@ interface Appointment {
     name: string;
     company: string | null;
   };
-  contacts?: {
-    name: string;
-    company_id: string | null;
+  assigned_closer?: {
+    full_name: string | null;
+    email: string | null;
   };
 }
 
@@ -68,9 +68,9 @@ export const useAppointments = () => {
             name,
             company
           ),
-          contacts (
-            name,
-            company_id
+          assigned_closer:profiles!assigned_to (
+            full_name,
+            email
           )
         `)
         .order('date', { ascending: true })
@@ -100,7 +100,7 @@ export const useAppointments = () => {
     }
   };
 
-  const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'contacts'>) => {
+  const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'assigned_closer'>) => {
     try {
       const { data, error } = await supabase
         .from('appointments')
@@ -111,9 +111,9 @@ export const useAppointments = () => {
             name,
             company
           ),
-          contacts (
-            name,
-            company_id
+          assigned_closer:profiles!assigned_to (
+            full_name,
+            email
           )
         `)
         .single();
@@ -148,9 +148,9 @@ export const useAppointments = () => {
             name,
             company
           ),
-          contacts (
-            name,
-            company_id
+          assigned_closer:profiles!assigned_to (
+            full_name,
+            email
           )
         `)
         .single();

@@ -11,8 +11,7 @@ export type Database = {
     Tables: {
       appointments: {
         Row: {
-          assigned_to: string | null
-          contact_id: string | null
+          assigned_to: string
           created_at: string
           date: string
           description: string | null
@@ -26,8 +25,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          assigned_to?: string | null
-          contact_id?: string | null
+          assigned_to: string
           created_at?: string
           date: string
           description?: string | null
@@ -41,8 +39,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          assigned_to?: string | null
-          contact_id?: string | null
+          assigned_to?: string
           created_at?: string
           date?: string
           description?: string | null
@@ -56,13 +53,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "appointments_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "appointments_lead_id_fkey"
             columns: ["lead_id"]

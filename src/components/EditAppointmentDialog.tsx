@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useLeads } from '@/hooks/useLeads';
-import { useContacts } from '@/hooks/useContacts';
+import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
 
 interface Appointment {
@@ -19,9 +19,8 @@ interface Appointment {
   time: string;
   duration: number;
   lead_id: string | null;
-  contact_id: string | null;
   scheduled_by: string;
-  assigned_to: string | null;
+  assigned_to: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -29,9 +28,9 @@ interface Appointment {
     name: string;
     company: string | null;
   };
-  contacts?: {
-    name: string;
-    company_id: string | null;
+  assigned_closer?: {
+    full_name: string | null;
+    email: string | null;
   };
 }
 
@@ -48,13 +47,13 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState(60);
   const [leadId, setLeadId] = useState<string>('');
-  const [contactId, setContactId] = useState<string>('');
+  const [assignedTo, setAssignedTo] = useState<string>('');
   const [status, setStatus] = useState('Agendado');
   const [loading, setLoading] = useState(false);
 
   const { updateAppointment } = useAppointments();
   const { leads } = useLeads();
-  const { contacts } = useContacts();
+  const { closers } = useClosers();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
       setTime(appointment.time);
       setDuration(appointment.duration);
       setLeadId(appointment.lead_id || '');
-      setContactId(appointment.contact_id || '');
+      setAssignedTo(appointment.assigned_to);
       setStatus(appointment.status);
     }
   }, [appointment]);
@@ -83,7 +82,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
       time,
       duration,
       lead_id: leadId || null,
-      contact_id: contactId || null,
+      assigned_to: assignedTo,
       status,
       updated_at: new Date().toISOString()
     };
@@ -99,7 +98,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
       setTime('');
       setDuration(60);
       setLeadId('');
-      setContactId('');
+      setAssignedTo('');
       setStatus('Agendado');
     }
 
@@ -214,16 +213,15 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contact">Contato</Label>
-              <Select value={contactId} onValueChange={setContactId}>
+              <Label htmlFor="assignedTo">Closer Responsável *</Label>
+              <Select value={assignedTo} onValueChange={setAssignedTo}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um contato (opcional)" />
+                  <SelectValue placeholder="Selecione um closer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum contato</SelectItem>
-                  {contacts.map((contact) => (
-                    <SelectItem key={contact.id} value={contact.id}>
-                      {contact.name} {contact.position && `(${contact.position})`}
+                  {closers.map((closer) => (
+                    <SelectItem key={closer.id} value={closer.id}>
+                      {closer.full_name || closer.email}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -235,7 +233,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !assignedTo}>
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </div>

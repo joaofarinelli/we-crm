@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, Building, Phone, FileText } from 'lucide-react';
+import { Calendar, Clock, User, Building, UserCheck, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -13,9 +13,8 @@ interface Appointment {
   time: string;
   duration: number;
   lead_id: string | null;
-  contact_id: string | null;
   scheduled_by: string;
-  assigned_to: string | null;
+  assigned_to: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -23,9 +22,9 @@ interface Appointment {
     name: string;
     company: string | null;
   };
-  contacts?: {
-    name: string;
-    company_id: string | null;
+  assigned_closer?: {
+    full_name: string | null;
+    email: string | null;
   };
 }
 
@@ -115,12 +114,12 @@ export const ViewAppointmentDialog = ({ open, onOpenChange, appointment }: ViewA
             </div>
           )}
 
-          {appointment.contacts && (
+          {appointment.assigned_closer && (
             <div className="flex items-center gap-3">
-              <Phone className="w-5 h-5 text-gray-500" />
+              <UserCheck className="w-5 h-5 text-gray-500" />
               <div>
-                <p className="font-medium text-gray-900">Contato</p>
-                <p className="text-gray-600 text-sm">{appointment.contacts.name}</p>
+                <p className="font-medium text-gray-900">Closer Responsável</p>
+                <p className="text-gray-600 text-sm">{appointment.assigned_closer.full_name || appointment.assigned_closer.email}</p>
               </div>
             </div>
           )}

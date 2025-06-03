@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useLeads } from '@/hooks/useLeads';
-import { useContacts } from '@/hooks/useContacts';
+import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AddAppointmentDialogProps {
@@ -31,7 +31,7 @@ interface AddAppointmentDialogProps {
 export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialogProps) => {
   const { createAppointment } = useAppointments();
   const { leads } = useLeads();
-  const { contacts } = useContacts();
+  const { closers } = useClosers();
   const { user } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -41,7 +41,6 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
     time: '',
     duration: 60,
     lead_id: '',
-    contact_id: '',
     assigned_to: '',
     status: 'Agendado'
   });
@@ -55,8 +54,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
       ...formData,
       scheduled_by: user.id,
       lead_id: formData.lead_id || null,
-      contact_id: formData.contact_id || null,
-      assigned_to: formData.assigned_to || null,
+      assigned_to: formData.assigned_to,
     };
 
     const created = await createAppointment(appointmentData);
@@ -69,7 +67,6 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
         time: '',
         duration: 60,
         lead_id: '',
-        contact_id: '',
         assigned_to: '',
         status: 'Agendado'
       });
@@ -160,15 +157,15 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
           </div>
 
           <div className="space-y-2">
-            <Label>Contato</Label>
-            <Select value={formData.contact_id} onValueChange={(value) => setFormData(prev => ({ ...prev, contact_id: value }))}>
+            <Label>Closer Responsável *</Label>
+            <Select value={formData.assigned_to} onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value }))}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione um contato" />
+                <SelectValue placeholder="Selecione um closer" />
               </SelectTrigger>
               <SelectContent>
-                {contacts.map((contact) => (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    {contact.name} {contact.companies?.name && `- ${contact.companies.name}`}
+                {closers.map((closer) => (
+                  <SelectItem key={closer.id} value={closer.id}>
+                    {closer.full_name || closer.email}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -194,7 +191,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={!formData.assigned_to}>
               Criar Agendamento
             </Button>
           </DialogFooter>

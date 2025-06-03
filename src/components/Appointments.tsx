@@ -7,7 +7,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { AddAppointmentDialog } from './AddAppointmentDialog';
 import { EditAppointmentDialog } from './EditAppointmentDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Calendar, Clock, User, Building, Edit2, Trash2, Phone } from 'lucide-react';
+import { Calendar, Clock, User, Building, Edit2, Trash2, UserCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -19,9 +19,8 @@ interface Appointment {
   time: string;
   duration: number;
   lead_id: string | null;
-  contact_id: string | null;
   scheduled_by: string;
-  assigned_to: string | null;
+  assigned_to: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -29,9 +28,9 @@ interface Appointment {
     name: string;
     company: string | null;
   };
-  contacts?: {
-    name: string;
-    company_id: string | null;
+  assigned_closer?: {
+    full_name: string | null;
+    email: string | null;
   };
 }
 
@@ -166,10 +165,10 @@ export const Appointments = () => {
                 </div>
               )}
 
-              {appointment.contacts && (
+              {appointment.assigned_closer && (
                 <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  <span>{appointment.contacts.name}</span>
+                  <UserCheck className="w-4 h-4 text-gray-500" />
+                  <span>{appointment.assigned_closer.full_name || appointment.assigned_closer.email}</span>
                 </div>
               )}
             </div>
