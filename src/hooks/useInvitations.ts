@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useProfiles } from '@/hooks/useProfiles';
 
 interface Invitation {
   id: string;
@@ -25,15 +24,35 @@ export const useInvitations = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { profiles } = useProfiles();
   const { toast } = useToast();
 
-  // Obter o company_id do usuário atual
-  const currentUserProfile = profiles.find(p => p.id === user?.id);
-  const userCompanyId = currentUserProfile?.company_id;
-
   const fetchInvitations = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
+      setLoading(true);
+      
+      // Primeiro, obter o company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      if (!profileData?.company_id) {
+        console.log('Usuário não possui company_id definido');
+        setInvitations([]);
+        return;
+      }
+
+      // Buscar convites da empresa do usuário
       const { data, error } = await supabase
         .from('user_invitations')
         .select(`
@@ -43,9 +62,12 @@ export const useInvitations = () => {
             description
           )
         `)
+        .eq('company_id', profileData.company_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      
+      console.log('Convites carregados:', data);
       setInvitations(data || []);
     } catch (error) {
       console.error('Erro ao buscar convites:', error);
@@ -60,23 +82,38 @@ export const useInvitations = () => {
   };
 
   const createInvitation = async (email: string, roleId: string) => {
-    if (!userCompanyId) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível identificar sua empresa",
-        variant: "destructive"
-      });
-      throw new Error('Company ID not found');
+    if (!user) {
+      throw new Error('Usuário não autenticado');
     }
 
     try {
+      // Obter o company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      if (!profileData?.company_id) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível identificar sua empresa",
+          variant: "destructive"
+        });
+        throw new Error('Company ID not found');
+      }
+
       const { data, error } = await supabase
         .from('user_invitations')
         .insert({
           email,
           role_id: roleId,
-          invited_by: user?.id,
-          company_id: userCompanyId
+          invited_by: user.id,
+          company_id: profileData.company_id
         })
         .select(`
           *,
@@ -134,10 +171,8 @@ export const useInvitations = () => {
   };
 
   useEffect(() => {
-    if (user && userCompanyId) {
-      fetchInvitations();
-    }
-  }, [user, userCompanyId]);
+    fetchInvitations();
+  }, [user]);
 
   return {
     invitations,
