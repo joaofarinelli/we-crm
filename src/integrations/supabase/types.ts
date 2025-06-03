@@ -176,7 +176,6 @@ export type Database = {
       }
       leads: {
         Row: {
-          company: string | null
           created_at: string
           created_by: string | null
           email: string | null
@@ -189,7 +188,6 @@ export type Database = {
           value: number | null
         }
         Insert: {
-          company?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -202,7 +200,6 @@ export type Database = {
           value?: number | null
         }
         Update: {
-          company?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null

@@ -7,7 +7,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { AddAppointmentDialog } from './AddAppointmentDialog';
 import { EditAppointmentDialog } from './EditAppointmentDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Calendar, Clock, User, Building, Edit2, Trash2, UserCheck } from 'lucide-react';
+import { Calendar, Clock, User, Edit2, Trash2, UserCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -26,7 +26,6 @@ interface Appointment {
   updated_at: string;
   leads?: {
     name: string;
-    company: string | null;
   };
   assigned_closer?: {
     full_name: string | null;
@@ -155,13 +154,6 @@ export const Appointments = () => {
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span>{appointment.leads.name}</span>
-                </div>
-              )}
-
-              {appointment.leads?.company && (
-                <div className="flex items-center gap-2">
-                  <Building className="w-4 h-4 text-gray-500" />
-                  <span>{appointment.leads.company}</span>
                 </div>
               )}
 

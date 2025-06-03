@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +18,6 @@ interface Appointment {
   updated_at: string;
   leads?: {
     name: string;
-    company: string | null;
   };
   assigned_closer?: {
     full_name: string | null;
@@ -65,8 +63,7 @@ export const useAppointments = () => {
         .select(`
           *,
           leads (
-            name,
-            company
+            name
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -109,8 +106,7 @@ export const useAppointments = () => {
         .select(`
           *,
           leads (
-            name,
-            company
+            name
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -147,8 +143,7 @@ export const useAppointments = () => {
         .select(`
           *,
           leads (
-            name,
-            company
+            name
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,

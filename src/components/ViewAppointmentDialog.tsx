@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, Building, UserCheck, FileText } from 'lucide-react';
+import { Calendar, Clock, User, UserCheck, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -20,7 +20,6 @@ interface Appointment {
   updated_at: string;
   leads?: {
     name: string;
-    company: string | null;
   };
   assigned_closer?: {
     full_name: string | null;
@@ -100,16 +99,6 @@ export const ViewAppointmentDialog = ({ open, onOpenChange, appointment }: ViewA
               <div>
                 <p className="font-medium text-gray-900">Lead</p>
                 <p className="text-gray-600 text-sm">{appointment.leads.name}</p>
-              </div>
-            </div>
-          )}
-
-          {appointment.leads?.company && (
-            <div className="flex items-center gap-3">
-              <Building className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="font-medium text-gray-900">Empresa</p>
-                <p className="text-gray-600 text-sm">{appointment.leads.company}</p>
               </div>
             </div>
           )}

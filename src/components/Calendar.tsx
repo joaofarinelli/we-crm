@@ -24,7 +24,6 @@ interface Appointment {
   updated_at: string;
   leads?: {
     name: string;
-    company: string | null;
   };
   assigned_closer?: {
     full_name: string | null;
