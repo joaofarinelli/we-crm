@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -200,7 +199,7 @@ export const useAppointments = () => {
 
   useEffect(() => {
     if (user) {
-      fetchInvitations();
+      fetchAppointments();
     }
   }, [user]);
 
