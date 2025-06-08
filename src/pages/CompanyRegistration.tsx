@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCompanies } from '@/hooks/useCompanies';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 const companySchema = z.object({
@@ -36,6 +37,7 @@ const companySchema = z.object({
   website: z.string().url('Digite uma URL válida').optional().or(z.literal('')),
   contactName: z.string().min(2, 'Nome do contato é obrigatório'),
   contactEmail: z.string().email('Email inválido'),
+  contactPassword: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   contactPhone: z.string().min(1, 'Telefone é obrigatório'),
   contactPosition: z.string().min(1, 'Cargo é obrigatório'),
   notes: z.string().optional(),
@@ -46,6 +48,7 @@ type CompanyFormData = z.infer<typeof companySchema>;
 export const CompanyRegistration = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createCompany } = useCompanies();
+  const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -60,6 +63,7 @@ export const CompanyRegistration = () => {
       website: '',
       contactName: '',
       contactEmail: '',
+      contactPassword: '',
       contactPhone: '',
       contactPosition: '',
       notes: '',
@@ -69,6 +73,18 @@ export const CompanyRegistration = () => {
   const onSubmit = async (data: CompanyFormData) => {
     setIsSubmitting(true);
     try {
+      // Primeiro, criar o usuário
+      const { error: signUpError } = await signUp(
+        data.contactEmail, 
+        data.contactPassword, 
+        data.contactName
+      );
+
+      if (signUpError) {
+        throw new Error(signUpError.message);
+      }
+
+      // Após criar o usuário, criar a empresa
       await createCompany({
         name: data.name,
         industry: data.industry,
@@ -81,7 +97,7 @@ export const CompanyRegistration = () => {
 
       toast({
         title: "Sucesso!",
-        description: "Empresa cadastrada com sucesso. Redirecionando para o dashboard...",
+        description: "Empresa e usuário cadastrados com sucesso. Redirecionando para o dashboard...",
       });
 
       // Redirecionar para o dashboard após cadastro
@@ -273,7 +289,8 @@ export const CompanyRegistration = () => {
 
                   {/* Dados do Contato */}
                   <div className="space-y-4 border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Dados do Contato</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">Dados do Administrador</h3>
+                    <p className="text-sm text-gray-600">Esta pessoa será o administrador da empresa no sistema</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
@@ -322,18 +339,32 @@ export const CompanyRegistration = () => {
 
                       <FormField
                         control={form.control}
-                        name="contactPhone"
+                        name="contactPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Telefone *</FormLabel>
+                            <FormLabel>Senha *</FormLabel>
                             <FormControl>
-                              <Input placeholder="(11) 99999-9999" {...field} />
+                              <Input type="password" placeholder="Mínimo 6 caracteres" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
+
+                    <FormField
+                      control={form.control}
+                      name="contactPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Telefone *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="(11) 99999-9999" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   {/* Observações */}
