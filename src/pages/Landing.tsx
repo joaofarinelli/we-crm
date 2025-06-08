@@ -5,10 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Users, BarChart3, Target, CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { CompanyRegistrationDialog } from '@/components/CompanyRegistrationDialog';
 
 export const Landing = () => {
-  const [showRegistration, setShowRegistration] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -95,7 +93,7 @@ export const Landing = () => {
                   <Button variant="outline" onClick={() => navigate('/')}>
                     Dashboard
                   </Button>
-                  <Button onClick={() => setShowRegistration(true)}>
+                  <Button onClick={() => navigate('/company-registration')}>
                     Cadastrar Empresa
                   </Button>
                 </>
@@ -104,7 +102,7 @@ export const Landing = () => {
                   <Button variant="ghost" onClick={() => navigate('/auth')}>
                     Entrar
                   </Button>
-                  <Button onClick={() => setShowRegistration(true)}>
+                  <Button onClick={() => navigate('/company-registration')}>
                     Cadastrar Empresa
                   </Button>
                 </>
@@ -132,13 +130,13 @@ export const Landing = () => {
                   Ir para Dashboard
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={() => setShowRegistration(true)}>
+                <Button variant="outline" size="lg" onClick={() => navigate('/company-registration')}>
                   Cadastrar Nova Empresa
                 </Button>
               </>
             ) : (
               <>
-                <Button size="lg" onClick={() => setShowRegistration(true)}>
+                <Button size="lg" onClick={() => navigate('/company-registration')}>
                   Começar Gratuitamente
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
@@ -221,7 +219,7 @@ export const Landing = () => {
                   <Button 
                     className="w-full" 
                     variant={plan.popular ? "default" : "outline"}
-                    onClick={() => setShowRegistration(true)}
+                    onClick={() => navigate('/company-registration')}
                   >
                     Escolher Plano
                   </Button>
@@ -247,7 +245,7 @@ export const Landing = () => {
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           ) : (
-            <Button size="lg" variant="secondary" onClick={() => setShowRegistration(true)}>
+            <Button size="lg" variant="secondary" onClick={() => navigate('/company-registration')}>
               Começar Agora - É Grátis
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
@@ -301,11 +299,6 @@ export const Landing = () => {
           </div>
         </div>
       </footer>
-
-      <CompanyRegistrationDialog 
-        open={showRegistration} 
-        onOpenChange={setShowRegistration}
-      />
     </div>
   );
 };
