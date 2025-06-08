@@ -23,13 +23,24 @@ export const useLeads = () => {
   const { toast } = useToast();
 
   const fetchLeads = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log('Fetching leads for user:', user.id);
       const { data, error } = await supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching leads:', error);
+        throw error;
+      }
+      
+      console.log('Fetched leads:', data);
       setLeads(data || []);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
@@ -38,33 +49,57 @@ export const useLeads = () => {
         description: "Não foi possível carregar os leads",
         variant: "destructive"
       });
+      setLeads([]);
     } finally {
       setLoading(false);
     }
   };
 
   const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'>) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      console.log('Creating lead:', leadData);
+      
       // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        throw profileError;
+      }
+
+      if (!profileData?.company_id) {
+        throw new Error('Company ID not found for user');
+      }
 
       const { data, error } = await supabase
         .from('leads')
         .insert([{ 
           ...leadData, 
-          created_by: user?.id,
+          created_by: user.id,
           company_id: profileData.company_id 
         }])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating lead:', error);
+        throw error;
+      }
+      
+      console.log('Lead created successfully:', data);
       setLeads(prev => [data, ...prev]);
       toast({
         title: "Sucesso",
@@ -82,7 +117,18 @@ export const useLeads = () => {
   };
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      console.log('Updating lead:', id, updates);
+      
       const { data, error } = await supabase
         .from('leads')
         .update(updates)
@@ -90,7 +136,12 @@ export const useLeads = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating lead:', error);
+        throw error;
+      }
+      
+      console.log('Lead updated successfully:', data);
       setLeads(prev => prev.map(lead => lead.id === id ? data : lead));
       toast({
         title: "Sucesso",
@@ -108,13 +159,29 @@ export const useLeads = () => {
   };
 
   const deleteLead = async (id: string) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      console.log('Deleting lead:', id);
+      
       const { error } = await supabase
         .from('leads')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting lead:', error);
+        throw error;
+      }
+      
+      console.log('Lead deleted successfully:', id);
       setLeads(prev => prev.filter(lead => lead.id !== id));
       toast({
         title: "Sucesso",
