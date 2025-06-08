@@ -30,9 +30,44 @@ export const useLeads = () => {
 
     try {
       console.log('Fetching leads for user:', user.id);
+      
+      // Primeiro buscar o company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        toast({
+          title: "Erro",
+          description: "Erro ao buscar perfil do usuário",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (!profileData?.company_id) {
+        console.error('User has no company_id configured');
+        toast({
+          title: "Erro",
+          description: "Usuário não tem empresa configurada",
+          variant: "destructive"
+        });
+        setLeads([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log('User company_id:', profileData.company_id);
+
+      // Agora buscar leads apenas da empresa do usuário
       const { data, error } = await supabase
         .from('leads')
         .select('*')
+        .eq('company_id', profileData.company_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -40,6 +75,7 @@ export const useLeads = () => {
         throw error;
       }
       
+      console.log('Fetched leads for company:', data?.length || 0, 'leads');
       console.log('Fetched leads:', data);
       setLeads(data || []);
     } catch (error) {
