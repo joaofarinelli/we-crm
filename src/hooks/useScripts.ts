@@ -11,6 +11,7 @@ export interface Script {
   category: string;
   description?: string;
   created_by: string;
+  company_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -44,11 +45,21 @@ export const useScripts = () => {
     mutationFn: async (scriptData: CreateScriptData) => {
       if (!user) throw new Error('Usuário não autenticado');
       
+      // Buscar company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      
       const { data, error } = await supabase
         .from('scripts')
         .insert({
           ...scriptData,
           created_by: user.id,
+          company_id: profileData.company_id,
         })
         .select()
         .single();

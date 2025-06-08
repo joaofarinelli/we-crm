@@ -13,6 +13,7 @@ interface Task {
   status: string | null;
   assignee_id: string | null;
   task_type: string | null;
+  company_id: string;
   created_at: string;
 }
 
@@ -43,11 +44,24 @@ export const useTasks = () => {
     }
   };
 
-  const createTask = async (taskData: Omit<Task, 'id' | 'created_at'>) => {
+  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'company_id'>) => {
     try {
+      // Buscar company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError) throw profileError;
+
       const { data, error } = await supabase
         .from('tasks')
-        .insert([{ ...taskData, created_by: user?.id }])
+        .insert([{ 
+          ...taskData, 
+          created_by: user?.id,
+          company_id: profileData.company_id 
+        }])
         .select()
         .single();
 

@@ -23,6 +23,7 @@ export const useAppointments = () => {
         .from('profiles')
         .select(`
           role_id,
+          company_id,
           roles (
             name,
             permissions
@@ -58,7 +59,7 @@ export const useAppointments = () => {
         // Closers só veem agendamentos onde eles são assigned_to
         query = query.eq('assigned_to', user.id);
       }
-      // SDRs e Admins veem todos os agendamentos (sem filtro adicional)
+      // SDRs e Admins veem todos os agendamentos da empresa (filtrado automaticamente pelo RLS)
 
       const { data, error } = await query;
 
@@ -78,11 +79,23 @@ export const useAppointments = () => {
     }
   };
 
-  const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'assigned_closer'>) => {
+  const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'assigned_closer' | 'company_id'>) => {
     try {
+      // Buscar company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError) throw profileError;
+
       const { data, error } = await supabase
         .from('appointments')
-        .insert([appointmentData])
+        .insert([{
+          ...appointmentData,
+          company_id: profileData.company_id
+        }])
         .select(`
           *,
           leads (

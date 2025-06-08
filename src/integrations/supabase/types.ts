@@ -12,6 +12,7 @@ export type Database = {
       appointments: {
         Row: {
           assigned_to: string
+          company_id: string
           created_at: string
           date: string
           description: string | null
@@ -26,6 +27,7 @@ export type Database = {
         }
         Insert: {
           assigned_to: string
+          company_id: string
           created_at?: string
           date: string
           description?: string | null
@@ -40,6 +42,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string
+          company_id?: string
           created_at?: string
           date?: string
           description?: string | null
@@ -58,6 +61,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
@@ -176,6 +186,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          company_id: string
           created_at: string
           created_by: string | null
           email: string | null
@@ -188,6 +199,7 @@ export type Database = {
           value: number | null
         }
         Insert: {
+          company_id: string
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -200,6 +212,7 @@ export type Database = {
           value?: number | null
         }
         Update: {
+          company_id?: string
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -211,7 +224,15 @@ export type Database = {
           updated_at?: string
           value?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -302,6 +323,7 @@ export type Database = {
       scripts: {
         Row: {
           category: string
+          company_id: string
           content: string
           created_at: string
           created_by: string
@@ -312,6 +334,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          company_id: string
           content: string
           created_at?: string
           created_by: string
@@ -322,6 +345,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          company_id?: string
           content?: string
           created_at?: string
           created_by?: string
@@ -330,11 +354,20 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scripts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
           assignee_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -348,6 +381,7 @@ export type Database = {
         }
         Insert: {
           assignee_id?: string | null
+          company_id: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -361,6 +395,7 @@ export type Database = {
         }
         Update: {
           assignee_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -372,7 +407,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_invitations: {
         Row: {
