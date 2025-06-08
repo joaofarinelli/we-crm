@@ -169,24 +169,51 @@ export const useLeads = () => {
     }
 
     try {
-      console.log('Deleting lead:', id);
+      console.log('Attempting to delete lead:', id);
       
-      const { error } = await supabase
-        .from('leads')
-        .delete()
-        .eq('id', id);
+      // Usar a função personalizada para deletar com validação robusta
+      const { data: result, error } = await supabase
+        .rpc('delete_lead_safely', { lead_id: id });
 
       if (error) {
-        console.error('Error deleting lead:', error);
+        console.error('Error calling delete function:', error);
         throw error;
       }
+
+      console.log('Delete function result:', result);
+
+      // Verificar se a função retornou sucesso
+      if (!result.success) {
+        console.error('Delete failed:', result.error);
+        
+        let errorMessage = "Não foi possível remover o lead";
+        if (result.error === 'Permission denied: different company') {
+          errorMessage = "Você não tem permissão para deletar este lead";
+        } else if (result.error === 'Lead not found') {
+          errorMessage = "Lead não encontrado";
+        } else if (result.error === 'User company not found') {
+          errorMessage = "Erro de configuração da empresa";
+        }
+        
+        toast({
+          title: "Erro",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Se chegou aqui, o delete foi bem-sucedido
+      console.log('Lead deleted successfully. Rows affected:', result.deleted_count);
       
-      console.log('Lead deleted successfully:', id);
+      // Remover do estado local apenas se o delete foi bem-sucedido
       setLeads(prev => prev.filter(lead => lead.id !== id));
+      
       toast({
         title: "Sucesso",
         description: "Lead removido com sucesso"
       });
+      
     } catch (error) {
       console.error('Erro ao deletar lead:', error);
       toast({
