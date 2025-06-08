@@ -171,42 +171,77 @@ export const useLeads = () => {
     try {
       console.log('Attempting to delete lead:', id);
       
-      // Usar a função personalizada para deletar com validação robusta
-      const { data: result, error } = await supabase
-        .rpc('delete_lead_safely', { lead_id: id });
+      // Primeiro, verificar se o lead existe e pertence à empresa do usuário
+      const { data: leadData, error: fetchError } = await supabase
+        .from('leads')
+        .select('id, company_id')
+        .eq('id', id)
+        .single();
 
-      if (error) {
-        console.error('Error calling delete function:', error);
-        throw error;
-      }
-
-      console.log('Delete function result:', result);
-
-      // Verificar se a função retornou sucesso
-      if (!result.success) {
-        console.error('Delete failed:', result.error);
-        
-        let errorMessage = "Não foi possível remover o lead";
-        if (result.error === 'Permission denied: different company') {
-          errorMessage = "Você não tem permissão para deletar este lead";
-        } else if (result.error === 'Lead not found') {
-          errorMessage = "Lead não encontrado";
-        } else if (result.error === 'User company not found') {
-          errorMessage = "Erro de configuração da empresa";
-        }
-        
+      if (fetchError) {
+        console.error('Error fetching lead for validation:', fetchError);
         toast({
           title: "Erro",
-          description: errorMessage,
+          description: "Lead não encontrado",
           variant: "destructive"
         });
         return;
       }
 
-      // Se chegou aqui, o delete foi bem-sucedido
-      console.log('Lead deleted successfully. Rows affected:', result.deleted_count);
+      // Verificar company_id do usuário
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profileData?.company_id) {
+        console.error('Error fetching user profile:', profileError);
+        toast({
+          title: "Erro",
+          description: "Erro de configuração da empresa",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Verificar se o usuário pode deletar este lead
+      if (leadData.company_id !== profileData.company_id) {
+        console.error('Permission denied: different company');
+        toast({
+          title: "Erro",
+          description: "Você não tem permissão para deletar este lead",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Executar o delete com returning para confirmar
+      const { data: deletedData, error: deleteError, count } = await supabase
+        .from('leads')
+        .delete({ count: 'exact' })
+        .eq('id', id)
+        .select();
+
+      if (deleteError) {
+        console.error('Error deleting lead:', deleteError);
+        throw deleteError;
+      }
+
+      // Verificar se alguma linha foi realmente deletada
+      if (!deletedData || deletedData.length === 0 || count === 0) {
+        console.error('No rows were deleted');
+        toast({
+          title: "Erro",
+          description: "Não foi possível remover o lead. Verifique suas permissões.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Lead deleted successfully. Rows affected:', count);
       
-      // Remover do estado local apenas se o delete foi bem-sucedido
+      // Remover do estado local apenas se o delete foi confirmado
       setLeads(prev => prev.filter(lead => lead.id !== id));
       
       toast({
