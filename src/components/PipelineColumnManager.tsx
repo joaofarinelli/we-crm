@@ -16,11 +16,12 @@ interface PipelineColumn {
 }
 
 export const PipelineColumnManager = () => {
-  const { columns, createColumn, updateColumn, deleteColumn } = usePipelineColumns();
+  const { columns, createColumn, updateColumn, deleteColumn, reorderColumns } = usePipelineColumns();
   const [editingColumn, setEditingColumn] = useState<PipelineColumn | null>(null);
   const [newColumn, setNewColumn] = useState({ name: '', color: '#3B82F6' });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
 
   const handleCreateColumn = async () => {
     if (!newColumn.name.trim()) return;
@@ -52,6 +53,56 @@ export const PipelineColumnManager = () => {
     if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os leads nela serão movidos para "Frio".')) {
       await deleteColumn(columnId);
     }
+  };
+
+  const handleDragStart = (e: React.DragEvent, columnId: string) => {
+    setDraggedColumnId(columnId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
+    e.preventDefault();
+    
+    if (!draggedColumnId || draggedColumnId === targetColumnId) {
+      setDraggedColumnId(null);
+      return;
+    }
+
+    const draggedColumn = columns.find(col => col.id === draggedColumnId);
+    const targetColumn = columns.find(col => col.id === targetColumnId);
+    
+    if (!draggedColumn || !targetColumn) {
+      setDraggedColumnId(null);
+      return;
+    }
+
+    // Criar nova ordem das colunas
+    const sortedColumns = [...columns].sort((a, b) => a.order_index - b.order_index);
+    const draggedIndex = sortedColumns.findIndex(col => col.id === draggedColumnId);
+    const targetIndex = sortedColumns.findIndex(col => col.id === targetColumnId);
+
+    // Remover a coluna arrastada e inserir na nova posição
+    const reorderedColumns = [...sortedColumns];
+    const [removed] = reorderedColumns.splice(draggedIndex, 1);
+    reorderedColumns.splice(targetIndex, 0, removed);
+
+    // Atualizar os índices
+    const updatedColumns = reorderedColumns.map((col, index) => ({
+      ...col,
+      order_index: index + 1
+    }));
+
+    await reorderColumns(updatedColumns);
+    setDraggedColumnId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedColumnId(null);
   };
 
   const colorOptions = [
@@ -119,12 +170,24 @@ export const PipelineColumnManager = () => {
       </div>
 
       <div className="space-y-3">
+        <p className="text-sm text-gray-600 mb-4">
+          Arraste as colunas para reordená-las:
+        </p>
         {columns.map((column) => (
           <div
             key={column.id}
-            className="flex items-center gap-3 p-3 border rounded-lg"
+            draggable
+            onDragStart={(e) => handleDragStart(e, column.id)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, column.id)}
+            onDragEnd={handleDragEnd}
+            className={`flex items-center gap-3 p-3 border rounded-lg cursor-move transition-all ${
+              draggedColumnId === column.id 
+                ? 'opacity-50 bg-gray-50' 
+                : 'hover:bg-gray-50'
+            }`}
           >
-            <GripVertical className="w-4 h-4 text-gray-400 cursor-move" />
+            <GripVertical className="w-4 h-4 text-gray-400" />
             <div
               className="w-4 h-4 rounded-full"
               style={{ backgroundColor: column.color }}
