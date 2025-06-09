@@ -120,10 +120,26 @@ export const useLeads = () => {
         throw new Error('Company ID not found for user');
       }
 
+      // Se não foi especificado status, usar a primeira coluna do pipeline
+      let finalLeadData = { ...leadData };
+      if (!finalLeadData.status) {
+        const { data: firstColumn } = await supabase
+          .from('pipeline_columns')
+          .select('name')
+          .eq('company_id', profileData.company_id)
+          .order('order_index', { ascending: true })
+          .limit(1)
+          .single();
+        
+        if (firstColumn) {
+          finalLeadData.status = firstColumn.name;
+        }
+      }
+
       const { data, error } = await supabase
         .from('leads')
         .insert([{ 
-          ...leadData, 
+          ...finalLeadData, 
           created_by: user.id,
           company_id: profileData.company_id 
         }])

@@ -4,20 +4,19 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLeads } from '@/hooks/useLeads';
-import { Edit2, Trash2, Phone, Mail } from 'lucide-react';
+import { usePipelineColumns } from '@/hooks/usePipelineColumns';
+import { Edit2, Trash2, Phone, Mail, Settings } from 'lucide-react';
 import { EditLeadDialog } from './EditLeadDialog';
+import { PipelineColumnManager } from './PipelineColumnManager';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export const Kanban = () => {
   const { leads, loading, deleteLead, updateLead } = useLeads();
+  const { columns, loading: columnsLoading } = usePipelineColumns();
   const [editingLead, setEditingLead] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [manageColumnsOpen, setManageColumnsOpen] = useState(false);
   const [draggedLead, setDraggedLead] = useState<string | null>(null);
-
-  const statusColumns = [
-    { status: 'Frio', title: 'Frio', color: 'bg-blue-100 border-blue-200' },
-    { status: 'Morno', title: 'Morno', color: 'bg-yellow-100 border-yellow-200' },
-    { status: 'Quente', title: 'Quente', color: 'bg-red-100 border-red-200' },
-  ];
 
   const getLeadsByStatus = (status: string) => {
     return leads.filter(lead => lead.status === status);
@@ -71,7 +70,7 @@ export const Kanban = () => {
     setDraggedLead(null);
   };
 
-  if (loading) {
+  if (loading || columnsLoading) {
     return (
       <div className="p-8 flex items-center justify-center">
         <div className="text-lg">Carregando kanban...</div>
@@ -81,20 +80,42 @@ export const Kanban = () => {
 
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Pipeline de Vendas</h1>
-        <p className="text-gray-600 mt-1">Visualize seus leads por status - arraste para mover entre colunas</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Pipeline de Vendas</h1>
+          <p className="text-gray-600 mt-1">Visualize seus leads por status - arraste para mover entre colunas</p>
+        </div>
+        <Dialog open={manageColumnsOpen} onOpenChange={setManageColumnsOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <Settings className="w-4 h-4 mr-2" />
+              Gerenciar Colunas
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Configurações do Pipeline</DialogTitle>
+            </DialogHeader>
+            <PipelineColumnManager />
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statusColumns.map((column) => {
-          const columnLeads = getLeadsByStatus(column.status);
+      <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(300px, 1fr))` }}>
+        {columns.map((column) => {
+          const columnLeads = getLeadsByStatus(column.name);
           const totalValue = columnLeads.reduce((sum, lead) => sum + (lead.value || 0), 0);
 
           return (
-            <div key={column.status} className="space-y-4">
-              <div className={`p-4 rounded-lg border-2 ${column.color}`}>
-                <h2 className="font-semibold text-lg">{column.title}</h2>
+            <div key={column.id} className="space-y-4">
+              <div 
+                className="p-4 rounded-lg border-2" 
+                style={{ 
+                  backgroundColor: `${column.color}15`, 
+                  borderColor: column.color 
+                }}
+              >
+                <h2 className="font-semibold text-lg">{column.name}</h2>
                 <p className="text-sm text-gray-600">
                   {columnLeads.length} leads • {formatValue(totalValue)}
                 </p>
@@ -105,7 +126,7 @@ export const Kanban = () => {
                   draggedLead ? 'border-gray-300 bg-gray-50' : 'border-transparent'
                 }`}
                 onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, column.status)}
+                onDrop={(e) => handleDrop(e, column.name)}
               >
                 {columnLeads.map((lead) => (
                   <Card

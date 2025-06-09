@@ -1,12 +1,11 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { usePipelineColumns } from '@/hooks/usePipelineColumns';
 
 interface PipelineChartProps {
   data: { status: string; value: number; count: number }[];
 }
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
 const chartConfig = {
   value: {
@@ -15,6 +14,8 @@ const chartConfig = {
 };
 
 export const PipelineChart = ({ data }: PipelineChartProps) => {
+  const { columns } = usePipelineColumns();
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -23,9 +24,15 @@ export const PipelineChart = ({ data }: PipelineChartProps) => {
     }).format(value);
   };
 
-  const dataWithColors = data.map((item, index) => ({
+  // Mapear cores das colunas customizadas
+  const getColumnColor = (status: string) => {
+    const column = columns.find(col => col.name === status);
+    return column?.color || '#6B7280';
+  };
+
+  const dataWithColors = data.map((item) => ({
     ...item,
-    fill: COLORS[index % COLORS.length]
+    fill: getColumnColor(item.status)
   }));
 
   return (
