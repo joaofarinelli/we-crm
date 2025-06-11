@@ -86,53 +86,162 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
+          address: string | null
+          billing_settings: Json | null
           created_at: string
           created_by: string | null
+          currency: string | null
+          date_format: string | null
           domain: string | null
           id: string
           industry: string | null
           location: string | null
+          logo_url: string | null
           name: string
+          notification_settings: Json | null
+          phone: string | null
           plan: string | null
           revenue: string | null
           size: string | null
           status: string | null
+          timezone: string | null
           updated_at: string
           website: string | null
         }
         Insert: {
+          address?: string | null
+          billing_settings?: Json | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
+          date_format?: string | null
           domain?: string | null
           id?: string
           industry?: string | null
           location?: string | null
+          logo_url?: string | null
           name: string
+          notification_settings?: Json | null
+          phone?: string | null
           plan?: string | null
           revenue?: string | null
           size?: string | null
           status?: string | null
+          timezone?: string | null
           updated_at?: string
           website?: string | null
         }
         Update: {
+          address?: string | null
+          billing_settings?: Json | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
+          date_format?: string | null
           domain?: string | null
           id?: string
           industry?: string | null
           location?: string | null
+          logo_url?: string | null
           name?: string
+          notification_settings?: Json | null
+          phone?: string | null
           plan?: string | null
           revenue?: string | null
           size?: string | null
           status?: string | null
+          timezone?: string | null
           updated_at?: string
           website?: string | null
         }
         Relationships: []
+      }
+      company_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
