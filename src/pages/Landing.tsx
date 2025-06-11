@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,108 +5,75 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Users, BarChart3, Target, CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-
 export const Landing = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const features = [
-    {
-      icon: <Building2 className="w-8 h-8 text-blue-600" />,
-      title: "Gestão de Empresas",
-      description: "Gerencie todas as informações das suas empresas clientes em um só lugar"
-    },
-    {
-      icon: <Users className="w-8 h-8 text-green-600" />,
-      title: "Equipe Unificada",
-      description: "Organize sua equipe de vendas com diferentes cargos e permissões"
-    },
-    {
-      icon: <Target className="w-8 h-8 text-purple-600" />,
-      title: "Gestão de Leads",
-      description: "Acompanhe e converta leads com nosso sistema avançado de CRM"
-    },
-    {
-      icon: <BarChart3 className="w-8 h-8 text-orange-600" />,
-      title: "Relatórios Completos",
-      description: "Analise o desempenho da sua equipe com relatórios detalhados"
-    }
-  ];
-
-  const plans = [
-    {
-      name: "Básico",
-      price: "R$ 49",
-      period: "/mês",
-      description: "Ideal para pequenas equipes",
-      features: [
-        "Até 5 usuários",
-        "1.000 leads por mês",
-        "Relatórios básicos",
-        "Suporte por email"
-      ],
-      popular: false
-    },
-    {
-      name: "Profissional",
-      price: "R$ 99",
-      period: "/mês",
-      description: "Para equipes em crescimento",
-      features: [
-        "Até 25 usuários",
-        "5.000 leads por mês",
-        "Relatórios avançados",
-        "Suporte prioritário",
-        "Integrações API"
-      ],
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "R$ 199",
-      period: "/mês",
-      description: "Para grandes organizações",
-      features: [
-        "Usuários ilimitados",
-        "Leads ilimitados",
-        "Relatórios personalizados",
-        "Suporte 24/7",
-        "Integrações personalizadas"
-      ],
-      popular: false
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  const {
+    user
+  } = useAuth();
+  const features = [{
+    icon: <Building2 className="w-8 h-8 text-blue-600" />,
+    title: "Gestão de Empresas",
+    description: "Gerencie todas as informações das suas empresas clientes em um só lugar"
+  }, {
+    icon: <Users className="w-8 h-8 text-green-600" />,
+    title: "Equipe Unificada",
+    description: "Organize sua equipe de vendas com diferentes cargos e permissões"
+  }, {
+    icon: <Target className="w-8 h-8 text-purple-600" />,
+    title: "Gestão de Leads",
+    description: "Acompanhe e converta leads com nosso sistema avançado de CRM"
+  }, {
+    icon: <BarChart3 className="w-8 h-8 text-orange-600" />,
+    title: "Relatórios Completos",
+    description: "Analise o desempenho da sua equipe com relatórios detalhados"
+  }];
+  const plans = [{
+    name: "Básico",
+    price: "R$ 49",
+    period: "/mês",
+    description: "Ideal para pequenas equipes",
+    features: ["Até 5 usuários", "1.000 leads por mês", "Relatórios básicos", "Suporte por email"],
+    popular: false
+  }, {
+    name: "Profissional",
+    price: "R$ 99",
+    period: "/mês",
+    description: "Para equipes em crescimento",
+    features: ["Até 25 usuários", "5.000 leads por mês", "Relatórios avançados", "Suporte prioritário", "Integrações API"],
+    popular: true
+  }, {
+    name: "Enterprise",
+    price: "R$ 199",
+    period: "/mês",
+    description: "Para grandes organizações",
+    features: ["Usuários ilimitados", "Leads ilimitados", "Relatórios personalizados", "Suporte 24/7", "Integrações personalizadas"],
+    popular: false
+  }];
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Building2 className="w-8 h-8 text-blue-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">ZestCRM</h1>
+              <h1 className="text-2xl font-bold text-gray-900">We CRM</h1>
             </div>
             <div className="flex items-center space-x-4">
-              {user ? (
-                <>
+              {user ? <>
                   <Button variant="outline" onClick={() => navigate('/')}>
                     Dashboard
                   </Button>
                   <Button onClick={() => navigate('/register-company')}>
                     Cadastrar Empresa
                   </Button>
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Button variant="ghost" onClick={() => navigate('/auth')}>
                     Entrar
                   </Button>
                   <Button onClick={() => navigate('/register-company')}>
                     Cadastrar Empresa
                   </Button>
-                </>
-              )}
+                </>}
             </div>
           </div>
         </div>
@@ -125,8 +91,7 @@ export const Landing = () => {
             Aumente sua conversão e organize seu time de vendas.
           </p>
           <div className="flex justify-center space-x-4">
-            {user ? (
-              <>
+            {user ? <>
                 <Button size="lg" onClick={() => navigate('/')}>
                   Ir para Dashboard
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -134,9 +99,7 @@ export const Landing = () => {
                 <Button variant="outline" size="lg" onClick={() => navigate('/register-company')}>
                   Cadastrar Nova Empresa
                 </Button>
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Button size="lg" onClick={() => navigate('/register-company')}>
                   Começar Gratuitamente
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -144,8 +107,7 @@ export const Landing = () => {
                 <Button variant="outline" size="lg" onClick={() => navigate('/auth')}>
                   Ver Demo
                 </Button>
-              </>
-            )}
+              </>}
           </div>
         </div>
       </section>
@@ -162,8 +124,7 @@ export const Landing = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-200">
+            {features.map((feature, index) => <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
                   <div className="mx-auto mb-4">
                     {feature.icon}
@@ -175,8 +136,7 @@ export const Landing = () => {
                     {feature.description}
                   </CardDescription>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -193,13 +153,10 @@ export const Landing = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.popular ? 'border-blue-500 shadow-xl' : ''}`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600">
+            {plans.map((plan, index) => <Card key={index} className={`relative ${plan.popular ? 'border-blue-500 shadow-xl' : ''}`}>
+                {plan.popular && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600">
                     Mais Popular
-                  </Badge>
-                )}
+                  </Badge>}
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <div className="mt-4">
@@ -210,23 +167,16 @@ export const Landing = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center">
+                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center">
                         <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
                         <span className="text-gray-600">{feature}</span>
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
-                  <Button 
-                    className="w-full" 
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() => navigate('/register-company')}
-                  >
+                  <Button className="w-full" variant={plan.popular ? "default" : "outline"} onClick={() => navigate('/register-company')}>
                     Escolher Plano
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -240,17 +190,13 @@ export const Landing = () => {
           <p className="text-xl text-blue-100 mb-8">
             Junte-se a centenas de empresas que já aumentaram suas vendas com nossa plataforma
           </p>
-          {user ? (
-            <Button size="lg" variant="secondary" onClick={() => navigate('/')}>
+          {user ? <Button size="lg" variant="secondary" onClick={() => navigate('/')}>
               Acessar Dashboard
               <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          ) : (
-            <Button size="lg" variant="secondary" onClick={() => navigate('/register-company')}>
+            </Button> : <Button size="lg" variant="secondary" onClick={() => navigate('/register-company')}>
               Começar Agora - É Grátis
               <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          )}
+            </Button>}
         </div>
       </section>
 
@@ -300,8 +246,6 @@ export const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
