@@ -7,6 +7,8 @@ interface CompanyWithStats {
   id: string;
   name: string;
   domain: string | null;
+  industry: string | null;
+  size: string | null;
   plan: string | null;
   status: string | null;
   created_at: string;

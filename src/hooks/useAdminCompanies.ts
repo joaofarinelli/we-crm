@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreateCompanyData {
-  name: string;
+  name?: string;
   domain?: string;
   industry?: string;
   size?: string;
@@ -24,6 +24,15 @@ export const useAdminCompanies = () => {
   const { toast } = useToast();
 
   const createCompany = async (data: CreateCompanyData) => {
+    if (!data.name) {
+      toast({
+        title: "Erro",
+        description: "Nome da empresa é obrigatório",
+        variant: "destructive"
+      });
+      return false;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -62,6 +71,15 @@ export const useAdminCompanies = () => {
   };
 
   const updateCompany = async (data: UpdateCompanyData) => {
+    if (!data.name) {
+      toast({
+        title: "Erro",
+        description: "Nome da empresa é obrigatório",
+        variant: "destructive"
+      });
+      return false;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
