@@ -30,7 +30,7 @@ export const useMeetingParticipants = (meetingId: string) => {
           user_id,
           role,
           created_at,
-          profiles!meeting_participants_user_id_fkey (
+          profiles (
             full_name,
             email
           )
@@ -59,7 +59,7 @@ export const useMeetingParticipants = (meetingId: string) => {
           user_id,
           role,
           created_at,
-          profiles!meeting_participants_user_id_fkey (
+          profiles (
             full_name,
             email
           )
@@ -116,7 +116,7 @@ export const useMeetingParticipants = (meetingId: string) => {
           user_id,
           role,
           created_at,
-          profiles!meeting_participants_user_id_fkey (
+          profiles (
             full_name,
             email
           )
