@@ -1,19 +1,26 @@
+
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useMeetingsForCalendar } from '@/hooks/useMeetingsForCalendar';
 import { ViewAppointmentDialog } from './ViewAppointmentDialog';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
+import { ViewMeetingDialog } from './ViewMeetingDialog';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User, Users } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment } from '@/types/appointment';
+import { Meeting } from '@/types/meeting';
 
 export const CalendarView = () => {
-  const { appointments, loading } = useAppointments();
+  const { appointments, loading: appointmentsLoading } = useAppointments();
+  const { meetings, isLoading: meetingsLoading } = useMeetingsForCalendar();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
+  const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
+  const [viewMeetingDialogOpen, setViewMeetingDialogOpen] = useState(false);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -25,11 +32,17 @@ export const CalendarView = () => {
     );
   };
 
+  const getMeetingsForDay = (date: Date) => {
+    return meetings.filter(meeting => 
+      isSameDay(new Date(meeting.date), date)
+    );
+  };
+
   const formatTime = (timeStr: string) => {
     return timeStr.slice(0, 5);
   };
 
-  const getStatusColor = (status: string) => {
+  const getAppointmentStatusColor = (status: string) => {
     switch (status) {
       case 'Agendado':
         return 'bg-blue-100 text-blue-800';
@@ -44,10 +57,30 @@ export const CalendarView = () => {
     }
   };
 
+  const getMeetingStatusColor = (status: string) => {
+    switch (status) {
+      case 'Agendada':
+        return 'bg-purple-100 text-purple-800';
+      case 'Em andamento':
+        return 'bg-orange-100 text-orange-800';
+      case 'Finalizada':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   const handleAppointmentClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
-    setViewDialogOpen(true);
+    setViewAppointmentDialogOpen(true);
   };
+
+  const handleMeetingClick = (meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setViewMeetingDialogOpen(true);
+  };
+
+  const loading = appointmentsLoading || meetingsLoading;
 
   if (loading) {
     return (
@@ -62,7 +95,7 @@ export const CalendarView = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Calendário</h1>
-          <p className="text-gray-600 mt-1">Visualize todos os agendamentos</p>
+          <p className="text-gray-600 mt-1">Visualize todos os agendamentos e reuniões</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -88,6 +121,18 @@ export const CalendarView = () => {
         </div>
       </div>
 
+      {/* Legenda */}
+      <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-blue-500"></div>
+          <span>Agendamentos</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-purple-500"></div>
+          <span>Reuniões</span>
+        </div>
+      </div>
+
       <Card className="p-6">
         <div className="grid grid-cols-7 gap-4 mb-4">
           {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
@@ -100,12 +145,13 @@ export const CalendarView = () => {
         <div className="grid grid-cols-7 gap-4">
           {daysInMonth.map((day) => {
             const dayAppointments = getAppointmentsForDay(day);
+            const dayMeetings = getMeetingsForDay(day);
             const isToday = isSameDay(day, new Date());
 
             return (
               <div
                 key={day.toISOString()}
-                className={`min-h-[120px] p-2 border rounded-lg ${
+                className={`min-h-[140px] p-2 border rounded-lg ${
                   isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
                 }`}
               >
@@ -116,6 +162,7 @@ export const CalendarView = () => {
                 </div>
 
                 <div className="space-y-1">
+                  {/* Agendamentos */}
                   {dayAppointments.map((appointment) => (
                     <div
                       key={appointment.id}
@@ -140,8 +187,31 @@ export const CalendarView = () => {
                         </div>
                       )}
                       
-                      <Badge className={`${getStatusColor(appointment.status)} text-xs mt-1`}>
+                      <Badge className={`${getAppointmentStatusColor(appointment.status)} text-xs mt-1`}>
                         {appointment.status}
+                      </Badge>
+                    </div>
+                  ))}
+
+                  {/* Reuniões */}
+                  {dayMeetings.map((meeting) => (
+                    <div
+                      key={meeting.id}
+                      className="text-xs p-1 rounded bg-purple-100 text-purple-800 border border-purple-200 cursor-pointer hover:bg-purple-200 transition-colors"
+                      onClick={() => handleMeetingClick(meeting)}
+                    >
+                      <div className="flex items-center gap-1 mb-1">
+                        <Clock className="w-3 h-3" />
+                        <span className="font-medium">{formatTime(meeting.time)}</span>
+                      </div>
+                      
+                      <div className="font-medium truncate" title={meeting.title}>
+                        <Users className="w-3 h-3 inline mr-1" />
+                        {meeting.title}
+                      </div>
+                      
+                      <Badge className={`${getMeetingStatusColor(meeting.status)} text-xs mt-1`}>
+                        {meeting.status}
                       </Badge>
                     </div>
                   ))}
@@ -152,18 +222,24 @@ export const CalendarView = () => {
         </div>
       </Card>
 
-      {appointments.length === 0 && (
+      {appointments.length === 0 && meetings.length === 0 && (
         <div className="text-center py-12">
           <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum agendamento</h3>
-          <p className="text-gray-500">Os agendamentos aparecerão aqui quando forem criados</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum evento</h3>
+          <p className="text-gray-500">Os agendamentos e reuniões aparecerão aqui quando forem criados</p>
         </div>
       )}
 
       <ViewAppointmentDialog
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
+        open={viewAppointmentDialogOpen}
+        onOpenChange={setViewAppointmentDialogOpen}
         appointment={selectedAppointment}
+      />
+
+      <ViewMeetingDialog
+        open={viewMeetingDialogOpen}
+        onOpenChange={setViewMeetingDialogOpen}
+        meeting={selectedMeeting}
       />
     </div>
   );
