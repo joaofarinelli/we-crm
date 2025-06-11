@@ -20,7 +20,9 @@ export const useSaasMetrics = () => {
     try {
       const { data, error } = await supabase.rpc('get_saas_metrics');
       if (error) throw error;
-      setMetrics(data);
+      
+      // Type cast the Json response to our SaasMetrics interface
+      setMetrics(data as SaasMetrics);
     } catch (error) {
       console.error('Erro ao buscar métricas SaaS:', error);
       toast({
