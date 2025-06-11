@@ -16,6 +16,7 @@ interface Profile {
     name: string;
     description: string | null;
     is_system_role: boolean;
+    permissions: any;
   };
   companies?: {
     name: string;
@@ -53,7 +54,8 @@ export const useProfiles = () => {
           roles (
             name,
             description,
-            is_system_role
+            is_system_role,
+            permissions
           ),
           companies (
             name,
@@ -89,7 +91,8 @@ export const useProfiles = () => {
           roles (
             name,
             description,
-            is_system_role
+            is_system_role,
+            permissions
           ),
           companies (
             name,
