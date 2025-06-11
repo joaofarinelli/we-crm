@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminMobileSidebar } from '@/components/admin/AdminMobileSidebar';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
@@ -12,6 +12,7 @@ const AdminSaas = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { isSaasAdmin, loading: adminLoading } = useSaasAdmin();
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   // Debug logs
   useEffect(() => {
@@ -22,6 +23,7 @@ const AdminSaas = () => {
     console.log('AdminSaas: Is SaaS Admin:', isSaasAdmin);
   }, [authLoading, adminLoading, user, isSaasAdmin]);
 
+  // Aguardar ambos os loadings terminarem antes de fazer qualquer redirecionamento
   if (authLoading || adminLoading) {
     console.log('AdminSaas: Still loading...');
     return (
@@ -31,11 +33,13 @@ const AdminSaas = () => {
     );
   }
 
+  // Só verificar user depois que loading terminou
   if (!user) {
     console.log('AdminSaas: No user, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
+  // Só verificar admin depois que loading terminou
   if (!isSaasAdmin) {
     console.log('AdminSaas: User is not SaaS admin, redirecting to home');
     return <Navigate to="/" replace />;
@@ -44,7 +48,8 @@ const AdminSaas = () => {
   console.log('AdminSaas: Access granted, rendering admin interface');
 
   const handleBackToCrm = () => {
-    window.location.href = '/';
+    console.log('AdminSaas: Navigating back to CRM using React Router');
+    navigate('/');
   };
 
   const renderContent = () => {

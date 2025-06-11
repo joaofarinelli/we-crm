@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useSaasAdmin } from "@/hooks/useSaasAdmin";
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -30,6 +31,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { signOut } = useAuth();
   const { company, isLoading } = useCompanySettings();
   const { isSaasAdmin } = useSaasAdmin();
+  const navigate = useNavigate();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,8 +48,8 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   ];
 
   const handleAdminSaasClick = () => {
-    console.log('Sidebar: Navigating to admin panel');
-    window.location.href = '/admin';
+    console.log('Sidebar: Navigating to admin panel using React Router');
+    navigate('/admin');
   };
 
   return (
