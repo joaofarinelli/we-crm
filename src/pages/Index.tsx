@@ -68,7 +68,7 @@ const Index = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
           <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-          <h1 className="font-semibold text-lg">CRM System</h1>
+          <h1 className="font-semibold text-lg">We CRM</h1>
           <div className="w-10"></div> {/* Spacer for balance */}
         </div>
         
