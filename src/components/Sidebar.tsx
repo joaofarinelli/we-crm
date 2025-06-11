@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,7 +32,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'meetings', label: 'Reuniões', icon: Video },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
-    { id: 'scripts', label: 'Scripts', icon: FileText },
+    { id: 'scripts', label: 'Materiais', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'settings', label: 'Configurações', icon: Settings },

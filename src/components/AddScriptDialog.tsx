@@ -59,7 +59,7 @@ export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) =>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Novo Script</DialogTitle>
+          <DialogTitle>Novo Material</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -102,7 +102,7 @@ export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) =>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="content">Conteúdo do Script *</Label>
+            <Label htmlFor="content">Conteúdo do Material *</Label>
             <Textarea
               id="content"
               value={formData.content}
@@ -117,7 +117,7 @@ export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) =>
               Cancelar
             </Button>
             <Button type="submit" disabled={createScript.isPending}>
-              {createScript.isPending ? 'Criando...' : 'Criar Script'}
+              {createScript.isPending ? 'Criando...' : 'Criar Material'}
             </Button>
           </DialogFooter>
         </form>

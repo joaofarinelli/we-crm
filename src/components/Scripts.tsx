@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +36,7 @@ export const Scripts = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este script?')) {
+    if (window.confirm('Tem certeza que deseja excluir este material?')) {
       await deleteScript.mutateAsync(id);
     }
   };
@@ -52,7 +53,7 @@ export const Scripts = () => {
   if (isLoading) {
     return (
       <div className="p-8">
-        <div className="text-center">Carregando scripts...</div>
+        <div className="text-center">Carregando materiais...</div>
       </div>
     );
   }
@@ -62,12 +63,12 @@ export const Scripts = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Scripts</h1>
-            <p className="text-gray-600">Gerencie seus scripts de vendas e atendimento</p>
+            <h1 className="text-3xl font-bold text-gray-900">Materiais</h1>
+            <p className="text-gray-600">Gerencie seus materiais de vendas e atendimento</p>
           </div>
           <Button onClick={() => setAddDialogOpen(true)} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Novo Script
+            Novo Material
           </Button>
         </div>
 
@@ -76,7 +77,7 @@ export const Scripts = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Buscar scripts..."
+                placeholder="Buscar materiais..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -116,7 +117,7 @@ export const Scripts = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleView(script)}
-                    title="Visualizar script"
+                    title="Visualizar material"
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -126,7 +127,7 @@ export const Scripts = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(script)}
-                        title="Editar script"
+                        title="Editar material"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -134,7 +135,7 @@ export const Scripts = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(script.id)}
-                        title="Excluir script"
+                        title="Excluir material"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -165,12 +166,12 @@ export const Scripts = () => {
         <div className="text-center py-12">
           <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Nenhum script encontrado
+            Nenhum material encontrado
           </h3>
           <p className="text-gray-600">
             {searchTerm || selectedCategory !== 'all'
               ? 'Tente ajustar os filtros de busca.'
-              : 'Comece criando seu primeiro script.'}
+              : 'Comece criando seu primeiro material.'}
           </p>
         </div>
       )}

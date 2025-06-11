@@ -69,11 +69,11 @@ export const useScripts = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scripts'] });
-      toast.success('Script criado com sucesso!');
+      toast.success('Material criado com sucesso!');
     },
     onError: (error) => {
-      console.error('Erro ao criar script:', error);
-      toast.error('Erro ao criar script');
+      console.error('Erro ao criar material:', error);
+      toast.error('Erro ao criar material');
     },
   });
 
@@ -91,11 +91,11 @@ export const useScripts = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scripts'] });
-      toast.success('Script atualizado com sucesso!');
+      toast.success('Material atualizado com sucesso!');
     },
     onError: (error) => {
-      console.error('Erro ao atualizar script:', error);
-      toast.error('Erro ao atualizar script');
+      console.error('Erro ao atualizar material:', error);
+      toast.error('Erro ao atualizar material');
     },
   });
 
@@ -110,11 +110,11 @@ export const useScripts = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scripts'] });
-      toast.success('Script excluído com sucesso!');
+      toast.success('Material excluído com sucesso!');
     },
     onError: (error) => {
-      console.error('Erro ao excluir script:', error);
-      toast.error('Erro ao excluir script');
+      console.error('Erro ao excluir material:', error);
+      toast.error('Erro ao excluir material');
     },
   });
 

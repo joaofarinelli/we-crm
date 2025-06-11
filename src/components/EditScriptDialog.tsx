@@ -66,7 +66,7 @@ export const EditScriptDialog = ({ open, onOpenChange, script }: EditScriptDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Editar Script</DialogTitle>
+          <DialogTitle>Editar Material</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -109,7 +109,7 @@ export const EditScriptDialog = ({ open, onOpenChange, script }: EditScriptDialo
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="content">Conteúdo do Script *</Label>
+            <Label htmlFor="content">Conteúdo do Material *</Label>
             <Textarea
               id="content"
               value={formData.content}

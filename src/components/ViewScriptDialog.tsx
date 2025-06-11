@@ -55,7 +55,7 @@ export const ViewScriptDialog = ({ open, onOpenChange, script }: ViewScriptDialo
         <div className="space-y-4">
           <div className="bg-gray-50 p-4 rounded-lg border">
             <div className="flex justify-between items-center mb-3">
-              <h4 className="text-sm font-medium text-gray-700">Conteúdo do Script:</h4>
+              <h4 className="text-sm font-medium text-gray-700">Conteúdo do Material:</h4>
               <Button
                 variant="outline"
                 size="sm"
