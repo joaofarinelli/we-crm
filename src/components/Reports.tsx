@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, TrendingUp, Download, Calendar, ArrowUpRight, ArrowDownRight, Users, Clock } from 'lucide-react';
+import { BarChart3, TrendingUp, Download, Calendar, ArrowUpRight, ArrowDownRight, Users, Clock, FileDown } from 'lucide-react';
 import { useReports } from '@/hooks/useReports';
 import { useMeetingsAndAppointmentsReports, PeriodType } from '@/hooks/useMeetingsAndAppointmentsReports';
 import { SalesChart } from '@/components/charts/SalesChart';
@@ -28,46 +29,168 @@ export const Reports = () => {
     return `${sign}${value.toFixed(1)}%`;
   };
 
-  const exportData = () => {
-    if (!reportData || !meetingsAppointmentsData) return;
-    
-    const dataToExport = {
-      geradoEm: new Date().toLocaleString('pt-BR'),
-      periodo: selectedPeriod,
-      kpis: {
-        taxaConversao: reportData.conversionRate,
-        ticketMedio: reportData.avgDealValue,
-        leadsQualificados: reportData.qualifiedLeads,
-        cicloVendas: reportData.avgSalesCycle,
-        receitaTotal: reportData.totalRevenue
-      },
-      reunioes: {
-        total: meetingsAppointmentsData.totalMeetings,
-        taxaConclusao: meetingsAppointmentsData.meetingCompletionRate,
-        duracaoMedia: meetingsAppointmentsData.avgMeetingDuration,
-        porPeriodo: meetingsAppointmentsData.meetingsByPeriod,
-        distribucaoStatus: meetingsAppointmentsData.meetingsStatusDistribution
-      },
-      agendamentos: {
-        total: meetingsAppointmentsData.totalAppointments,
-        taxaComparecimento: meetingsAppointmentsData.appointmentShowRate,
-        duracaoMedia: meetingsAppointmentsData.avgAppointmentDuration,
-        porPeriodo: meetingsAppointmentsData.appointmentsByPeriod,
-        distribucaoStatus: meetingsAppointmentsData.appointmentsStatusDistribution
-      },
-      salesByMonth: reportData.salesByMonth,
-      pipeline: reportData.pipelineData,
-      leadsPorFonte: reportData.leadsBySource,
-      atividadesPorMes: reportData.activitiesByMonth
-    };
+  // Função utilitária para converter dados em CSV
+  const convertToCSV = (data: any[], headers: { [key: string]: string }) => {
+    const headerRow = Object.values(headers).join(',');
+    const dataRows = data.map(row => {
+      return Object.keys(headers).map(key => {
+        const value = row[key];
+        if (typeof value === 'string' && value.includes(',')) {
+          return `"${value}"`;
+        }
+        return value || '';
+      }).join(',');
+    });
+    return [headerRow, ...dataRows].join('\n');
+  };
 
-    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+  // Função para fazer download do CSV
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `relatorio-completo-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Funções específicas de exportação
+  const exportSalesData = () => {
+    if (!reportData) return;
+    
+    const headers = {
+      month: 'Mês',
+      value: 'Valor (R$)',
+      count: 'Quantidade de Vendas'
+    };
+    
+    const csvContent = convertToCSV(reportData.salesByMonth, headers);
+    downloadCSV(csvContent, 'vendas-por-periodo');
+  };
+
+  const exportMeetingsData = () => {
+    if (!meetingsAppointmentsData) return;
+    
+    const headers = {
+      period: 'Período',
+      count: 'Total',
+      completed: 'Finalizadas',
+      scheduled: 'Agendadas',
+      inProgress: 'Em Andamento'
+    };
+    
+    const csvContent = convertToCSV(meetingsAppointmentsData.meetingsByPeriod, headers);
+    downloadCSV(csvContent, `reunioes-${selectedPeriod}`);
+  };
+
+  const exportAppointmentsData = () => {
+    if (!meetingsAppointmentsData) return;
+    
+    const headers = {
+      period: 'Período',
+      count: 'Total',
+      scheduled: 'Agendados',
+      completed: 'Realizados',
+      cancelled: 'Cancelados'
+    };
+    
+    const csvContent = convertToCSV(meetingsAppointmentsData.appointmentsByPeriod, headers);
+    downloadCSV(csvContent, `agendamentos-${selectedPeriod}`);
+  };
+
+  const exportLeadsData = () => {
+    if (!reportData) return;
+    
+    const headers = {
+      source: 'Fonte',
+      count: 'Quantidade'
+    };
+    
+    const csvContent = convertToCSV(reportData.leadsBySource, headers);
+    downloadCSV(csvContent, 'leads-por-fonte');
+  };
+
+  const exportPipelineData = () => {
+    if (!reportData) return;
+    
+    const headers = {
+      status: 'Status',
+      value: 'Valor (R$)',
+      count: 'Quantidade'
+    };
+    
+    const csvContent = convertToCSV(reportData.pipelineData, headers);
+    downloadCSV(csvContent, 'pipeline-vendas');
+  };
+
+  const exportKPIsData = () => {
+    if (!reportData || !meetingsAppointmentsData) return;
+    
+    const kpiData = [
+      {
+        metrica: 'Taxa de Conversão',
+        valor: `${reportData.conversionRate.toFixed(1)}%`,
+        categoria: 'Vendas'
+      },
+      {
+        metrica: 'Ticket Médio',
+        valor: formatCurrency(reportData.avgDealValue),
+        categoria: 'Vendas'
+      },
+      {
+        metrica: 'Leads Qualificados',
+        valor: reportData.qualifiedLeads.toString(),
+        categoria: 'Vendas'
+      },
+      {
+        metrica: 'Ciclo de Vendas',
+        valor: `${Math.round(reportData.avgSalesCycle)} dias`,
+        categoria: 'Vendas'
+      },
+      {
+        metrica: 'Total de Reuniões',
+        valor: meetingsAppointmentsData.totalMeetings.toString(),
+        categoria: 'Atendimento'
+      },
+      {
+        metrica: 'Taxa de Conclusão Reuniões',
+        valor: `${meetingsAppointmentsData.meetingCompletionRate.toFixed(1)}%`,
+        categoria: 'Atendimento'
+      },
+      {
+        metrica: 'Total de Agendamentos',
+        valor: meetingsAppointmentsData.totalAppointments.toString(),
+        categoria: 'Atendimento'
+      },
+      {
+        metrica: 'Taxa de Comparecimento',
+        valor: `${meetingsAppointmentsData.appointmentShowRate.toFixed(1)}%`,
+        categoria: 'Atendimento'
+      }
+    ];
+    
+    const headers = {
+      metrica: 'Métrica',
+      valor: 'Valor',
+      categoria: 'Categoria'
+    };
+    
+    const csvContent = convertToCSV(kpiData, headers);
+    downloadCSV(csvContent, 'kpis-gerais');
+  };
+
+  const exportActivitiesData = () => {
+    if (!reportData) return;
+    
+    const headers = {
+      month: 'Mês',
+      tasks: 'Tarefas',
+      appointments: 'Agendamentos'
+    };
+    
+    const csvContent = convertToCSV(reportData.activitiesByMonth, headers);
+    downloadCSV(csvContent, 'atividades-mensais');
   };
 
   if (isLoading || isLoadingMeetingsAppointments) {
@@ -144,27 +267,56 @@ export const Reports = () => {
     }
   ];
 
-  const reports = [
+  // Dados para os botões de exportação
+  const exportOptions = [
     {
-      title: 'Vendas por Período',
-      description: 'Análise de vendas dos últimos 6 meses',
+      title: 'Exportar KPIs Gerais',
+      description: 'Métricas principais de vendas e atendimento',
       icon: BarChart3,
       color: 'bg-blue-100 text-blue-600',
-      data: reportData.salesByMonth
+      action: exportKPIsData
     },
     {
-      title: 'Pipeline de Vendas',
-      description: 'Distribuição de leads por status',
+      title: 'Exportar Vendas',
+      description: 'Dados de vendas por período',
       icon: TrendingUp,
       color: 'bg-green-100 text-green-600',
-      data: reportData.pipelineData
+      action: exportSalesData
     },
     {
-      title: 'Atividades Mensais',
-      description: 'Tarefas e agendamentos por mês',
-      icon: Calendar,
+      title: 'Exportar Reuniões',
+      description: `Dados de reuniões por ${selectedPeriod === 'daily' ? 'dia' : selectedPeriod === 'weekly' ? 'semana' : selectedPeriod === 'monthly' ? 'mês' : 'ano'}`,
+      icon: Users,
       color: 'bg-purple-100 text-purple-600',
-      data: reportData.activitiesByMonth
+      action: exportMeetingsData
+    },
+    {
+      title: 'Exportar Agendamentos',
+      description: `Dados de agendamentos por ${selectedPeriod === 'daily' ? 'dia' : selectedPeriod === 'weekly' ? 'semana' : selectedPeriod === 'monthly' ? 'mês' : 'ano'}`,
+      icon: Calendar,
+      color: 'bg-orange-100 text-orange-600',
+      action: exportAppointmentsData
+    },
+    {
+      title: 'Exportar Pipeline',
+      description: 'Distribuição de leads por status',
+      icon: BarChart3,
+      color: 'bg-indigo-100 text-indigo-600',
+      action: exportPipelineData
+    },
+    {
+      title: 'Exportar Leads por Fonte',
+      description: 'Distribuição de leads por origem',
+      icon: Users,
+      color: 'bg-pink-100 text-pink-600',
+      action: exportLeadsData
+    },
+    {
+      title: 'Exportar Atividades',
+      description: 'Tarefas e agendamentos mensais',
+      icon: Calendar,
+      color: 'bg-teal-100 text-teal-600',
+      action: exportActivitiesData
     }
   ];
 
@@ -180,10 +332,6 @@ export const Reports = () => {
             selectedPeriod={selectedPeriod} 
             onPeriodChange={setSelectedPeriod} 
           />
-          <Button onClick={exportData} className="bg-blue-600 hover:bg-blue-700">
-            <Download className="w-4 h-4 mr-2" />
-            Exportar Dados
-          </Button>
         </div>
       </div>
 
@@ -369,25 +517,27 @@ export const Reports = () => {
         <ActivitiesChart data={reportData.activitiesByMonth} />
       </Card>
 
-      {/* Relatórios Disponíveis */}
+      {/* Nova Seção: Exportar Relatórios */}
       <Card className="p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Análises Detalhadas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {reports.map((report, index) => {
-            const Icon = report.icon;
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Exportar Relatórios (CSV)</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {exportOptions.map((option, index) => {
+            const Icon = option.icon;
             return (
               <div key={index} className="p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <div className={`w-12 h-12 rounded-lg ${report.color} flex items-center justify-center mb-4`}>
+                <div className={`w-12 h-12 rounded-lg ${option.color} flex items-center justify-center mb-4`}>
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{report.title}</h3>
-                <p className="text-gray-600 mb-4">{report.description}</p>
-                <div className="text-sm text-gray-500">
-                  {Array.isArray(report.data) && report.data.length > 0 
-                    ? `${report.data.length} registros encontrados`
-                    : 'Sem dados disponíveis'
-                  }
-                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{option.title}</h3>
+                <p className="text-gray-600 mb-4">{option.description}</p>
+                <Button 
+                  onClick={option.action}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  size="sm"
+                >
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Baixar CSV
+                </Button>
               </div>
             );
           })}
