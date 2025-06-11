@@ -3,15 +3,16 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Clock, Plus, FileText, Upload, Link as LinkIcon, Image, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { useMeetingDetails } from '@/hooks/useMeetings';
+import { useMeetingDetails } from '@/hooks/useMeetingDetails';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AgendaItem } from './AgendaItem';
+import { MeetingStatusSelector } from './MeetingStatusSelector';
 
 interface MeetingDetailsProps {
   meetingId: string;
@@ -19,7 +20,19 @@ interface MeetingDetailsProps {
 }
 
 export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
-  const { meeting, agendas, minutes, attachments, saveMinutes, addAgendaItem, addAttachment } = useMeetingDetails(meetingId);
+  const { 
+    meeting, 
+    agendas, 
+    minutes, 
+    attachments, 
+    updateMeeting,
+    saveMinutes, 
+    addAgendaItem, 
+    updateAgendaItem,
+    deleteAgendaItem,
+    reorderAgendaItems,
+    addAttachment 
+  } = useMeetingDetails(meetingId);
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -49,6 +62,37 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
       order_index: nextIndex,
     });
     setNewAgendaItem('');
+  };
+
+  const handleUpdateAgendaItem = async (id: string, updates: any) => {
+    await updateAgendaItem.mutateAsync({ id, ...updates });
+  };
+
+  const handleDeleteAgendaItem = async (id: string) => {
+    await deleteAgendaItem.mutateAsync(id);
+  };
+
+  const handleMoveAgendaItem = async (itemId: string, direction: 'up' | 'down') => {
+    const currentIndex = agendas.findIndex(item => item.id === itemId);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= agendas.length) return;
+
+    const reorderedItems = [...agendas];
+    [reorderedItems[currentIndex], reorderedItems[newIndex]] = 
+    [reorderedItems[newIndex], reorderedItems[currentIndex]];
+
+    const updates = reorderedItems.map((item, index) => ({
+      id: item.id,
+      order_index: index + 1,
+    }));
+
+    await reorderAgendaItems.mutateAsync(updates);
+  };
+
+  const handleStatusChange = async (status: any) => {
+    await updateMeeting.mutateAsync({ status });
   };
 
   const handleAddLink = async () => {
@@ -108,19 +152,6 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Agendada':
-        return 'bg-blue-500';
-      case 'Em andamento':
-        return 'bg-green-500';
-      case 'Finalizada':
-        return 'bg-gray-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
   if (!meeting) {
     return (
       <div className="p-6">
@@ -141,9 +172,11 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900">{meeting.title}</h1>
-            <Badge className={getStatusColor(meeting.status)}>
-              {meeting.status}
-            </Badge>
+            <MeetingStatusSelector
+              meeting={meeting}
+              onStatusChange={handleStatusChange}
+              disabled={updateMeeting.isPending}
+            />
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
             <div className="flex items-center gap-1">
@@ -181,19 +214,16 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               {agendas.map((item, index) => (
-                <div key={item.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <span className="text-sm font-medium text-gray-500 mt-0.5">
-                      {index + 1}.
-                    </span>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{item.title}</h4>
-                      {item.description && (
-                        <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <AgendaItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  totalItems={agendas.length}
+                  onUpdate={handleUpdateAgendaItem}
+                  onDelete={handleDeleteAgendaItem}
+                  onMoveUp={(id) => handleMoveAgendaItem(id, 'up')}
+                  onMoveDown={(id) => handleMoveAgendaItem(id, 'down')}
+                />
               ))}
             </div>
 
@@ -204,7 +234,11 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
                 onChange={(e) => setNewAgendaItem(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleAddAgendaItem()}
               />
-              <Button onClick={handleAddAgendaItem} size="sm">
+              <Button 
+                onClick={handleAddAgendaItem} 
+                size="sm"
+                disabled={addAgendaItem.isPending}
+              >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
