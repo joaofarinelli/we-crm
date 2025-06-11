@@ -1,33 +1,18 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { Building2, ArrowLeft } from 'lucide-react';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-
 const companySchema = z.object({
   name: z.string().min(2, 'Nome da empresa deve ter pelo menos 2 caracteres'),
   industry: z.string().min(1, 'Selecione um setor'),
@@ -40,18 +25,21 @@ const companySchema = z.object({
   contactPassword: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   contactPhone: z.string().min(1, 'Telefone é obrigatório'),
   contactPosition: z.string().min(1, 'Cargo é obrigatório'),
-  notes: z.string().optional(),
+  notes: z.string().optional()
 });
-
 type CompanyFormData = z.infer<typeof companySchema>;
-
 export const CompanyRegistration = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createCompany } = useCompanies();
-  const { signUp } = useAuth();
-  const { toast } = useToast();
+  const {
+    createCompany
+  } = useCompanies();
+  const {
+    signUp
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companySchema),
     defaultValues: {
@@ -66,20 +54,16 @@ export const CompanyRegistration = () => {
       contactPassword: '',
       contactPhone: '',
       contactPosition: '',
-      notes: '',
-    },
+      notes: ''
+    }
   });
-
   const onSubmit = async (data: CompanyFormData) => {
     setIsSubmitting(true);
     try {
       // Primeiro, criar o usuário
-      const { error: signUpError } = await signUp(
-        data.contactEmail, 
-        data.contactPassword, 
-        data.contactName
-      );
-
+      const {
+        error: signUpError
+      } = await signUp(data.contactEmail, data.contactPassword, data.contactName);
       if (signUpError) {
         throw new Error(signUpError.message);
       }
@@ -92,12 +76,11 @@ export const CompanyRegistration = () => {
         revenue: data.revenue || null,
         location: data.location,
         website: data.website || null,
-        status: 'Prospect',
+        status: 'Prospect'
       });
-
       toast({
         title: "Sucesso!",
-        description: "Empresa e usuário cadastrados com sucesso. Redirecionando para o dashboard...",
+        description: "Empresa e usuário cadastrados com sucesso. Redirecionando para o dashboard..."
       });
 
       // Redirecionar para o dashboard após cadastro
@@ -107,22 +90,20 @@ export const CompanyRegistration = () => {
       toast({
         title: "Erro",
         description: "Não foi possível cadastrar a empresa. Tente novamente.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Building2 className="w-8 h-8 text-blue-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">ZestCRM</h1>
+              <h1 className="text-2xl font-bold text-gray-900">We CRM</h1>
             </div>
             <Button variant="ghost" onClick={() => navigate(-1)}>
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -158,26 +139,20 @@ export const CompanyRegistration = () => {
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-900">Informações da Empresa</h3>
                     
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="name" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Nome da Empresa *</FormLabel>
                           <FormControl>
                             <Input placeholder="Ex: Minha Empresa LTDA" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="industry"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="industry" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Setor *</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
@@ -199,15 +174,11 @@ export const CompanyRegistration = () => {
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
 
-                      <FormField
-                        control={form.control}
-                        name="size"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="size" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Tamanho da Empresa *</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
@@ -225,17 +196,13 @@ export const CompanyRegistration = () => {
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="revenue"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="revenue" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Receita Anual</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
@@ -253,38 +220,28 @@ export const CompanyRegistration = () => {
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
 
-                      <FormField
-                        control={form.control}
-                        name="location"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="location" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Localização *</FormLabel>
                             <FormControl>
                               <Input placeholder="Ex: São Paulo, SP" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
 
-                    <FormField
-                      control={form.control}
-                      name="website"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="website" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Website</FormLabel>
                           <FormControl>
                             <Input placeholder="https://www.suaempresa.com.br" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
 
                   {/* Dados do Contato */}
@@ -293,106 +250,73 @@ export const CompanyRegistration = () => {
                     <p className="text-sm text-gray-600">Esta pessoa será o administrador da empresa no sistema</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="contactName"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="contactName" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Nome Completo *</FormLabel>
                             <FormControl>
                               <Input placeholder="Seu nome completo" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
 
-                      <FormField
-                        control={form.control}
-                        name="contactPosition"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="contactPosition" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Cargo *</FormLabel>
                             <FormControl>
                               <Input placeholder="Ex: CEO, Diretor de Vendas" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="contactEmail"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="contactEmail" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Email *</FormLabel>
                             <FormControl>
                               <Input type="email" placeholder="seu@email.com" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
 
-                      <FormField
-                        control={form.control}
-                        name="contactPassword"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="contactPassword" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Senha *</FormLabel>
                             <FormControl>
                               <Input type="password" placeholder="Mínimo 6 caracteres" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
 
-                    <FormField
-                      control={form.control}
-                      name="contactPhone"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="contactPhone" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Telefone *</FormLabel>
                           <FormControl>
                             <Input placeholder="(11) 99999-9999" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
 
                   {/* Observações */}
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="notes" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Observações</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Conte-nos mais sobre suas necessidades ou objetivos..."
-                            className="min-h-[100px]"
-                            {...field} 
-                          />
+                          <Textarea placeholder="Conte-nos mais sobre suas necessidades ou objetivos..." className="min-h-[100px]" {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
 
                   <div className="flex justify-end space-x-4 pt-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate(-1)}
-                      disabled={isSubmitting}
-                    >
+                    <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isSubmitting}>
                       Cancelar
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
@@ -405,8 +329,6 @@ export const CompanyRegistration = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CompanyRegistration;
