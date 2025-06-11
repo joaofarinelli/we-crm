@@ -28,6 +28,11 @@ export interface CompanySettings {
     auto_billing: boolean;
     invoice_email: string | null;
   };
+  whatsapp_support: {
+    enabled: boolean;
+    phone: string | null;
+    message: string;
+  };
 }
 
 export const useCompanySettings = () => {
@@ -85,7 +90,10 @@ export const useCompanySettings = () => {
           : { email: true, push: true, sms: false },
         billing_settings: typeof data.billing_settings === 'object' && data.billing_settings !== null
           ? data.billing_settings as { auto_billing: boolean; invoice_email: string | null; }
-          : { auto_billing: true, invoice_email: null }
+          : { auto_billing: true, invoice_email: null },
+        whatsapp_support: typeof data.whatsapp_support === 'object' && data.whatsapp_support !== null
+          ? data.whatsapp_support as { enabled: boolean; phone: string | null; message: string; }
+          : { enabled: false, phone: null, message: 'Olá! Preciso de ajuda.' }
       } as CompanySettings;
     },
     enabled: !!user?.id,

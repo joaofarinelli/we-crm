@@ -10,26 +10,28 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import CompanyRegistration from "./pages/CompanyRegistration";
 import NotFound from "./pages/NotFound";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/company-registration" element={<CompanyRegistration />} />
             <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/landing" element={<Landing />} />
+            <Route path="/company-registration" element={<CompanyRegistration />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+          <WhatsAppButton />
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

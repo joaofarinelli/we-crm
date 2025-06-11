@@ -159,6 +159,7 @@ export type Database = {
           timezone: string | null
           updated_at: string
           website: string | null
+          whatsapp_support: Json | null
         }
         Insert: {
           address?: string | null
@@ -182,6 +183,7 @@ export type Database = {
           timezone?: string | null
           updated_at?: string
           website?: string | null
+          whatsapp_support?: Json | null
         }
         Update: {
           address?: string | null
@@ -205,6 +207,7 @@ export type Database = {
           timezone?: string | null
           updated_at?: string
           website?: string | null
+          whatsapp_support?: Json | null
         }
         Relationships: []
       }
