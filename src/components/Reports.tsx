@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,7 +55,7 @@ export const Reports = () => {
         porPeriodo: meetingsAppointmentsData.appointmentsByPeriod,
         distribucaoStatus: meetingsAppointmentsData.appointmentsStatusDistribution
       },
-      vendasPorMes: reportData.vendasPorMes,
+      salesByMonth: reportData.salesByMonth,
       pipeline: reportData.pipelineData,
       leadsPorFonte: reportData.leadsBySource,
       atividadesPorMes: reportData.activitiesByMonth
