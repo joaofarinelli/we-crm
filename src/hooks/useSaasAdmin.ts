@@ -20,38 +20,66 @@ export const useSaasAdmin = () => {
       console.log('useSaasAdmin: Checking admin status for user:', user.id);
 
       try {
-        // Primeira tentativa: usar a função RPC
-        const { data, error } = await supabase.rpc('is_saas_admin');
+        // Use the secure function to check admin status
+        const { data, error } = await supabase.rpc('is_saas_admin_for_company_management');
         
         if (error) {
-          console.error('useSaasAdmin: Error calling is_saas_admin RPC:', error);
+          console.error('useSaasAdmin: Error calling is_saas_admin_for_company_management RPC:', error);
           
-          // Fallback: verificar diretamente na tabela profiles
-          console.log('useSaasAdmin: Trying fallback method...');
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select(`
-              role_id,
-              roles!inner(name)
-            `)
-            .eq('id', user.id)
-            .single();
+          // Fallback: try the original function
+          console.log('useSaasAdmin: Trying fallback is_saas_admin function...');
+          const { data: fallbackData, error: fallbackError } = await supabase.rpc('is_saas_admin');
+          
+          if (fallbackError) {
+            console.error('useSaasAdmin: Fallback method also failed:', fallbackError);
+            
+            // Last resort: direct query (this may fail due to RLS)
+            console.log('useSaasAdmin: Trying direct query fallback...');
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select(`
+                role_id,
+                roles!inner(name)
+              `)
+              .eq('id', user.id)
+              .single();
 
-          if (profileError) {
-            console.error('useSaasAdmin: Fallback method also failed:', profileError);
-            throw profileError;
+            if (profileError) {
+              console.error('useSaasAdmin: All methods failed:', profileError);
+              throw profileError;
+            }
+
+            const isAdmin = profileData?.roles?.name === 'Administrador do Sistema';
+            console.log('useSaasAdmin: Direct query result:', isAdmin);
+            setIsSaasAdmin(isAdmin);
+          } else {
+            console.log('useSaasAdmin: Fallback RPC result:', fallbackData);
+            setIsSaasAdmin(fallbackData || false);
           }
-
-          const isAdmin = profileData?.roles?.name === 'Administrador do Sistema';
-          console.log('useSaasAdmin: Fallback result:', isAdmin);
-          setIsSaasAdmin(isAdmin);
         } else {
-          console.log('useSaasAdmin: RPC result:', data);
+          console.log('useSaasAdmin: Primary RPC result:', data);
           setIsSaasAdmin(data || false);
         }
+
+        // Log admin check for security audit
+        await supabase.rpc('log_security_event', {
+          event_type: 'admin_status_check',
+          details: { is_admin: data || false }
+        }).catch(console.error); // Don't fail if logging fails
+        
       } catch (error) {
         console.error('Erro ao verificar admin SaaS:', error);
         setIsSaasAdmin(false);
+        
+        // Try to log the failed admin check
+        try {
+          await supabase.rpc('log_security_event', {
+            event_type: 'admin_check_failed',
+            details: { error: error.message }
+          });
+        } catch (logError) {
+          console.error('Failed to log security event:', logError);
+        }
       } finally {
         setLoading(false);
       }

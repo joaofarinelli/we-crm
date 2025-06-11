@@ -1011,6 +1011,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_saas_admin_for_company_management: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       mark_invitation_used: {
         Args: { invitation_token: string; user_id: string }
         Returns: boolean
