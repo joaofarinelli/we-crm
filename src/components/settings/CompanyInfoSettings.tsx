@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,9 +14,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Building2, Upload, MapPin, Globe, Phone } from 'lucide-react';
 import { useCompanySettings } from '@/hooks/useCompanySettings';
+import { useToast } from '@/hooks/use-toast';
 
 export const CompanyInfoSettings = () => {
-  const { company, updateCompany } = useCompanySettings();
+  const { company, updateCompany, uploadLogo, isUploadingLogo } = useCompanySettings();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -41,11 +45,70 @@ export const CompanyInfoSettings = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateCompany.mutate(formData);
+    updateCompany.mutate(formData, {
+      onSuccess: () => {
+        toast({
+          title: "Sucesso",
+          description: "Informações da empresa atualizadas com sucesso!",
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar informações da empresa.",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLogoUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um arquivo de imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar tamanho do arquivo (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Erro",
+        description: "O arquivo deve ter no máximo 2MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    uploadLogo.mutate(file, {
+      onSuccess: () => {
+        toast({
+          title: "Sucesso",
+          description: "Logo atualizado com sucesso!",
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Erro",
+          description: "Erro ao fazer upload do logo.",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   return (
@@ -66,11 +129,23 @@ export const CompanyInfoSettings = () => {
             </AvatarFallback>
           </Avatar>
           <div>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogoUpload}
+              disabled={isUploadingLogo}
+            >
               <Upload className="w-4 h-4 mr-2" />
-              Alterar Logo
+              {isUploadingLogo ? 'Enviando...' : 'Alterar Logo'}
             </Button>
             <p className="text-xs text-gray-500 mt-1">PNG ou JPG, máx. 2MB</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
         </div>
 
