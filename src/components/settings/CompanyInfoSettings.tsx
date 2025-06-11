@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +34,7 @@ export const CompanyInfoSettings = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateCompany.mutateAsync(formData);
+    updateCompany.mutate(formData);
   };
 
   const handleInputChange = (field: string, value: string) => {

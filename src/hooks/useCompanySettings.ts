@@ -122,8 +122,8 @@ export const useCompanySettings = () => {
   return {
     company,
     isLoading,
-    updateCompany: updateCompanyMutation.mutate,
-    uploadLogo: uploadLogoMutation.mutate,
+    updateCompany: updateCompanyMutation,
+    uploadLogo: uploadLogoMutation,
     isUpdating: updateCompanyMutation.isPending,
     isUploadingLogo: uploadLogoMutation.isPending,
   };

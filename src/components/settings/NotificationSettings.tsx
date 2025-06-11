@@ -30,7 +30,7 @@ export const NotificationSettings = () => {
   }, [company]);
 
   const handleSave = () => {
-    updateCompany.mutateAsync({
+    updateCompany.mutate({
       notification_settings: settings,
     });
   };
