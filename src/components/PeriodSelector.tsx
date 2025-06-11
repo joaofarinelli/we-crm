@@ -13,6 +13,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   onPeriodChange
 }) => {
   const periods: { value: PeriodType; label: string }[] = [
+    { value: 'daily', label: 'Diário' },
     { value: 'weekly', label: 'Semanal' },
     { value: 'monthly', label: 'Mensal' },
     { value: 'yearly', label: 'Anual' }

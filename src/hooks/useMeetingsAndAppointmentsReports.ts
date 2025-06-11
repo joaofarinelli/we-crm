@@ -21,7 +21,7 @@ export interface MeetingsAppointmentsReportData {
   };
 }
 
-export type PeriodType = 'weekly' | 'monthly' | 'yearly';
+export type PeriodType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export const useMeetingsAndAppointmentsReports = (period: PeriodType = 'monthly') => {
   const { user } = useAuth();
@@ -36,7 +36,11 @@ export const useMeetingsAndAppointmentsReports = (period: PeriodType = 'monthly'
       let dateFormat = 'month';
       let periodLength = 'month';
 
-      if (period === 'weekly') {
+      if (period === 'daily') {
+        periodsToFetch = 30; // 30 dias
+        dateFormat = 'day';
+        periodLength = 'day';
+      } else if (period === 'weekly') {
         periodsToFetch = 12; // 12 semanas
         dateFormat = 'week';
         periodLength = 'week';
@@ -62,7 +66,11 @@ export const useMeetingsAndAppointmentsReports = (period: PeriodType = 'monthly'
         let periodEnd: Date;
         let periodLabel: string;
 
-        if (period === 'weekly') {
+        if (period === 'daily') {
+          periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+          periodEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i + 1);
+          periodLabel = periodStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        } else if (period === 'weekly') {
           periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7) - 6);
           periodEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7));
           periodLabel = `Sem ${periodsToFetch - i}`;
@@ -78,7 +86,7 @@ export const useMeetingsAndAppointmentsReports = (period: PeriodType = 'monthly'
 
         const periodMeetings = allMeetings?.filter(meeting => {
           const meetingDate = new Date(meeting.date);
-          return meetingDate >= periodStart && meetingDate <= periodEnd;
+          return meetingDate >= periodStart && meetingDate < periodEnd;
         }) || [];
 
         return {
@@ -95,7 +103,11 @@ export const useMeetingsAndAppointmentsReports = (period: PeriodType = 'monthly'
         let periodEnd: Date;
         let periodLabel: string;
 
-        if (period === 'weekly') {
+        if (period === 'daily') {
+          periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+          periodEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i + 1);
+          periodLabel = periodStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        } else if (period === 'weekly') {
           periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7) - 6);
           periodEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7));
           periodLabel = `Sem ${periodsToFetch - i}`;
@@ -111,7 +123,7 @@ export const useMeetingsAndAppointmentsReports = (period: PeriodType = 'monthly'
 
         const periodAppointments = allAppointments?.filter(appointment => {
           const appointmentDate = new Date(appointment.date);
-          return appointmentDate >= periodStart && appointmentDate <= periodEnd;
+          return appointmentDate >= periodStart && appointmentDate < periodEnd;
         }) || [];
 
         return {
