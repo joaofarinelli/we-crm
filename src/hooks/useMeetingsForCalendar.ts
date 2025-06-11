@@ -33,19 +33,24 @@ export const useMeetingsForCalendar = () => {
         if (error) throw error;
         return data as Meeting[];
       } else {
-        // Usuário comum vê apenas reuniões onde é participante
+        // Primeiro buscar os IDs das reuniões onde o usuário é participante
+        const { data: participantData, error: participantError } = await supabase
+          .from('meeting_participants')
+          .select('meeting_id')
+          .eq('user_id', user.id);
+        
+        if (participantError) throw participantError;
+        
+        const meetingIds = participantData.map(p => p.meeting_id);
+        
+        if (meetingIds.length === 0) return [];
+        
+        // Buscar as reuniões usando os IDs encontrados
         const { data, error } = await supabase
           .from('meetings')
-          .select(`
-            *
-          `)
+          .select('*')
           .eq('company_id', currentUserProfile.company_id)
-          .in('id', 
-            supabase
-              .from('meeting_participants')
-              .select('meeting_id')
-              .eq('user_id', user.id)
-          )
+          .in('id', meetingIds)
           .order('date', { ascending: false });
         
         if (error) throw error;
