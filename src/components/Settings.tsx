@@ -5,18 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { 
   Building2, 
   Users, 
-  Shield, 
   Settings as SettingsIcon, 
-  CreditCard, 
-  Plug,
-  Bell,
-  FileText
+  Shield
 } from 'lucide-react';
 import { CompanyInfoSettings } from './settings/CompanyInfoSettings';
-import { NotificationSettings } from './settings/NotificationSettings';
 import { SystemSettings } from './settings/SystemSettings';
-import { UserManagement } from './UserManagement';
-import { RoleManagement } from './RoleManagement';
+import { UserRoleManagement } from './settings/UserRoleManagement';
+import { AdvancedSettings } from './settings/AdvancedSettings';
 
 export const Settings = () => {
   const [activeTab, setActiveTab] = useState('company');
@@ -30,21 +25,9 @@ export const Settings = () => {
     },
     {
       id: 'users',
-      label: 'Usuários',
+      label: 'Usuários & Cargos',
       icon: Users,
-      component: UserManagement,
-    },
-    {
-      id: 'roles',
-      label: 'Cargos',
-      icon: Shield,
-      component: RoleManagement,
-    },
-    {
-      id: 'notifications',
-      label: 'Notificações',
-      icon: Bell,
-      component: NotificationSettings,
+      component: UserRoleManagement,
     },
     {
       id: 'system',
@@ -53,52 +36,10 @@ export const Settings = () => {
       component: SystemSettings,
     },
     {
-      id: 'billing',
-      label: 'Plano',
-      icon: CreditCard,
-      component: () => (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <CreditCard className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium mb-2">Configurações de Plano</h3>
-              <p className="text-gray-500">Em desenvolvimento</p>
-            </div>
-          </CardContent>
-        </Card>
-      ),
-    },
-    {
-      id: 'integrations',
-      label: 'Integrações',
-      icon: Plug,
-      component: () => (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <Plug className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium mb-2">Integrações</h3>
-              <p className="text-gray-500">Em desenvolvimento</p>
-            </div>
-          </CardContent>
-        </Card>
-      ),
-    },
-    {
-      id: 'audit',
-      label: 'Auditoria',
-      icon: FileText,
-      component: () => (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium mb-2">Logs de Auditoria</h3>
-              <p className="text-gray-500">Em desenvolvimento</p>
-            </div>
-          </CardContent>
-        </Card>
-      ),
+      id: 'advanced',
+      label: 'Avançado',
+      icon: Shield,
+      component: AdvancedSettings,
     },
   ];
 
@@ -112,17 +53,17 @@ export const Settings = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-4">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <TabsTrigger 
                 key={tab.id} 
                 value={tab.id} 
-                className="flex flex-col gap-1 p-3"
+                className="flex items-center gap-2 p-3"
               >
                 <Icon className="w-4 h-4" />
-                <span className="text-xs">{tab.label}</span>
+                <span className="text-sm">{tab.label}</span>
               </TabsTrigger>
             );
           })}

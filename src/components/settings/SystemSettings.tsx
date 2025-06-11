@@ -1,20 +1,63 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Plus, Trash2, Settings, Bell, Clock } from 'lucide-react';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
+import { useCompanySettings } from '@/hooks/useCompanySettings';
 import { useToast } from '@/hooks/use-toast';
 
 export const SystemSettings = () => {
   const { toast } = useToast();
   const { columns, createColumn, deleteColumn } = usePipelineColumns();
+  const { company, updateCompany } = useCompanySettings();
   const [newColumnName, setNewColumnName] = useState('');
   const [isAddingColumn, setIsAddingColumn] = useState(false);
+  
+  // Configurações básicas
+  const [basicSettings, setBasicSettings] = useState({
+    timezone: 'America/Sao_Paulo',
+    currency: 'BRL',
+    date_format: 'DD/MM/YYYY',
+  });
+
+  // Configurações de notificações
+  const [notifications, setNotifications] = useState({
+    email: true,
+    push: true,
+    sms: false,
+    leads: true,
+    appointments: true,
+  });
+
+  useEffect(() => {
+    if (company) {
+      setBasicSettings({
+        timezone: company.timezone || 'America/Sao_Paulo',
+        currency: company.currency || 'BRL',
+        date_format: company.date_format || 'DD/MM/YYYY',
+      });
+      
+      if (company.notification_settings) {
+        setNotifications(prev => ({
+          ...prev,
+          ...company.notification_settings,
+        }));
+      }
+    }
+  }, [company]);
 
   const handleAddColumn = async () => {
     if (!newColumnName.trim()) return;
@@ -58,65 +101,131 @@ export const SystemSettings = () => {
     }
   };
 
-  const leadStatuses = [
-    { name: 'Novo Lead', color: '#10B981' },
-    { name: 'Contactado', color: '#3B82F6' },
-    { name: 'Qualificado', color: '#F59E0B' },
-    { name: 'Proposta Enviada', color: '#8B5CF6' },
-    { name: 'Negociação', color: '#F97316' },
-    { name: 'Fechado', color: '#059669' },
-    { name: 'Perdido', color: '#EF4444' },
-  ];
+  const saveBasicSettings = () => {
+    updateCompany.mutate(basicSettings);
+  };
 
-  const leadSources = [
-    'Website',
-    'Redes Sociais',
-    'Google Ads',
-    'Facebook Ads',
-    'Indicação',
-    'Cold Email',
-    'Telefone',
-    'Evento',
-    'Outros'
-  ];
+  const saveNotifications = () => {
+    updateCompany.mutate({
+      notification_settings: notifications,
+    });
+  };
+
+  const toggleNotification = (key: string) => {
+    setNotifications(prev => ({
+      ...prev,
+      [key]: !prev[key as keyof typeof prev],
+    }));
+  };
 
   return (
     <div className="space-y-6">
-      {/* Pipeline Settings */}
+      {/* Configurações Básicas */}
       <Card>
         <CardHeader>
-          <CardTitle>Configurações do Pipeline</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="w-5 h-5" />
+            Configurações Básicas
+          </CardTitle>
           <CardDescription>
-            Gerencie as colunas do seu pipeline de vendas
+            Fuso horário, moeda e formato de data
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Fuso Horário</Label>
+              <Select 
+                value={basicSettings.timezone} 
+                onValueChange={(value) => setBasicSettings(prev => ({ ...prev, timezone: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/Sao_Paulo">Brasília (UTC-3)</SelectItem>
+                  <SelectItem value="America/Manaus">Manaus (UTC-4)</SelectItem>
+                  <SelectItem value="America/Rio_Branco">Rio Branco (UTC-5)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">Moeda</Label>
+              <Select 
+                value={basicSettings.currency} 
+                onValueChange={(value) => setBasicSettings(prev => ({ ...prev, currency: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BRL">Real (R$)</SelectItem>
+                  <SelectItem value="USD">Dólar ($)</SelectItem>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="date_format">Formato de Data</Label>
+              <Select 
+                value={basicSettings.date_format} 
+                onValueChange={(value) => setBasicSettings(prev => ({ ...prev, date_format: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DD/MM/YYYY">DD/MM/AAAA</SelectItem>
+                  <SelectItem value="MM/DD/YYYY">MM/DD/AAAA</SelectItem>
+                  <SelectItem value="YYYY-MM-DD">AAAA-MM-DD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button onClick={saveBasicSettings} disabled={updateCompany.isPending}>
+              Salvar Configurações
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pipeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Pipeline de Vendas
+          </CardTitle>
+          <CardDescription>
+            Gerencie as colunas do seu pipeline
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {columns.map((column) => (
               <div
                 key={column.id}
-                className="p-4 border rounded-lg flex items-center justify-between"
+                className="p-3 border rounded-lg flex items-center justify-between"
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   <div
-                    className="w-4 h-4 rounded-full"
+                    className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: column.color }}
                   />
-                  <span className="font-medium">{column.name}</span>
+                  <span className="text-sm font-medium">{column.name}</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <Edit2 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteColumn(column.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteColumn(column.id)}
+                  className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
               </div>
             ))}
           </div>
@@ -133,98 +242,85 @@ export const SystemSettings = () => {
             <Button 
               onClick={handleAddColumn}
               disabled={isAddingColumn || !newColumnName.trim()}
+              size="sm"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Coluna
+              <Plus className="w-4 h-4 mr-1" />
+              Adicionar
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Lead Settings */}
+      {/* Notificações */}
       <Card>
         <CardHeader>
-          <CardTitle>Configurações de Leads</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            Notificações
+          </CardTitle>
           <CardDescription>
-            Status e fontes de leads disponíveis
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label className="text-base font-medium">Status de Leads</Label>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {leadStatuses.map((status, index) => (
-                <Badge
-                  key={index}
-                  style={{ backgroundColor: status.color }}
-                  className="text-white"
-                >
-                  {status.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
-
-          <div>
-            <Label className="text-base font-medium">Fontes de Leads</Label>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {leadSources.map((source, index) => (
-                <Badge key={index} variant="outline">
-                  {source}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Workflow Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Configurações de Workflow</CardTitle>
-          <CardDescription>
-            Automatizações e fluxos de trabalho
+            Configure como você quer receber notificações
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-medium">Auto-seguimento de leads</h4>
-                <p className="text-sm text-gray-600">
-                  Criar tarefas automáticas de seguimento para novos leads
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Canais</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="email" className="text-sm">Email</Label>
+                  <Switch
+                    id="email"
+                    checked={notifications.email}
+                    onCheckedChange={() => toggleNotification('email')}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="push" className="text-sm">Push</Label>
+                  <Switch
+                    id="push"
+                    checked={notifications.push}
+                    onCheckedChange={() => toggleNotification('push')}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="sms" className="text-sm">SMS</Label>
+                  <Switch
+                    id="sms"
+                    checked={notifications.sms}
+                    onCheckedChange={() => toggleNotification('sms')}
+                  />
+                </div>
               </div>
-              <Button variant="outline" size="sm">
-                Configurar
-              </Button>
             </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-medium">Notificações de pipeline</h4>
-                <p className="text-sm text-gray-600">
-                  Receber notificações quando leads mudarem de estágio
-                </p>
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Tipos</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="leads" className="text-sm">Novos Leads</Label>
+                  <Switch
+                    id="leads"
+                    checked={notifications.leads}
+                    onCheckedChange={() => toggleNotification('leads')}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="appointments" className="text-sm">Agendamentos</Label>
+                  <Switch
+                    id="appointments"
+                    checked={notifications.appointments}
+                    onCheckedChange={() => toggleNotification('appointments')}
+                  />
+                </div>
               </div>
-              <Button variant="outline" size="sm">
-                Configurar
-              </Button>
             </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-medium">Relatórios automáticos</h4>
-                <p className="text-sm text-gray-600">
-                  Enviar relatórios de desempenho por email semanalmente
-                </p>
-              </div>
-              <Button variant="outline" size="sm">
-                Configurar
-              </Button>
-            </div>
+          </div>
+          
+          <div className="flex justify-end pt-4">
+            <Button onClick={saveNotifications} disabled={updateCompany.isPending}>
+              Salvar Notificações
+            </Button>
           </div>
         </CardContent>
       </Card>
