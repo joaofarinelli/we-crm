@@ -12,7 +12,7 @@ export interface MeetingParticipantWithProfile {
   profiles?: {
     full_name: string | null;
     email: string | null;
-  };
+  } | null;
 }
 
 export const useMeetingParticipants = (meetingId: string) => {
@@ -25,8 +25,12 @@ export const useMeetingParticipants = (meetingId: string) => {
       const { data, error } = await supabase
         .from('meeting_participants')
         .select(`
-          *,
-          profiles (
+          id,
+          meeting_id,
+          user_id,
+          role,
+          created_at,
+          profiles!meeting_participants_user_id_fkey (
             full_name,
             email
           )
@@ -50,8 +54,12 @@ export const useMeetingParticipants = (meetingId: string) => {
           role,
         }])
         .select(`
-          *,
-          profiles (
+          id,
+          meeting_id,
+          user_id,
+          role,
+          created_at,
+          profiles!meeting_participants_user_id_fkey (
             full_name,
             email
           )
@@ -103,8 +111,12 @@ export const useMeetingParticipants = (meetingId: string) => {
         .update({ role })
         .eq('id', participantId)
         .select(`
-          *,
-          profiles (
+          id,
+          meeting_id,
+          user_id,
+          role,
+          created_at,
+          profiles!meeting_participants_user_id_fkey (
             full_name,
             email
           )
