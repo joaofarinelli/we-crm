@@ -37,14 +37,6 @@ export const Leads = () => {
       // Filtro por origem
       const sourceMatch = filters.source === 'todas' || lead.source === filters.source;
 
-      // Filtro por faixa de valor
-      const valueMatch = (() => {
-        const leadValue = lead.value || 0;
-        const minValue = filters.valueRange.min ? parseFloat(filters.valueRange.min) : 0;
-        const maxValue = filters.valueRange.max ? parseFloat(filters.valueRange.max) : Infinity;
-        return leadValue >= minValue && leadValue <= maxValue;
-      })();
-
       // Filtro por período de criação
       const dateMatch = (() => {
         if (!filters.dateRange.from && !filters.dateRange.to) return true;
@@ -56,7 +48,7 @@ export const Leads = () => {
         return leadDate >= fromDate && leadDate <= toDate;
       })();
 
-      return searchMatch && statusMatch && sourceMatch && valueMatch && dateMatch;
+      return searchMatch && statusMatch && sourceMatch && dateMatch;
     });
   }, [leads, filters]);
 
@@ -71,14 +63,6 @@ export const Leads = () => {
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200';
     }
-  };
-
-  const formatValue = (value: number | null) => {
-    if (!value) return 'R$ 0';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
   };
 
   const formatDate = (dateString: string) => {
@@ -153,7 +137,6 @@ export const Leads = () => {
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="text-left sm:text-right">
-                  <p className="text-xl font-bold text-gray-900">{formatValue(lead.value)}</p>
                   <p className="text-sm text-gray-500">Origem: {lead.source || 'N/A'}</p>
                   <p className="text-xs text-gray-400 mt-1">Criado: {formatDate(lead.created_at)}</p>
                 </div>

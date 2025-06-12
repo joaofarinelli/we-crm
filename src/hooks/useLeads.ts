@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,7 +8,6 @@ interface Lead {
   name: string;
   email: string | null;
   phone: string | null;
-  value: number | null;
   status: string | null;
   source: string | null;
   company_id: string;

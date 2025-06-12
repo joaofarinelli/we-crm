@@ -53,7 +53,7 @@ export const useReports = () => {
         supabase.from('appointments').select('*').gte('created_at', sixMonthsAgo.toISOString())
       ]);
 
-      // Calcular vendas por mês (últimos 6 meses)
+      // Calcular vendas por mês (últimos 6 meses) - agora baseado apenas na quantidade
       const salesByMonth = Array.from({ length: 6 }, (_, i) => {
         const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
@@ -65,7 +65,7 @@ export const useReports = () => {
 
         return {
           month: monthDate.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
-          value: monthLeads.reduce((sum, lead) => sum + (lead.value || 0), 0),
+          value: monthLeads.length, // Agora representa quantidade em vez de valor monetário
           count: monthLeads.length
         };
       }).reverse();
@@ -75,7 +75,7 @@ export const useReports = () => {
         const statusLeads = allLeads?.filter(lead => lead.status === status) || [];
         return {
           status,
-          value: statusLeads.reduce((sum, lead) => sum + (lead.value || 0), 0),
+          value: statusLeads.length, // Agora representa quantidade
           count: statusLeads.length
         };
       });
@@ -85,12 +85,9 @@ export const useReports = () => {
       const qualifiedLeads = allLeads?.filter(lead => lead.status === 'Quente').length || 0;
       const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0;
       
-      const leadsWithValue = allLeads?.filter(lead => lead.value && lead.value > 0) || [];
-      const avgDealValue = leadsWithValue.length > 0 
-        ? leadsWithValue.reduce((sum, lead) => sum + (lead.value || 0), 0) / leadsWithValue.length 
-        : 0;
-
-      const totalRevenue = allLeads?.reduce((sum, lead) => sum + (lead.value || 0), 0) || 0;
+      // Remover cálculo de ticket médio já que não temos mais valores
+      const avgDealValue = 0;
+      const totalRevenue = 0;
 
       // Calcular ciclo de vendas médio (diferença entre criação e última atualização dos leads quentes)
       const hotLeads = allLeads?.filter(lead => lead.status === 'Quente') || [];

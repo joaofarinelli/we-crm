@@ -53,7 +53,6 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
     if (filters.searchTerm) count++;
     if (filters.status !== 'todos') count++;
     if (filters.source !== 'todas') count++;
-    if (filters.valueRange.min || filters.valueRange.max) count++;
     if (filters.dateRange.from || filters.dateRange.to) count++;
     return count;
   };
@@ -98,7 +97,7 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
       </div>
 
       {isExpanded && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
             <select
@@ -127,28 +126,6 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
               <option value="Telemarketing">Telemarketing</option>
               <option value="Evento">Evento</option>
             </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Valor (R$)</label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Min"
-                type="number"
-                value={filters.valueRange.min}
-                onChange={(e) => updateFilters({ 
-                  valueRange: { ...filters.valueRange, min: e.target.value }
-                })}
-              />
-              <Input
-                placeholder="Max"
-                type="number"
-                value={filters.valueRange.max}
-                onChange={(e) => updateFilters({ 
-                  valueRange: { ...filters.valueRange, max: e.target.value }
-                })}
-              />
-            </div>
           </div>
 
           <div>

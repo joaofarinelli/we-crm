@@ -23,7 +23,6 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
     name: '',
     email: '',
     phone: '',
-    value: '',
     status: 'Frio',
     source: ''
   });
@@ -35,7 +34,6 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      value: formData.value ? parseFloat(formData.value) : null,
       status: formData.status,
       source: formData.source || null
     });
@@ -45,7 +43,6 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
       name: '',
       email: '',
       phone: '',
-      value: '',
       status: 'Frio',
       source: ''
     });
@@ -86,17 +83,6 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="value">Valor</Label>
-            <Input
-              id="value"
-              type="number"
-              step="0.01"
-              value={formData.value}
-              onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
             />
           </div>
           

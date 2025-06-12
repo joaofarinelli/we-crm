@@ -17,7 +17,6 @@ interface Lead {
   name: string;
   email: string | null;
   phone: string | null;
-  value: number | null;
   status: string | null;
   source: string | null;
   created_at: string;
@@ -35,7 +34,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     name: '',
     email: '',
     phone: '',
-    value: '',
     status: 'Frio',
     source: ''
   });
@@ -46,7 +44,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        value: lead.value?.toString() || '',
         status: lead.status || 'Frio',
         source: lead.source || ''
       });
@@ -61,7 +58,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      value: formData.value ? parseFloat(formData.value) : null,
       status: formData.status,
       source: formData.source || null
     });
@@ -102,17 +98,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="value">Valor</Label>
-            <Input
-              id="value"
-              type="number"
-              step="0.01"
-              value={formData.value}
-              onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
             />
           </div>
           

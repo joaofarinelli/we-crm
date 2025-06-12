@@ -22,14 +22,6 @@ export const Kanban = () => {
     return leads.filter(lead => lead.status === status);
   };
 
-  const formatValue = (value: number | null) => {
-    if (!value) return 'R$ 0';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este lead?')) {
       await deleteLead(id);
@@ -104,7 +96,6 @@ export const Kanban = () => {
       <div className="grid gap-6 px-8" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(300px, 1fr))` }}>
         {columns.map((column) => {
           const columnLeads = getLeadsByStatus(column.name);
-          const totalValue = columnLeads.reduce((sum, lead) => sum + (lead.value || 0), 0);
 
           return (
             <div key={column.id} className="space-y-4">
@@ -117,7 +108,7 @@ export const Kanban = () => {
               >
                 <h2 className="font-semibold text-lg">{column.name}</h2>
                 <p className="text-sm text-gray-600">
-                  {columnLeads.length} leads • {formatValue(totalValue)}
+                  {columnLeads.length} leads
                 </p>
               </div>
 
@@ -188,7 +179,6 @@ export const Kanban = () => {
                       <Badge variant="outline" className="text-xs">
                         {lead.source || 'N/A'}
                       </Badge>
-                      <span className="font-medium text-sm">{formatValue(lead.value)}</span>
                     </div>
                   </Card>
                 ))}
