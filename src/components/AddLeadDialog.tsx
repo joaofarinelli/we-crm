@@ -46,7 +46,7 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
     email: '',
     phone: '',
     status: 'Frio',
-    source: ''
+    source: undefined as string | undefined
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,7 +66,7 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
       email: '',
       phone: '',
       status: 'Frio',
-      source: ''
+      source: undefined
     });
     
     onOpenChange(false);

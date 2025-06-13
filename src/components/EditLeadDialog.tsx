@@ -57,7 +57,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     email: '',
     phone: '',
     status: 'Frio',
-    source: ''
+    source: undefined as string | undefined
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         email: lead.email || '',
         phone: lead.phone || '',
         status: lead.status || 'Frio',
-        source: lead.source || ''
+        source: lead.source || undefined
       });
     }
   }, [lead]);
