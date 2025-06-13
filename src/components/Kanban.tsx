@@ -17,13 +17,14 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const Kanban = () => {
-  const { appointments, updateAppointment, deleteAppointment, loading } = useAppointments();
+  const { appointments, updateAppointmentOptimistic, deleteAppointment, loading } = useAppointments();
   const { columns } = usePipelineColumns();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showColumnManager, setShowColumnManager] = useState(false);
+  const [dragLoading, setDragLoading] = useState<string | null>(null);
 
   // Group appointments by status (column)
   const appointmentsByStatus = appointments.reduce((acc, appointment) => {
@@ -40,11 +41,25 @@ export const Kanban = () => {
 
     const appointmentId = result.draggableId;
     const newStatus = result.destination.droppableId;
+    const sourceStatus = result.source.droppableId;
+
+    // Se não mudou de status, não fazer nada
+    if (sourceStatus === newStatus) return;
+
+    setDragLoading(appointmentId);
 
     try {
-      await updateAppointment(appointmentId, { status: newStatus });
+      console.log(`Movendo agendamento ${appointmentId} de ${sourceStatus} para ${newStatus}`);
+      
+      // Usar atualização otimística para feedback imediato
+      await updateAppointmentOptimistic(appointmentId, { status: newStatus });
+      
+      console.log('Agendamento movido com sucesso');
     } catch (error) {
-      console.error('Erro ao atualizar status do agendamento:', error);
+      console.error('Erro ao mover agendamento:', error);
+      // O rollback já é tratado na função updateAppointmentOptimistic
+    } finally {
+      setDragLoading(null);
     }
   };
 
@@ -141,14 +156,17 @@ export const Kanban = () => {
                         key={appointment.id}
                         draggableId={appointment.id}
                         index={index}
+                        isDragDisabled={dragLoading === appointment.id}
                       >
                         {(provided, snapshot) => (
                           <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`cursor-move transition-shadow ${
-                              snapshot.isDragging ? 'shadow-lg' : 'hover:shadow-md'
+                            className={`cursor-move transition-all duration-200 ${
+                              snapshot.isDragging ? 'shadow-lg rotate-2 scale-105' : 'hover:shadow-md'
+                            } ${
+                              dragLoading === appointment.id ? 'opacity-50 pointer-events-none' : ''
                             }`}
                           >
                             <CardContent className="p-4">
@@ -224,6 +242,13 @@ export const Kanban = () => {
                                   <p className="text-xs text-gray-500 line-clamp-2">
                                     {appointment.description}
                                   </p>
+                                )}
+
+                                {dragLoading === appointment.id && (
+                                  <div className="flex items-center gap-2 text-xs text-blue-600">
+                                    <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    Movendo...
+                                  </div>
                                 )}
                               </div>
                             </CardContent>

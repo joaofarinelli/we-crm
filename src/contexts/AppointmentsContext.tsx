@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +9,7 @@ interface AppointmentsContextType {
   loading: boolean;
   createAppointment: (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'assigned_closer' | 'company_id'>) => Promise<any>;
   updateAppointment: (id: string, updates: Partial<Appointment>) => Promise<any>;
+  updateAppointmentOptimistic: (id: string, updates: Partial<Appointment>) => Promise<void>;
   deleteAppointment: (id: string) => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -186,6 +186,44 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
     }
   };
 
+  // Nova função para atualização otimista (para drag & drop)
+  const updateAppointmentOptimistic = async (id: string, updates: Partial<Appointment>) => {
+    // Salvar estado anterior para rollback se necessário
+    const previousAppointments = [...appointments];
+    
+    // Atualizar estado local imediatamente (otimistic update)
+    setAppointments(prev => 
+      prev.map(appointment => 
+        appointment.id === id ? { ...appointment, ...updates } : appointment
+      )
+    );
+
+    try {
+      // Fazer a atualização no servidor
+      const { error } = await supabase
+        .from('appointments')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      console.log('Agendamento atualizado com sucesso via drag & drop');
+    } catch (error) {
+      console.error('Erro ao atualizar agendamento via drag & drop:', error);
+      
+      // Fazer rollback do estado local em caso de erro
+      setAppointments(previousAppointments);
+      
+      toast({
+        title: "Erro",
+        description: "Não foi possível mover o agendamento",
+        variant: "destructive"
+      });
+      
+      throw error;
+    }
+  };
+
   const deleteAppointment = async (id: string) => {
     try {
       const { error } = await supabase
@@ -269,7 +307,14 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
             table: 'appointments'
           },
           async (payload) => {
-            console.log('Agendamento atualizado:', payload.new);
+            console.log('Agendamento atualizado via real-time:', payload.new);
+            
+            // Verificar se já foi atualizado otimisticamente
+            const currentAppointment = appointments.find(apt => apt.id === payload.new.id);
+            if (currentAppointment && currentAppointment.status === payload.new.status) {
+              console.log('Agendamento já atualizado otimisticamente, ignorando real-time update');
+              return;
+            }
             
             const { data, error } = await supabase
               .from('appointments')
@@ -332,6 +377,7 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         loading,
         createAppointment,
         updateAppointment,
+        updateAppointmentOptimistic,
         deleteAppointment,
         refetch: fetchAppointments
       }}
