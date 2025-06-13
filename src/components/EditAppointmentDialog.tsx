@@ -196,12 +196,14 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="lead">Lead</Label>
-              <Select value={leadId} onValueChange={setLeadId}>
+              <Select 
+                value={leadId || undefined} 
+                onValueChange={(value) => setLeadId(value || '')}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um lead (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum lead</SelectItem>
                   {leads.map((lead) => (
                     <SelectItem key={lead.id} value={lead.id}>
                       {lead.name}
