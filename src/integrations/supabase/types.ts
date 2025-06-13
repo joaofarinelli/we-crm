@@ -1020,6 +1020,10 @@ export type Database = {
         Args: { invitation_token: string }
         Returns: Json
       }
+      create_default_pipeline_columns: {
+        Args: { target_company_id: string }
+        Returns: undefined
+      }
       create_default_roles_for_company: {
         Args: { target_company_id: string }
         Returns: undefined
@@ -1051,6 +1055,10 @@ export type Database = {
       mark_invitation_used: {
         Args: { invitation_token: string; user_id: string }
         Returns: boolean
+      }
+      sync_appointment_status_with_pipeline: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

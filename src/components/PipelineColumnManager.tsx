@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, GripVertical, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
+import { usePipelineSync } from '@/hooks/usePipelineSync';
 
 interface PipelineColumn {
   id: string;
@@ -17,6 +18,7 @@ interface PipelineColumn {
 
 export const PipelineColumnManager = () => {
   const { columns, createColumn, updateColumn, deleteColumn, reorderColumns } = usePipelineColumns();
+  const { syncPipelineColumns, createDefaultColumns, syncing } = usePipelineSync();
   const [editingColumn, setEditingColumn] = useState<PipelineColumn | null>(null);
   const [newColumn, setNewColumn] = useState({ name: '', color: '#3B82F6' });
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -50,7 +52,7 @@ export const PipelineColumnManager = () => {
   };
 
   const handleDeleteColumn = async (columnId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os leads nela serão movidos para "Frio".')) {
+    if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os agendamentos nela serão movidos para "Agendado".')) {
       await deleteColumn(columnId);
     }
   };
@@ -119,59 +121,79 @@ export const PipelineColumnManager = () => {
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Gerenciar Colunas do Pipeline</h3>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Coluna
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Criar Nova Coluna</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome da Coluna</Label>
-                <Input
-                  id="name"
-                  value={newColumn.name}
-                  onChange={(e) => setNewColumn(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Ex: Qualificado"
-                />
-              </div>
-              <div>
-                <Label htmlFor="color">Cor</Label>
-                <div className="flex gap-2 mt-2">
-                  {colorOptions.map((color) => (
-                    <button
-                      key={color.value}
-                      className={`w-8 h-8 rounded-full border-2 ${
-                        newColumn.color === color.value ? 'border-gray-800' : 'border-gray-300'
-                      }`}
-                      style={{ backgroundColor: color.value }}
-                      onClick={() => setNewColumn(prev => ({ ...prev, color: color.value }))}
-                      title={color.name}
-                    />
-                  ))}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={createDefaultColumns}
+            disabled={syncing}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Colunas Padrão
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={syncPipelineColumns}
+            disabled={syncing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+            Sincronizar
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Coluna
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Nova Coluna</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nome da Coluna</Label>
+                  <Input
+                    id="name"
+                    value={newColumn.name}
+                    onChange={(e) => setNewColumn(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Ex: Qualificado"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="color">Cor</Label>
+                  <div className="flex gap-2 mt-2">
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color.value}
+                        className={`w-8 h-8 rounded-full border-2 ${
+                          newColumn.color === color.value ? 'border-gray-800' : 'border-gray-300'
+                        }`}
+                        style={{ backgroundColor: color.value }}
+                        onClick={() => setNewColumn(prev => ({ ...prev, color: color.value }))}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={handleCreateColumn} className="flex-1">
+                    Criar Coluna
+                  </Button>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
+                    Cancelar
+                  </Button>
                 </div>
               </div>
-              <div className="flex gap-2 pt-4">
-                <Button onClick={handleCreateColumn} className="flex-1">
-                  Criar Coluna
-                </Button>
-                <Button variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="space-y-3">
         <p className="text-sm text-gray-600 mb-4">
-          Arraste as colunas para reordená-las:
+          Arraste as colunas para reordená-las. Use "Sincronizar" para criar colunas baseadas nos status dos agendamentos existentes.
         </p>
         {columns.map((column) => (
           <div
