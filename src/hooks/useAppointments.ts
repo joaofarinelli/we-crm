@@ -194,8 +194,11 @@ export const useAppointments = () => {
 
       // Configurar listeners para mudanças em tempo real com um nome único baseado no user ID
       const channelName = `appointments_changes_${user.id}_${Date.now()}`;
-      const channel = supabase
-        .channel(channelName)
+      
+      const channel = supabase.channel(channelName);
+      
+      // Configurar todos os listeners antes de fazer subscribe
+      channel
         .on(
           'postgres_changes',
           {
@@ -280,8 +283,12 @@ export const useAppointments = () => {
               prev.filter(appointment => appointment.id !== payload.old.id)
             );
           }
-        )
-        .subscribe();
+        );
+
+      // Subscribe apenas uma vez após configurar todos os listeners
+      const subscription = channel.subscribe((status) => {
+        console.log('Canal subscription status:', status);
+      });
 
       // Cleanup function
       return () => {
