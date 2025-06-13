@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useScripts } from '@/hooks/useScripts';
+import { ScriptAttachments } from '@/components/ScriptAttachments';
 
 interface AddScriptDialogProps {
   open: boolean;
@@ -33,17 +34,22 @@ export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) =>
     category: 'Vendas',
     description: ''
   });
+  const [createdScriptId, setCreatedScriptId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await createScript.mutateAsync({
+    const result = await createScript.mutateAsync({
       title: formData.title,
       content: formData.content,
       category: formData.category,
       description: formData.description || undefined
     });
 
+    setCreatedScriptId(result.id);
+  };
+
+  const handleClose = () => {
     // Reset form
     setFormData({
       title: '',
@@ -51,76 +57,94 @@ export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) =>
       category: 'Vendas',
       description: ''
     });
-    
+    setCreatedScriptId(null);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo Material</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Título *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              required
-            />
+        
+        {!createdScriptId ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Título *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="category">Categoria</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Vendas">Vendas</SelectItem>
+                  <SelectItem value="Atendimento">Atendimento</SelectItem>
+                  <SelectItem value="Objeções">Objeções</SelectItem>
+                  <SelectItem value="Fechamento">Fechamento</SelectItem>
+                  <SelectItem value="Follow-up">Follow-up</SelectItem>
+                  <SelectItem value="Outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Descrição</Label>
+              <Input
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="content">Conteúdo do Material *</Label>
+              <Textarea
+                id="content"
+                value={formData.content}
+                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                rows={8}
+                required
+              />
+            </div>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createScript.isPending}>
+                {createScript.isPending ? 'Criando...' : 'Criar Material'}
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium text-green-600 mb-2">Material criado com sucesso!</h3>
+              <p className="text-gray-600">Agora você pode adicionar arquivos e links ao material.</p>
+            </div>
+            
+            <ScriptAttachments scriptId={createdScriptId} showManageButton />
+            
+            <DialogFooter>
+              <Button onClick={handleClose}>
+                Finalizar
+              </Button>
+            </DialogFooter>
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="category">Categoria</Label>
-            <Select
-              value={formData.category}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Vendas">Vendas</SelectItem>
-                <SelectItem value="Atendimento">Atendimento</SelectItem>
-                <SelectItem value="Objeções">Objeções</SelectItem>
-                <SelectItem value="Fechamento">Fechamento</SelectItem>
-                <SelectItem value="Follow-up">Follow-up</SelectItem>
-                <SelectItem value="Outros">Outros</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Input
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="content">Conteúdo do Material *</Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              rows={8}
-              required
-            />
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createScript.isPending}>
-              {createScript.isPending ? 'Criando...' : 'Criar Material'}
-            </Button>
-          </DialogFooter>
-        </form>
+        )}
       </DialogContent>
     </Dialog>
   );

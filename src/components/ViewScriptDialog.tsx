@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check } from 'lucide-react';
 import { Script } from '@/hooks/useScripts';
+import { ScriptAttachments } from '@/components/ScriptAttachments';
 import { toast } from 'sonner';
 
 interface ViewScriptDialogProps {
@@ -81,6 +82,8 @@ export const ViewScriptDialog = ({ open, onOpenChange, script }: ViewScriptDialo
               </pre>
             </div>
           </div>
+
+          <ScriptAttachments scriptId={script.id} />
           
           <div className="text-xs text-gray-500 border-t pt-3">
             <p>Criado em: {new Date(script.created_at).toLocaleDateString('pt-BR')}</p>

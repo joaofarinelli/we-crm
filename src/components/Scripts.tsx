@@ -4,12 +4,93 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, FileText, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, FileText, Eye, Paperclip } from 'lucide-react';
 import { useScripts, Script } from '@/hooks/useScripts';
+import { useScriptAttachments } from '@/hooks/useScriptAttachments';
 import { AddScriptDialog } from '@/components/AddScriptDialog';
 import { EditScriptDialog } from '@/components/EditScriptDialog';
 import { ViewScriptDialog } from '@/components/ViewScriptDialog';
 import { useAuth } from '@/hooks/useAuth';
+
+const ScriptCard = ({ script, onEdit, onDelete, onView, canEdit }: {
+  script: Script;
+  onEdit: (script: Script) => void;
+  onDelete: (id: string) => void;
+  onView: (script: Script) => void;
+  canEdit: boolean;
+}) => {
+  const { attachments } = useScriptAttachments(script.id);
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-lg">{script.title}</CardTitle>
+              {attachments.length > 0 && (
+                <div className="flex items-center gap-1 text-gray-500">
+                  <Paperclip className="w-4 h-4" />
+                  <span className="text-xs">{attachments.length}</span>
+                </div>
+              )}
+            </div>
+            <Badge variant="secondary" className="mb-2">
+              {script.category}
+            </Badge>
+            {script.description && (
+              <CardDescription>{script.description}</CardDescription>
+            )}
+          </div>
+          <div className="flex gap-1 ml-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onView(script)}
+              title="Visualizar material"
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
+            {canEdit && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(script)}
+                  title="Editar material"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(script.id)}
+                  title="Excluir material"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="bg-gray-50 p-3 rounded-md">
+          <div className="flex items-center gap-2 mb-2">
+            <FileText className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Prévia:</span>
+          </div>
+          <p className="text-sm text-gray-600 line-clamp-4">
+            {script.content}
+          </p>
+        </div>
+        <div className="mt-3 text-xs text-gray-500">
+          Criado em: {new Date(script.created_at).toLocaleDateString('pt-BR')}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export const Scripts = () => {
   const { scripts, isLoading, deleteScript } = useScripts();
@@ -100,65 +181,14 @@ export const Scripts = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredScripts.map((script) => (
-          <Card key={script.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-lg mb-1">{script.title}</CardTitle>
-                  <Badge variant="secondary" className="mb-2">
-                    {script.category}
-                  </Badge>
-                  {script.description && (
-                    <CardDescription>{script.description}</CardDescription>
-                  )}
-                </div>
-                <div className="flex gap-1 ml-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleView(script)}
-                    title="Visualizar material"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  {canEditScript(script) && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(script)}
-                        title="Editar material"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(script.id)}
-                        title="Excluir material"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700">Prévia:</span>
-                </div>
-                <p className="text-sm text-gray-600 line-clamp-4">
-                  {script.content}
-                </p>
-              </div>
-              <div className="mt-3 text-xs text-gray-500">
-                Criado em: {new Date(script.created_at).toLocaleDateString('pt-BR')}
-              </div>
-            </CardContent>
-          </Card>
+          <ScriptCard
+            key={script.id}
+            script={script}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
+            canEdit={canEditScript(script)}
+          />
         ))}
       </div>
 
