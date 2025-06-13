@@ -110,7 +110,7 @@ export const useAppointments = () => {
 
       if (error) throw error;
       
-      setAppointments(prev => [data, ...prev]);
+      // Não precisa mais atualizar o estado aqui, o real-time vai fazer isso
       toast({
         title: "Sucesso",
         description: "Agendamento criado com sucesso"
@@ -147,7 +147,7 @@ export const useAppointments = () => {
 
       if (error) throw error;
       
-      setAppointments(prev => prev.map(appointment => appointment.id === id ? data : appointment));
+      // Não precisa mais atualizar o estado aqui, o real-time vai fazer isso
       toast({
         title: "Sucesso",
         description: "Agendamento atualizado com sucesso"
@@ -172,7 +172,8 @@ export const useAppointments = () => {
         .eq('id', id);
 
       if (error) throw error;
-      setAppointments(prev => prev.filter(appointment => appointment.id !== id));
+      
+      // Não precisa mais atualizar o estado aqui, o real-time vai fazer isso
       toast({
         title: "Sucesso",
         description: "Agendamento removido com sucesso"
@@ -190,6 +191,96 @@ export const useAppointments = () => {
   useEffect(() => {
     if (user) {
       fetchAppointments();
+
+      // Configurar listeners para mudanças em tempo real
+      const channel = supabase
+        .channel('appointments_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'appointments'
+          },
+          async (payload) => {
+            console.log('Novo agendamento inserido:', payload.new);
+            
+            // Buscar o agendamento completo com os joins
+            const { data, error } = await supabase
+              .from('appointments')
+              .select(`
+                *,
+                leads (
+                  name
+                ),
+                assigned_closer:profiles!appointments_assigned_to_fkey (
+                  full_name,
+                  email
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (!error && data) {
+              setAppointments(prev => [data, ...prev]);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'appointments'
+          },
+          async (payload) => {
+            console.log('Agendamento atualizado:', payload.new);
+            
+            // Buscar o agendamento completo com os joins
+            const { data, error } = await supabase
+              .from('appointments')
+              .select(`
+                *,
+                leads (
+                  name
+                ),
+                assigned_closer:profiles!appointments_assigned_to_fkey (
+                  full_name,
+                  email
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (!error && data) {
+              setAppointments(prev => 
+                prev.map(appointment => 
+                  appointment.id === data.id ? data : appointment
+                )
+              );
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'appointments'
+          },
+          (payload) => {
+            console.log('Agendamento deletado:', payload.old);
+            setAppointments(prev => 
+              prev.filter(appointment => appointment.id !== payload.old.id)
+            );
+          }
+        )
+        .subscribe();
+
+      // Cleanup function
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
