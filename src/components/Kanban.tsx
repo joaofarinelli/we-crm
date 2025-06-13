@@ -3,38 +3,39 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useLeads } from '@/hooks/useLeads';
+import { useAppointments } from '@/hooks/useAppointments';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
-import { Edit2, Trash2, Phone, Mail, Settings } from 'lucide-react';
-import { EditLeadDialog } from './EditLeadDialog';
+import { Edit2, Trash2, Calendar, Clock, User, UserCheck, Settings } from 'lucide-react';
+import { EditAppointmentKanbanDialog } from './EditAppointmentKanbanDialog';
 import { PipelineColumnManager } from './PipelineColumnManager';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Appointment } from '@/types/appointment';
 
 export const Kanban = () => {
-  const { leads, loading, deleteLead, updateLead } = useLeads();
+  const { appointments, loading, deleteAppointment, updateAppointment } = useAppointments();
   const { columns, loading: columnsLoading } = usePipelineColumns();
-  const [editingLead, setEditingLead] = useState(null);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [manageColumnsOpen, setManageColumnsOpen] = useState(false);
-  const [draggedLead, setDraggedLead] = useState<string | null>(null);
+  const [draggedAppointment, setDraggedAppointment] = useState<string | null>(null);
 
-  const getLeadsByStatus = (status: string) => {
-    return leads.filter(lead => lead.status === status);
+  const getAppointmentsByStatus = (status: string) => {
+    return appointments.filter(appointment => appointment.status === status);
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este lead?')) {
-      await deleteLead(id);
+    if (window.confirm('Tem certeza que deseja excluir este agendamento?')) {
+      await deleteAppointment(id);
     }
   };
 
-  const handleEdit = (lead: any) => {
-    setEditingLead(lead);
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
     setEditDialogOpen(true);
   };
 
-  const handleDragStart = (e: React.DragEvent, leadId: string) => {
-    setDraggedLead(leadId);
+  const handleDragStart = (e: React.DragEvent, appointmentId: string) => {
+    setDraggedAppointment(appointmentId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -46,26 +47,34 @@ export const Kanban = () => {
   const handleDrop = async (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
     
-    if (!draggedLead) return;
+    if (!draggedAppointment) return;
 
-    const leadToUpdate = leads.find(lead => lead.id === draggedLead);
-    if (!leadToUpdate || leadToUpdate.status === newStatus) {
-      setDraggedLead(null);
+    const appointmentToUpdate = appointments.find(appointment => appointment.id === draggedAppointment);
+    if (!appointmentToUpdate || appointmentToUpdate.status === newStatus) {
+      setDraggedAppointment(null);
       return;
     }
 
-    await updateLead(draggedLead, { status: newStatus });
-    setDraggedLead(null);
+    await updateAppointment(draggedAppointment, { status: newStatus });
+    setDraggedAppointment(null);
   };
 
   const handleDragEnd = () => {
-    setDraggedLead(null);
+    setDraggedAppointment(null);
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('pt-BR');
+  };
+
+  const formatTime = (timeStr: string) => {
+    return timeStr.slice(0, 5);
   };
 
   if (loading || columnsLoading) {
     return (
       <div className="py-8 flex items-center justify-center">
-        <div className="text-lg">Carregando kanban...</div>
+        <div className="text-lg">Carregando pipeline...</div>
       </div>
     );
   }
@@ -74,8 +83,8 @@ export const Kanban = () => {
     <div className="py-8 space-y-6">
       <div className="flex justify-between items-center px-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pipeline de Vendas</h1>
-          <p className="text-gray-600 mt-1">Visualize seus leads por status - arraste para mover entre colunas</p>
+          <h1 className="text-3xl font-bold text-gray-900">Pipeline de Agendamentos</h1>
+          <p className="text-gray-600 mt-1">Visualize seus agendamentos por status - arraste para mover entre colunas</p>
         </div>
         <Dialog open={manageColumnsOpen} onOpenChange={setManageColumnsOpen}>
           <DialogTrigger asChild>
@@ -95,7 +104,7 @@ export const Kanban = () => {
 
       <div className="grid gap-6 px-8" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(300px, 1fr))` }}>
         {columns.map((column) => {
-          const columnLeads = getLeadsByStatus(column.name);
+          const columnAppointments = getAppointmentsByStatus(column.name);
 
           return (
             <div key={column.id} className="space-y-4">
@@ -108,32 +117,35 @@ export const Kanban = () => {
               >
                 <h2 className="font-semibold text-lg">{column.name}</h2>
                 <p className="text-sm text-gray-600">
-                  {columnLeads.length} leads
+                  {columnAppointments.length} agendamentos
                 </p>
               </div>
 
               <div
                 className={`space-y-3 min-h-[200px] p-2 rounded-lg transition-colors border-2 border-dashed ${
-                  draggedLead ? 'border-gray-300 bg-gray-50' : 'border-transparent'
+                  draggedAppointment ? 'border-gray-300 bg-gray-50' : 'border-transparent'
                 }`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, column.name)}
               >
-                {columnLeads.map((lead) => (
+                {columnAppointments.map((appointment) => (
                   <Card
-                    key={lead.id}
+                    key={appointment.id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, lead.id)}
+                    onDragStart={(e) => handleDragStart(e, appointment.id)}
                     onDragEnd={handleDragEnd}
                     className={`p-4 transition-all cursor-move ${
-                      draggedLead === lead.id 
+                      draggedAppointment === appointment.id 
                         ? 'opacity-50 rotate-2 shadow-lg' 
                         : 'hover:shadow-md'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h3 className="font-medium text-gray-900">{lead.name}</h3>
+                        <h3 className="font-medium text-gray-900">{appointment.title}</h3>
+                        {appointment.description && (
+                          <p className="text-sm text-gray-600 mt-1">{appointment.description}</p>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         <Button 
@@ -141,7 +153,7 @@ export const Kanban = () => {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEdit(lead);
+                            handleEdit(appointment);
                           }}
                         >
                           <Edit2 className="w-3 h-3" />
@@ -152,7 +164,7 @@ export const Kanban = () => {
                           className="text-red-600 hover:text-red-700"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(lead.id);
+                            handleDelete(appointment.id);
                           }}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -161,31 +173,39 @@ export const Kanban = () => {
                     </div>
 
                     <div className="space-y-2 text-xs text-gray-500">
-                      {lead.email && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(appointment.date)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatTime(appointment.time)} ({appointment.duration} min)</span>
+                      </div>
+                      {appointment.leads && (
                         <div className="flex items-center gap-1">
-                          <Mail className="w-3 h-3" />
-                          <span>{lead.email}</span>
+                          <User className="w-3 h-3" />
+                          <span>{appointment.leads.name}</span>
                         </div>
                       )}
-                      {lead.phone && (
+                      {appointment.assigned_closer && (
                         <div className="flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          <span>{lead.phone}</span>
+                          <UserCheck className="w-3 h-3" />
+                          <span>{appointment.assigned_closer.full_name || appointment.assigned_closer.email}</span>
                         </div>
                       )}
                     </div>
 
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
                       <Badge variant="outline" className="text-xs">
-                        {lead.source || 'N/A'}
+                        {appointment.status}
                       </Badge>
                     </div>
                   </Card>
                 ))}
 
-                {columnLeads.length === 0 && (
+                {columnAppointments.length === 0 && (
                   <div className="p-6 text-center text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
-                    Nenhum lead neste status
+                    Nenhum agendamento neste status
                   </div>
                 )}
               </div>
@@ -194,8 +214,8 @@ export const Kanban = () => {
         })}
       </div>
 
-      <EditLeadDialog
-        lead={editingLead}
+      <EditAppointmentKanbanDialog
+        appointment={editingAppointment}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
       />
