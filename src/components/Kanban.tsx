@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
@@ -97,7 +96,7 @@ export const Kanban = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 space-y-6 min-h-screen">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Pipeline de Agendamentos</h1>
@@ -124,10 +123,10 @@ export const Kanban = () => {
       )}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex gap-6 overflow-x-auto pb-4">
           {columns.map((column) => (
-            <div key={column.id} className="space-y-4">
-              <Card>
+            <div key={column.id} className="flex-1 min-w-[300px] max-w-[350px] space-y-4">
+              <Card className="shrink-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <div
@@ -147,7 +146,7 @@ export const Kanban = () => {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`min-h-[200px] space-y-3 p-2 rounded-lg transition-colors ${
+                    className={`h-[calc(100vh-350px)] overflow-y-auto space-y-3 p-2 rounded-lg transition-colors ${
                       snapshot.isDraggingOver ? 'bg-gray-100' : ''
                     }`}
                   >
@@ -163,7 +162,7 @@ export const Kanban = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`cursor-move transition-all duration-200 ${
+                            className={`cursor-move transition-all duration-200 shrink-0 ${
                               snapshot.isDragging ? 'shadow-lg rotate-2 scale-105' : 'hover:shadow-md'
                             } ${
                               dragLoading === appointment.id ? 'opacity-50 pointer-events-none' : ''
