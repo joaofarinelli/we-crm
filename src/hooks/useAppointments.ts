@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +10,7 @@ export const useAppointments = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
 
   const fetchAppointments = async () => {
     try {
@@ -192,10 +193,18 @@ export const useAppointments = () => {
     if (user) {
       fetchAppointments();
 
+      // Verificar se já existe um canal ativo para evitar múltiplas subscriptions
+      if (channelRef.current) {
+        console.log('Canal já existe, removendo anterior');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+
       // Configurar listeners para mudanças em tempo real com um nome único baseado no user ID
       const channelName = `appointments_changes_${user.id}_${Date.now()}`;
       
       const channel = supabase.channel(channelName);
+      channelRef.current = channel;
       
       // Configurar todos os listeners antes de fazer subscribe
       channel
@@ -286,14 +295,17 @@ export const useAppointments = () => {
         );
 
       // Subscribe apenas uma vez após configurar todos os listeners
-      const subscription = channel.subscribe((status) => {
+      channel.subscribe((status) => {
         console.log('Canal subscription status:', status);
       });
 
       // Cleanup function
       return () => {
         console.log('Cleaning up appointments channel:', channelName);
-        supabase.removeChannel(channel);
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
       };
     }
   }, [user]);
