@@ -72,7 +72,7 @@ export const RoleManagement = () => {
     return <div className="p-6">Carregando cargos...</div>;
   }
 
-  // Filtrar apenas cargos da empresa do usuário (não incluir cargos do sistema)
+  // Filtrar apenas cargos da empresa (os cargos do sistema agora são controlados pelo RLS)
   const companyRoles = roles.filter(role => !role.is_system_role);
 
   return (

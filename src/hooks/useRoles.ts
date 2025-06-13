@@ -23,6 +23,7 @@ export const useRoles = () => {
 
   const fetchRoles = async () => {
     try {
+      // O RLS agora já filtra automaticamente os cargos pela empresa do usuário
       const { data, error } = await supabase
         .from('roles')
         .select('*')
