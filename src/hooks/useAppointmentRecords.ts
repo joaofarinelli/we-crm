@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -139,51 +138,50 @@ export const useAppointmentRecords = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchRecords();
+    if (!user) return;
 
-      // Clean up any existing channel first
+    fetchRecords();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
       if (channelRef.current) {
-        console.log('Cleaning up existing appointment records channel');
+        console.log('Cleaning up appointment records channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
+    };
 
-      // Create unique channel name using user ID and timestamp
-      const channelName = `appointment-records-changes-${user.id}-${Date.now()}`;
+    // Clean up any existing channel first
+    cleanup();
 
-      // Setup realtime subscription
-      const channel = supabase
-        .channel(channelName)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'appointment_records'
-          },
-          (payload) => {
-            console.log('Appointment record change detected:', payload);
-            setIsUpdating(true);
-            
-            setTimeout(() => {
-              fetchRecords();
-              setIsUpdating(false);
-            }, 500);
-          }
-        )
-        .subscribe();
+    // Create unique channel name using user ID and timestamp
+    const channelName = `appointment-records-changes-${user.id}-${Date.now()}`;
 
-      channelRef.current = channel;
-
-      return () => {
-        if (channelRef.current) {
-          console.log('Cleaning up appointment records channel:', channelName);
-          supabase.removeChannel(channelRef.current);
-          channelRef.current = null;
+    // Setup realtime subscription
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointment_records'
+        },
+        (payload) => {
+          console.log('Appointment record change detected:', payload);
+          setIsUpdating(true);
+          
+          setTimeout(() => {
+            fetchRecords();
+            setIsUpdating(false);
+          }, 500);
         }
-      };
-    }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   return {

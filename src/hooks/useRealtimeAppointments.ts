@@ -69,51 +69,50 @@ export const useRealtimeAppointments = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchAppointments();
+    if (!user) return;
 
-      // Clean up any existing channel first
+    fetchAppointments();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
       if (channelRef.current) {
-        console.log('Cleaning up existing appointments channel');
+        console.log('Cleaning up appointments channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
+    };
 
-      // Create unique channel name using user ID and timestamp
-      const channelName = `appointments-changes-${user.id}-${Date.now()}`;
-      
-      // Setup realtime subscription
-      const channel = supabase
-        .channel(channelName)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'appointments'
-          },
-          (payload) => {
-            console.log('Appointment change detected:', payload);
-            setIsUpdating(true);
-            
-            setTimeout(() => {
-              fetchAppointments();
-              setIsUpdating(false);
-            }, 500);
-          }
-        )
-        .subscribe();
+    // Clean up any existing channel first
+    cleanup();
 
-      channelRef.current = channel;
-
-      return () => {
-        if (channelRef.current) {
-          console.log('Cleaning up appointments channel:', channelName);
-          supabase.removeChannel(channelRef.current);
-          channelRef.current = null;
+    // Create unique channel name using user ID and timestamp
+    const channelName = `appointments-changes-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments'
+        },
+        (payload) => {
+          console.log('Appointment change detected:', payload);
+          setIsUpdating(true);
+          
+          setTimeout(() => {
+            fetchAppointments();
+            setIsUpdating(false);
+          }, 500);
         }
-      };
-    }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   return {
