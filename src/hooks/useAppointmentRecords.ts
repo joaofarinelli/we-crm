@@ -25,7 +25,7 @@ export const useAppointmentRecords = () => {
 
       if (error) throw error;
       
-      setRecords(data || []);
+      setRecords((data || []) as AppointmentRecord[]);
     } catch (error) {
       console.error('Erro ao buscar registros de atendimento:', error);
       toast({

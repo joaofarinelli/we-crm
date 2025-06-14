@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Clock, User, Eye, Edit, Trash2, CheckCircle, MessageSquare, Timeline } from 'lucide-react';
+import { Calendar, Clock, User, Eye, Edit, Trash2, CheckCircle, MessageSquare, History } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
 
   const { deleteAppointment } = useAppointments();
   const { getRecordsByAppointment } = useAppointmentRecords();
-  const { getFollowUpsByAppointment, getPendingFollowUps } = useFollowUps();
+  const { getFollowUpsByAppointment } = useFollowUps();
 
   const appointmentRecords = getRecordsByAppointment(appointment.id);
   const appointmentFollowUps = getFollowUpsByAppointment(appointment.id);
@@ -150,7 +150,7 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
               size="sm"
               onClick={() => setTimelineDialogOpen(true)}
             >
-              <Timeline className="w-4 h-4 mr-1" />
+              <History className="w-4 h-4 mr-1" />
               Timeline
             </Button>
 

@@ -26,7 +26,7 @@ export const useFollowUps = () => {
 
       if (error) throw error;
       
-      setFollowUps(data || []);
+      setFollowUps((data || []) as FollowUp[]);
     } catch (error) {
       console.error('Erro ao buscar follow-ups:', error);
       toast({

@@ -9,19 +9,8 @@ import { EmptyAppointments } from './appointments/EmptyAppointments';
 import { Appointment } from '@/types/appointment';
 
 export const Appointments = () => {
-  const { appointments, loading, deleteAppointment } = useAppointments();
+  const { appointments, loading } = useAppointments();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-
-  const handleEdit = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setEditDialogOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    await deleteAppointment(id);
-  };
 
   const handleCreateNew = () => {
     setAddDialogOpen(true);
@@ -52,8 +41,6 @@ export const Appointments = () => {
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         ))}
 
@@ -65,12 +52,6 @@ export const Appointments = () => {
       <AddAppointmentDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-      />
-
-      <EditAppointmentDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        appointment={selectedAppointment}
       />
     </div>
   );
