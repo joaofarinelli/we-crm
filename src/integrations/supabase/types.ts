@@ -9,6 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointment_records: {
+        Row: {
+          appointment_id: string
+          company_id: string
+          created_at: string
+          created_by: string
+          end_time: string
+          id: string
+          next_steps: string | null
+          notes: string | null
+          objections: string | null
+          outcome: string | null
+          start_time: string
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          end_time: string
+          id?: string
+          next_steps?: string | null
+          notes?: string | null
+          objections?: string | null
+          outcome?: string | null
+          start_time: string
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          end_time?: string
+          id?: string
+          next_steps?: string | null
+          notes?: string | null
+          objections?: string | null
+          outcome?: string | null
+          start_time?: string
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_records_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           assigned_to: string
@@ -320,6 +376,84 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follow_ups: {
+        Row: {
+          appointment_id: string
+          appointment_record_id: string | null
+          channel: string
+          company_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          message_sent: string | null
+          notes: string | null
+          response_date: string | null
+          response_received: string | null
+          result: string | null
+          scheduled_date: string
+          scheduled_time: string
+          sequence_number: number
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          appointment_record_id?: string | null
+          channel: string
+          company_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          message_sent?: string | null
+          notes?: string | null
+          response_date?: string | null
+          response_received?: string | null
+          result?: string | null
+          scheduled_date: string
+          scheduled_time: string
+          sequence_number?: number
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          appointment_record_id?: string | null
+          channel?: string
+          company_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          message_sent?: string | null
+          notes?: string | null
+          response_date?: string | null
+          response_received?: string | null
+          result?: string | null
+          scheduled_date?: string
+          scheduled_time?: string
+          sequence_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_appointment_record_id_fkey"
+            columns: ["appointment_record_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_records"
             referencedColumns: ["id"]
           },
         ]

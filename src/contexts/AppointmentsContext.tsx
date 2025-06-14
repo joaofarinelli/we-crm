@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -42,7 +43,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         return;
       }
 
-      // Primeiro, obter o role do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select(`
@@ -61,7 +61,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
       }
 
       const userRole = profileData?.roles?.name;
-      console.log('User role:', userRole);
 
       let query = supabase
         .from('appointments')
@@ -78,17 +77,13 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .order('date', { ascending: true })
         .order('time', { ascending: true });
 
-      // Aplicar filtros baseados no role
       if (userRole === 'Closer') {
-        // Closers só veem agendamentos onde eles são assigned_to
         query = query.eq('assigned_to', user.id);
       }
-      // SDRs e Admins veem todos os agendamentos da empresa (filtrado automaticamente pelo RLS)
 
       const { data, error } = await query;
 
       if (error) throw error;
-      console.log('Agendamentos carregados:', data);
       
       setAppointments(data || []);
     } catch (error) {
@@ -105,7 +100,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
 
   const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'assigned_closer' | 'company_id'>) => {
     try {
-      // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
@@ -186,12 +180,9 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
     }
   };
 
-  // Nova função para atualização otimista (para drag & drop)
   const updateAppointmentOptimistic = async (id: string, updates: Partial<Appointment>) => {
-    // Salvar estado anterior para rollback se necessário
     const previousAppointments = [...appointments];
     
-    // Atualizar estado local imediatamente (otimistic update)
     setAppointments(prev => 
       prev.map(appointment => 
         appointment.id === id ? { ...appointment, ...updates } : appointment
@@ -199,19 +190,14 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
     );
 
     try {
-      // Fazer a atualização no servidor
       const { error } = await supabase
         .from('appointments')
         .update(updates)
         .eq('id', id);
 
       if (error) throw error;
-      
-      console.log('Agendamento atualizado com sucesso via drag & drop');
     } catch (error) {
       console.error('Erro ao atualizar agendamento via drag & drop:', error);
-      
-      // Fazer rollback do estado local em caso de erro
       setAppointments(previousAppointments);
       
       toast({
@@ -251,19 +237,15 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
     if (user) {
       fetchAppointments();
 
-      // Cleanup any existing channel
       if (channelRef.current) {
-        console.log('Removing existing appointments channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
 
-      // Create a single channel for this user
       const channelName = `appointments_${user.id}`;
       const channel = supabase.channel(channelName);
       channelRef.current = channel;
       
-      // Configure all listeners
       channel
         .on(
           'postgres_changes',
@@ -273,8 +255,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
             table: 'appointments'
           },
           async (payload) => {
-            console.log('Novo agendamento inserido:', payload.new);
-            
             const { data, error } = await supabase
               .from('appointments')
               .select(`
@@ -307,12 +287,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
             table: 'appointments'
           },
           async (payload) => {
-            console.log('Agendamento atualizado via real-time:', payload.new);
-            
-            // Verificar se já foi atualizado otimisticamente
             const currentAppointment = appointments.find(apt => apt.id === payload.new.id);
             if (currentAppointment && currentAppointment.status === payload.new.status) {
-              console.log('Agendamento já atualizado otimisticamente, ignorando real-time update');
               return;
             }
             
@@ -348,20 +324,15 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
             table: 'appointments'
           },
           (payload) => {
-            console.log('Agendamento deletado:', payload.old);
             setAppointments(prev => 
               prev.filter(appointment => appointment.id !== payload.old.id)
             );
           }
         );
 
-      // Subscribe once
-      channel.subscribe((status) => {
-        console.log('Appointments channel status:', status);
-      });
+      channel.subscribe();
 
       return () => {
-        console.log('Cleaning up appointments channel');
         if (channelRef.current) {
           supabase.removeChannel(channelRef.current);
           channelRef.current = null;
