@@ -8,6 +8,7 @@ import { Appointment } from '@/types/appointment';
 interface AppointmentsContextType {
   appointments: Appointment[];
   loading: boolean;
+  isUpdating: boolean;
   createAppointment: (appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at' | 'leads' | 'assigned_closer' | 'company_id'>) => Promise<any>;
   updateAppointment: (id: string, updates: Partial<Appointment>) => Promise<any>;
   updateAppointmentOptimistic: (id: string, updates: Partial<Appointment>) => Promise<void>;
@@ -32,9 +33,11 @@ interface AppointmentsProviderProps {
 export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchAppointments = async () => {
     try {
@@ -234,111 +237,57 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
   };
 
   useEffect(() => {
-    if (user) {
-      fetchAppointments();
+    if (!user) return;
 
-      if (channelRef.current) {
+    fetchAppointments();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
+      if (channelRef.current && isSubscribedRef.current) {
+        console.log('Cleaning up appointments context channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        isSubscribedRef.current = false;
       }
+    };
 
-      const channelName = `appointments_${user.id}`;
-      const channel = supabase.channel(channelName);
-      channelRef.current = channel;
-      
-      channel
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'appointments'
-          },
-          async (payload) => {
-            const { data, error } = await supabase
-              .from('appointments')
-              .select(`
-                *,
-                leads (
-                  name
-                ),
-                assigned_closer:profiles!appointments_assigned_to_fkey (
-                  full_name,
-                  email
-                )
-              `)
-              .eq('id', payload.new.id)
-              .single();
+    // Clean up any existing channel first
+    cleanup();
 
-            if (!error && data) {
-              setAppointments(prev => {
-                const exists = prev.some(apt => apt.id === data.id);
-                if (exists) return prev;
-                return [data, ...prev];
-              });
-            }
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'appointments'
-          },
-          async (payload) => {
-            const currentAppointment = appointments.find(apt => apt.id === payload.new.id);
-            if (currentAppointment && currentAppointment.status === payload.new.status) {
-              return;
-            }
-            
-            const { data, error } = await supabase
-              .from('appointments')
-              .select(`
-                *,
-                leads (
-                  name
-                ),
-                assigned_closer:profiles!appointments_assigned_to_fkey (
-                  full_name,
-                  email
-                )
-              `)
-              .eq('id', payload.new.id)
-              .single();
-
-            if (!error && data) {
-              setAppointments(prev => 
-                prev.map(appointment => 
-                  appointment.id === data.id ? data : appointment
-                )
-              );
-            }
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'DELETE',
-            schema: 'public',
-            table: 'appointments'
-          },
-          (payload) => {
-            setAppointments(prev => 
-              prev.filter(appointment => appointment.id !== payload.old.id)
-            );
-          }
-        );
-
-      channel.subscribe();
-
-      return () => {
-        if (channelRef.current) {
-          supabase.removeChannel(channelRef.current);
-          channelRef.current = null;
+    // Create unique channel name using user ID and timestamp
+    const channelName = `appointments-context-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase.channel(channelName);
+    
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments'
+        },
+        (payload) => {
+          console.log('Appointment change detected in context:', payload);
+          setIsUpdating(true);
+          
+          setTimeout(() => {
+            fetchAppointments();
+            setIsUpdating(false);
+          }, 500);
         }
-      };
-    }
+      )
+      .subscribe((status) => {
+        console.log('Appointments context subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   return (
@@ -346,6 +295,7 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
       value={{
         appointments,
         loading,
+        isUpdating,
         createAppointment,
         updateAppointment,
         updateAppointmentOptimistic,

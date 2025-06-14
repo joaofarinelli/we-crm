@@ -6,11 +6,11 @@ import { AppointmentCard } from './appointments/AppointmentCard';
 import { EmptyAppointments } from './appointments/EmptyAppointments';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { RealtimeBadge } from '@/components/ui/realtime-badge';
-import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments';
+import { useAppointments } from '@/hooks/useAppointments';
 import { Plus } from 'lucide-react';
 
 export const Appointments = () => {
-  const { appointments, loading, isUpdating } = useRealtimeAppointments();
+  const { appointments, loading, isUpdating } = useAppointments();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const handleCreateNew = () => {
