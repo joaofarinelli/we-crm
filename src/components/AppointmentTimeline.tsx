@@ -1,5 +1,5 @@
 
-import { Clock, MessageSquare, Phone, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Clock, MessageSquare, Calendar, CheckCircle, AlertCircle, User, Phone, Mail, Video, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -90,76 +90,93 @@ export const AppointmentTimeline = ({
 
   const timelineItems = createTimelineItems();
 
-  const getIcon = (type: string) => {
+  const getIcon = (type: string, data?: any) => {
     switch (type) {
       case 'appointment':
         return <Calendar className="w-4 h-4" />;
       case 'record':
         return <CheckCircle className="w-4 h-4" />;
       case 'followup':
-        return <MessageSquare className="w-4 h-4" />;
+        const followUpData = data as FollowUp;
+        switch (followUpData?.channel) {
+          case 'Telefone':
+            return <Phone className="w-4 h-4" />;
+          case 'WhatsApp':
+            return <MessageSquare className="w-4 h-4" />;
+          case 'Email':
+            return <Mail className="w-4 h-4" />;
+          case 'VideoCall':
+            return <Video className="w-4 h-4" />;
+          case 'Presencial':
+            return <MapPin className="w-4 h-4" />;
+          default:
+            return <MessageSquare className="w-4 h-4" />;
+        }
       default:
         return <Clock className="w-4 h-4" />;
     }
   };
 
   const getStatusColor = (type: string, status?: string) => {
-    if (type === 'followup' && status === 'Pendente') return 'bg-yellow-100 text-yellow-800';
-    if (type === 'followup' && status === 'Fechou') return 'bg-green-100 text-green-800';
-    if (type === 'record' && status === 'Fechou') return 'bg-green-100 text-green-800';
-    if (status === 'Cancelado') return 'bg-red-100 text-red-800';
-    return 'bg-blue-100 text-blue-800';
+    if (type === 'followup' && status === 'Pendente') return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    if (type === 'followup' && status === 'Fechou') return 'bg-green-100 text-green-800 border-green-200';
+    if (type === 'record' && status === 'Fechou') return 'bg-green-100 text-green-800 border-green-200';
+    if (status === 'Cancelado') return 'bg-red-100 text-red-800 border-red-200';
+    return 'bg-blue-100 text-blue-800 border-blue-200';
   };
 
   const hasRecord = records.length > 0;
-  const hasPendingFollowUps = followUps.some(f => !f.completed);
 
   return (
-    <div className="space-y-6">
-      {/* Botões de Ação */}
-      <div className="flex gap-2 flex-wrap">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Botões de Ação - Responsivos */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
         {!hasRecord && appointment.status !== 'Cancelado' && (
-          <Button onClick={onRecordAttendance} size="sm">
+          <Button onClick={onRecordAttendance} size="sm" className="w-full sm:w-auto">
             <CheckCircle className="w-4 h-4 mr-2" />
             Registrar Atendimento
           </Button>
         )}
         
         {hasRecord && (
-          <Button onClick={onAddFollowUp} variant="outline" size="sm">
+          <Button onClick={onAddFollowUp} variant="outline" size="sm" className="w-full sm:w-auto">
             <MessageSquare className="w-4 h-4 mr-2" />
             Adicionar Follow-up
           </Button>
         )}
       </div>
 
-      {/* Timeline */}
-      <div className="space-y-4">
+      {/* Timeline - Responsiva */}
+      <div className="space-y-3 sm:space-y-4">
         {timelineItems.map((item, index) => (
-          <Card key={item.id} className="relative">
+          <Card key={item.id} className="relative hover:shadow-md transition-shadow">
+            {/* Linha conectora - visível apenas em desktop */}
             {index < timelineItems.length - 1 && (
-              <div className="absolute left-6 top-12 w-px h-8 bg-gray-200" />
+              <div className="hidden sm:block absolute left-6 top-12 w-px h-8 bg-gray-200" />
             )}
             
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  {getIcon(item.type)}
+            <CardContent className="pt-4 sm:pt-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                {/* Ícone - Responsivo */}
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center self-start">
+                  {getIcon(item.type, item.data)}
                 </div>
                 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-medium text-gray-900">{item.title}</h4>
+                <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
+                  {/* Header do item */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">{item.title}</h4>
                     {item.status && (
-                      <Badge className={getStatusColor(item.type, item.status)}>
+                      <Badge className={`${getStatusColor(item.type, item.status)} text-xs w-fit`}>
                         {item.status}
                       </Badge>
                     )}
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                  <p className="text-sm text-gray-600 break-words">{item.description}</p>
                   
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  {/* Data e hora */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-gray-500">
                     <span>
                       {format(parseISO(item.date), 'dd/MM/yyyy', { locale: ptBR })}
                     </span>
@@ -170,11 +187,12 @@ export const AppointmentTimeline = ({
 
                   {/* Ações específicas para follow-ups pendentes */}
                   {item.type === 'followup' && item.status === 'Pendente' && (
-                    <div className="mt-3">
+                    <div className="pt-2 sm:pt-3">
                       <Button 
                         size="sm" 
                         variant="outline"
                         onClick={() => onCompleteFollowUp(item.data as FollowUp)}
+                        className="w-full sm:w-auto"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Marcar como Concluído
@@ -184,14 +202,14 @@ export const AppointmentTimeline = ({
 
                   {/* Detalhes adicionais para registros */}
                   {item.type === 'record' && (
-                    <div className="mt-3 space-y-2 text-sm">
+                    <div className="pt-2 sm:pt-3 space-y-2 text-sm">
                       {(item.data as AppointmentRecord).objections && (
-                        <div>
+                        <div className="break-words">
                           <strong>Objeções:</strong> {(item.data as AppointmentRecord).objections}
                         </div>
                       )}
                       {(item.data as AppointmentRecord).next_steps && (
-                        <div>
+                        <div className="break-words">
                           <strong>Próximos Passos:</strong> {(item.data as AppointmentRecord).next_steps}
                         </div>
                       )}
@@ -200,14 +218,14 @@ export const AppointmentTimeline = ({
 
                   {/* Detalhes adicionais para follow-ups */}
                   {item.type === 'followup' && (
-                    <div className="mt-3 space-y-2 text-sm">
+                    <div className="pt-2 sm:pt-3 space-y-2 text-sm">
                       {(item.data as FollowUp).response_received && (
-                        <div>
+                        <div className="break-words">
                           <strong>Resposta:</strong> {(item.data as FollowUp).response_received}
                         </div>
                       )}
                       {(item.data as FollowUp).notes && (
-                        <div>
+                        <div className="break-words">
                           <strong>Observações:</strong> {(item.data as FollowUp).notes}
                         </div>
                       )}
@@ -220,12 +238,13 @@ export const AppointmentTimeline = ({
         ))}
       </div>
 
+      {/* Empty State */}
       {timelineItems.length === 1 && (
         <Card className="border-dashed">
           <CardContent className="pt-6 text-center text-gray-500">
             <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-            <p>Nenhum atendimento ou follow-up registrado ainda.</p>
-            <p className="text-sm">Registre o atendimento para iniciar o acompanhamento.</p>
+            <p className="text-sm sm:text-base">Nenhum atendimento ou follow-up registrado ainda.</p>
+            <p className="text-xs sm:text-sm mt-1">Registre o atendimento para iniciar o acompanhamento.</p>
           </CardContent>
         </Card>
       )}

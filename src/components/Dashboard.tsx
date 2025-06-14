@@ -1,237 +1,185 @@
 
-import { 
-  TrendingUp, 
-  Users, 
-  CheckSquare,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-  Target,
-  Percent
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useAuth } from '@/hooks/useAuth';
+import { RealtimeBadge } from '@/components/ui/realtime-badge';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const Dashboard = () => {
-  const { stats, loading } = useDashboard();
+  const { user } = useAuth();
+  const { 
+    totalLeads, 
+    totalAppointments, 
+    completedAppointments, 
+    conversionRate,
+    todayAppointments,
+    pendingTasks,
+    loading 
+  } = useDashboard();
 
-  const formatPercentage = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
-    return `${sign}${value.toFixed(1)}%`;
-  };
-
-  const metrics = [
+  const stats = [
     {
       title: 'Total de Leads',
-      value: stats.totalLeads.toString(),
-      change: formatPercentage(stats.trendsData.leadsChange),
-      trend: stats.trendsData.leadsChange >= 0 ? 'up' : 'down',
-      icon: TrendingUp,
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Total de Contatos',
-      value: stats.totalContacts.toString(),
-      change: formatPercentage(stats.trendsData.contactsChange),
-      trend: stats.trendsData.contactsChange >= 0 ? 'up' : 'down',
+      value: totalLeads,
       icon: Users,
-      color: 'text-orange-600'
-    },
-    {
-      title: 'Total de Tarefas',
-      value: stats.totalTasks.toString(),
-      change: formatPercentage(stats.trendsData.tasksChange),
-      trend: stats.trendsData.tasksChange >= 0 ? 'up' : 'down',
-      icon: CheckSquare,
-      color: 'text-green-600'
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      description: 'Leads cadastrados'
     },
     {
       title: 'Agendamentos',
-      value: stats.totalAppointments.toString(),
-      change: formatPercentage(stats.trendsData.appointmentsChange),
-      trend: stats.trendsData.appointmentsChange >= 0 ? 'up' : 'down',
+      value: totalAppointments,
       icon: Calendar,
-      color: 'text-purple-600'
-    }
-  ];
-
-  const kpis = [
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      description: 'Total de agendamentos'
+    },
+    {
+      title: 'Realizados',
+      value: completedAppointments,
+      icon: CheckCircle,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      description: 'Agendamentos concluídos'
+    },
     {
       title: 'Taxa de Conversão',
-      value: `${stats.conversionRate.toFixed(1)}%`,
-      icon: Target,
-      color: 'text-green-600'
-    },
-    {
-      title: 'Total no Pipeline',
-      value: stats.totalPipelineValue.toString(),
+      value: `${conversionRate.toFixed(1)}%`,
       icon: TrendingUp,
-      color: 'text-purple-600'
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      description: 'Taxa de fechamento'
     },
     {
-      title: 'Leads Qualificados',
-      value: (stats.leadsByStatus['Quente'] || 0).toString(),
-      icon: Percent,
-      color: 'text-orange-600'
+      title: 'Hoje',
+      value: todayAppointments,
+      icon: Clock,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+      description: 'Agendamentos hoje'
     },
     {
-      title: 'Leads Ativos',
-      value: ((stats.leadsByStatus['Quente'] || 0) + (stats.leadsByStatus['Morno'] || 0)).toString(),
-      icon: Users,
-      color: 'text-blue-600'
+      title: 'Tarefas Pendentes',
+      value: pendingTasks,
+      icon: Target,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      description: 'Tarefas em aberto'
     }
   ];
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="text-lg">Carregando dashboard...</div>
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <LoadingIndicator className="py-16" text="Carregando dashboard..." />
       </div>
     );
   }
 
   return (
-    <div className="py-8 space-y-8">
-      <div className="flex justify-between items-center px-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Visão geral do seu negócio</p>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      {/* Header - Responsivo */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 lg:mb-8">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Dashboard
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
+            Bem-vindo de volta, {user?.email?.split('@')[0]}!
+          </p>
         </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500">Último update</p>
-          <p className="text-lg font-semibold text-gray-900">Agora mesmo</p>
-        </div>
+        
+        <RealtimeBadge isUpdating={false} />
       </div>
 
-      {/* Métricas principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
-        {metrics.map((metric) => {
-          const Icon = metric.icon;
-          return (
-            <Card key={metric.title} className="p-6 hover:shadow-lg transition-shadow duration-200">
-              <div className="flex items-center justify-between">
-                <div className={`p-2 rounded-lg ${metric.color} bg-opacity-10`}>
-                  <Icon className={`w-6 h-6 ${metric.color}`} />
-                </div>
-                <div className={`flex items-center gap-1 text-sm ${
-                  metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {metric.trend === 'up' ? (
-                    <ArrowUpRight className="w-4 h-4" />
-                  ) : (
-                    <ArrowDownRight className="w-4 h-4" />
-                  )}
-                  {metric.change}
-                </div>
+      {/* Grid de KPIs - Responsivo */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8">
+        {stats.map((stat, index) => (
+          <Card key={index} className="hover:shadow-md transition-all duration-200 group">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
+                {stat.title}
+              </CardTitle>
+              <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                <stat.icon className={`h-4 w-4 ${stat.color}`} />
               </div>
-              <div className="mt-4">
-                <h3 className="text-2xl font-bold text-gray-900">{metric.value}</h3>
-                <p className="text-gray-600 text-sm mt-1">{metric.title}</p>
-              </div>
-            </Card>
-          );
-        })}
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-8 w-16 mb-1" />
+              ) : (
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {stat.value}
+                </div>
+              )}
+              <p className="text-xs text-gray-500">{stat.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* KPIs Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <Card key={kpi.title} className="p-6">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${kpi.color} bg-opacity-10`}>
-                  <Icon className={`w-5 h-5 ${kpi.color}`} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                  <p className="text-sm text-gray-600">{kpi.title}</p>
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-8">
-        {/* Status das Tarefas */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Status das Tarefas</h3>
-          <div className="space-y-4">
-            {Object.entries(stats.tasksByStatus).map(([status, count]) => (
-              <div key={status}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">{status}</span>
-                  <span className="text-sm text-gray-500">{count} tarefas</span>
-                </div>
-                <Progress value={stats.totalTasks > 0 ? (count / stats.totalTasks) * 100 : 0} className="h-2" />
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Status dos Leads */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Status dos Leads</h3>
-          <div className="space-y-4">
-            {Object.entries(stats.leadsByStatus).map(([status, count]) => (
-              <div key={status}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">{status}</span>
-                  <span className="text-sm text-gray-500">{count} leads</span>
-                </div>
-                <Progress value={stats.totalLeads > 0 ? (count / stats.totalLeads) * 100 : 0} className="h-2" />
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Leads Recentes */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Leads Recentes</h3>
-          <div className="space-y-4">
-            {stats.recentLeads.length > 0 ? (
-              stats.recentLeads.map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-gray-900">{lead.name}</p>
-                    <p className="text-sm text-gray-500">{lead.email || 'Sem email'}</p>
+      {/* Seções Principais - Layout Responsivo */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        {/* Agendamentos Recentes */}
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Próximos Agendamentos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      lead.status === 'Quente' 
-                        ? 'bg-red-100 text-red-700'
-                        : lead.status === 'Morno'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {lead.status}
-                    </span>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>Nenhum agendamento próximo</p>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-center py-4">Nenhum lead recente</p>
-            )}
-          </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Atividades Recentes */}
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Atividades Recentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-start space-x-3">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Target className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>Nenhuma atividade recente</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
         </Card>
       </div>
-
-      {/* Status dos Agendamentos */}
-      {Object.keys(stats.appointmentsByStatus).length > 0 && (
-        <Card className="p-6 mx-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Status dos Agendamentos</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Object.entries(stats.appointmentsByStatus).map(([status, count]) => (
-              <div key={status} className="text-center p-4 bg-gray-50 rounded-lg">
-                <p className="text-2xl font-bold text-gray-900">{count}</p>
-                <p className="text-sm text-gray-600">{status}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 };
