@@ -315,12 +315,124 @@ export const useLeads = () => {
     }
   }, [user]);
 
+  const importLeadsFromCSV = async (
+    csvLeads: Array<{
+      nome: string;
+      email?: string;
+      telefone?: string;
+      status?: string;
+      origem?: string;
+    }>,
+    onProgress?: (progress: number) => void
+  ) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive"
+      });
+      return { success: 0, errors: 0, total: 0 };
+    }
+
+    try {
+      // Buscar company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profileData?.company_id) {
+        throw new Error('Company ID not found for user');
+      }
+
+      // Buscar primeira coluna do pipeline para status padrão
+      const { data: firstColumn } = await supabase
+        .from('pipeline_columns')
+        .select('name')
+        .eq('company_id', profileData.company_id)
+        .order('order_index', { ascending: true })
+        .limit(1)
+        .single();
+
+      const defaultStatus = firstColumn?.name || 'Frio';
+
+      let successCount = 0;
+      let errorCount = 0;
+      const total = csvLeads.length;
+
+      // Processar leads em lotes de 10
+      const batchSize = 10;
+      for (let i = 0; i < csvLeads.length; i += batchSize) {
+        const batch = csvLeads.slice(i, i + batchSize);
+        
+        const leadsToInsert = batch.map(csvLead => ({
+          name: csvLead.nome.trim(),
+          email: csvLead.email?.trim() || null,
+          phone: csvLead.telefone?.trim() || null,
+          status: csvLead.status?.trim() || defaultStatus,
+          source: csvLead.origem?.trim() || null,
+          created_by: user.id,
+          company_id: profileData.company_id
+        }));
+
+        try {
+          const { data, error } = await supabase
+            .from('leads')
+            .insert(leadsToInsert)
+            .select();
+
+          if (error) {
+            console.error('Batch insert error:', error);
+            errorCount += batch.length;
+          } else {
+            successCount += data?.length || 0;
+            // Adicionar leads criados ao estado local
+            if (data) {
+              setLeads(prev => [...data, ...prev]);
+            }
+          }
+        } catch (batchError) {
+          console.error('Batch processing error:', batchError);
+          errorCount += batch.length;
+        }
+
+        // Atualizar progresso
+        const progress = ((i + batchSize) / total) * 100;
+        onProgress?.(Math.min(progress, 100));
+
+        // Pequena pausa entre lotes para não sobrecarregar
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      const results = { success: successCount, errors: errorCount, total };
+      
+      if (successCount > 0) {
+        toast({
+          title: "Sucesso",
+          description: `${successCount} leads importados com sucesso`
+        });
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Erro ao importar leads:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível importar os leads",
+        variant: "destructive"
+      });
+      return { success: 0, errors: csvLeads.length, total: csvLeads.length };
+    }
+  };
+
   return {
     leads,
     loading,
     createLead,
     updateLead,
     deleteLead,
+    importLeadsFromCSV,
     refetch: fetchLeads
   };
 };

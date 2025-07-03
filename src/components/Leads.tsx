@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, Phone, Mail } from 'lucide-react';
+import { Plus, Edit2, Trash2, Phone, Mail, Upload } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,12 +8,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useLeads } from '@/hooks/useLeads';
 import { EditLeadDialog } from './EditLeadDialog';
 import { AddLeadDialog } from './AddLeadDialog';
+import { ImportLeadsDialog } from './ImportLeadsDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
 
 export const Leads = () => {
   const [editingLead, setEditingLead] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [filters, setFilters] = useState<LeadFilterState>({
     searchTerm: '',
     status: 'todos',
@@ -93,13 +95,23 @@ export const Leads = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
           <p className="text-gray-600 mt-1">Gerencie seus prospects e oportunidades</p>
         </div>
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-          onClick={() => setAddDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Lead
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="flex-1 sm:flex-none"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Importar CSV
+          </Button>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Lead
+          </Button>
+        </div>
       </div>
 
       <div className="px-4 md:px-8">
@@ -205,6 +217,11 @@ export const Leads = () => {
       <AddLeadDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
+      />
+
+      <ImportLeadsDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
       />
     </div>
   );
