@@ -43,10 +43,6 @@ const companySchema = z.object({
   phone: z.string().optional(),
   plan: z.string().optional(),
   status: z.string().optional(),
-  // Campos para criar administrador
-  createAdmin: z.boolean().optional(),
-  adminEmail: z.string().email('Email inválido').optional(),
-  adminName: z.string().optional(),
 });
 
 type CompanyFormData = z.infer<typeof companySchema>;
@@ -78,8 +74,6 @@ export const CompanyFormDialog = ({
   onSuccess 
 }: CompanyFormDialogProps) => {
   const { createCompany, updateCompany, loading } = useAdminCompanies();
-  const { createUserInvitation } = useSaasProfiles();
-  const { roles } = useRoles();
   const isEditing = !!company;
 
   const form = useForm<CompanyFormData>({
@@ -94,9 +88,6 @@ export const CompanyFormDialog = ({
       phone: '',
       plan: 'basic',
       status: 'Prospect',
-      createAdmin: false,
-      adminEmail: '',
-      adminName: '',
     },
   });
 
@@ -112,9 +103,6 @@ export const CompanyFormDialog = ({
         phone: company.phone || '',
         plan: company.plan || 'basic',
         status: company.status || 'Prospect',
-        createAdmin: false,
-        adminEmail: '',
-        adminName: '',
       });
     } else {
       form.reset({
@@ -127,16 +115,12 @@ export const CompanyFormDialog = ({
         phone: '',
         plan: 'basic',
         status: 'Prospect',
-        createAdmin: false,
-        adminEmail: '',
-        adminName: '',
       });
     }
   }, [company, form]);
 
   const onSubmit = async (data: CompanyFormData) => {
     let success = false;
-    let newCompanyId: string | null = null;
     
     if (isEditing && company) {
       success = await updateCompany({
@@ -146,23 +130,9 @@ export const CompanyFormDialog = ({
     } else {
       const result = await createCompany(data);
       success = !!result;
-      newCompanyId = result;
     }
 
     if (success) {
-      // Se criar admin foi solicitado e é uma nova empresa
-      if (data.createAdmin && !isEditing && newCompanyId && data.adminEmail) {
-        try {
-          // Buscar role de Admin para a empresa
-          const adminRole = roles.find(role => role.name === 'Admin');
-          if (adminRole) {
-            await createUserInvitation(data.adminEmail, newCompanyId, adminRole.id);
-          }
-        } catch (error) {
-          console.error('Erro ao criar convite para admin:', error);
-        }
-      }
-      
       form.reset();
       onOpenChange(false);
       onSuccess();
@@ -366,69 +336,6 @@ export const CompanyFormDialog = ({
               />
             </div>
 
-            {!isEditing && (
-              <>
-                <Separator />
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <FormField
-                      control={form.control}
-                      name="createAdmin"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Criar usuário administrador para esta empresa
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Um convite será enviado por email para o administrador
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {form.watch('createAdmin') && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
-                      <FormField
-                        control={form.control}
-                        name="adminEmail"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email do Administrador *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="admin@empresa.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="adminName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome do Administrador</FormLabel>
-                            <FormControl>
-                              <Input placeholder="João Silva" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
 
             <div className="flex justify-end space-x-4 pt-6">
               <Button

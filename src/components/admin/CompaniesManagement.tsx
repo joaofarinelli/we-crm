@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CreateUserDialog } from './CreateUserDialog';
+import { AssignExistingUserDialog } from './AssignExistingUserDialog';
 
 interface CompanyData {
   id: string;
@@ -36,8 +36,8 @@ export const CompaniesManagement = () => {
   const { companies, loading, updateCompanyStatus, refetch } = useAllCompanies();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<CompanyData | null>(null);
-  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
-  const [selectedCompanyForUser, setSelectedCompanyForUser] = useState<string>('');
+  const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false);
+  const [selectedCompanyForUser, setSelectedCompanyForUser] = useState<{ id: string; name: string } | null>(null);
 
   if (loading) {
     return (
@@ -87,14 +87,14 @@ export const CompaniesManagement = () => {
     refetch();
   };
 
-  const handleAssignUser = (companyId: string) => {
-    setSelectedCompanyForUser(companyId);
-    setCreateUserDialogOpen(true);
+  const handleAssignUser = (company: CompanyData) => {
+    setSelectedCompanyForUser({ id: company.id, name: company.name });
+    setAssignUserDialogOpen(true);
   };
 
-  const handleCreateUserSuccess = () => {
+  const handleAssignUserSuccess = () => {
     refetch();
-    setSelectedCompanyForUser('');
+    setSelectedCompanyForUser(null);
   };
 
   return (
@@ -252,7 +252,7 @@ export const CompaniesManagement = () => {
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => handleAssignUser(company.id)}
+                    onClick={() => handleAssignUser(company)}
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
                     Atribuir Usuário
@@ -278,12 +278,15 @@ export const CompaniesManagement = () => {
         onSuccess={handleDialogSuccess}
       />
 
-      <CreateUserDialog
-        open={createUserDialogOpen}
-        onOpenChange={setCreateUserDialogOpen}
-        onSuccess={handleCreateUserSuccess}
-        preselectedCompanyId={selectedCompanyForUser}
-      />
+      {selectedCompanyForUser && (
+        <AssignExistingUserDialog
+          open={assignUserDialogOpen}
+          onOpenChange={setAssignUserDialogOpen}
+          companyId={selectedCompanyForUser.id}
+          companyName={selectedCompanyForUser.name}
+          onSuccess={handleAssignUserSuccess}
+        />
+      )}
     </div>
   );
 };
