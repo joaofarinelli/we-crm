@@ -14,6 +14,8 @@ interface Invitation {
   expires_at: string;
   used_at: string | null;
   created_at: string;
+  sent_via_email?: boolean;
+  supabase_invite_id?: string | null;
   roles?: {
     name: string;
     description: string | null;
@@ -163,6 +165,74 @@ export const useInvitations = () => {
     }
   };
 
+  const createNativeInvitation = async (email: string, roleId: string, sendEmail: boolean = true) => {
+    if (!user) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: {
+          email,
+          role_id: roleId,
+          send_email: sendEmail
+        }
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Falha ao processar convite');
+      }
+
+      // Atualizar lista local
+      setInvitations(prev => [data.invitation, ...prev]);
+      
+      toast({
+        title: "Sucesso",
+        description: data.message
+      });
+      
+      return data.invitation;
+    } catch (error: any) {
+      console.error('Erro ao criar convite nativo:', error);
+      
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível enviar o convite. Tente novamente.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const resendInvitation = async (invitationId: string) => {
+    try {
+      const invitation = invitations.find(inv => inv.id === invitationId);
+      if (!invitation) {
+        throw new Error('Convite não encontrado');
+      }
+
+      if (!invitation.sent_via_email) {
+        throw new Error('Este convite não foi enviado por email');
+      }
+
+      await createNativeInvitation(invitation.email, invitation.role_id, true);
+      
+      toast({
+        title: "Sucesso",
+        description: "Convite reenviado com sucesso"
+      });
+    } catch (error: any) {
+      console.error('Erro ao reenviar convite:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível reenviar o convite",
+        variant: "destructive"
+      });
+    }
+  };
+
   const deleteInvitation = async (id: string) => {
     try {
       const { error } = await supabase
@@ -195,6 +265,8 @@ export const useInvitations = () => {
     invitations,
     loading,
     createInvitation,
+    createNativeInvitation,
+    resendInvitation,
     deleteInvitation,
     refetch: fetchInvitations
   };

@@ -6,12 +6,14 @@ import {
   Building2, 
   Users, 
   Settings as SettingsIcon, 
-  Shield
+  Shield,
+  Mail
 } from 'lucide-react';
 import { CompanyInfoSettings } from './settings/CompanyInfoSettings';
 import { SystemSettings } from './settings/SystemSettings';
 import { UserRoleManagement } from './settings/UserRoleManagement';
 import { AdvancedSettings } from './settings/AdvancedSettings';
+import { InvitationSettings } from './settings/InvitationSettings';
 
 export const Settings = () => {
   const [activeTab, setActiveTab] = useState('company');
@@ -28,6 +30,12 @@ export const Settings = () => {
       label: 'Usuários & Cargos',
       icon: Users,
       component: UserRoleManagement,
+    },
+    {
+      id: 'invitations',
+      label: 'Convites',
+      icon: Mail,
+      component: InvitationSettings,
     },
     {
       id: 'system',
@@ -53,7 +61,7 @@ export const Settings = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

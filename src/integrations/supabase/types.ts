@@ -1013,6 +1013,8 @@ export type Database = {
           id: string
           invited_by: string
           role_id: string
+          sent_via_email: boolean | null
+          supabase_invite_id: string | null
           token: string
           used_at: string | null
         }
@@ -1024,6 +1026,8 @@ export type Database = {
           id?: string
           invited_by: string
           role_id: string
+          sent_via_email?: boolean | null
+          supabase_invite_id?: string | null
           token?: string
           used_at?: string | null
         }
@@ -1035,6 +1039,8 @@ export type Database = {
           id?: string
           invited_by?: string
           role_id?: string
+          sent_via_email?: boolean | null
+          supabase_invite_id?: string | null
           token?: string
           used_at?: string | null
         }

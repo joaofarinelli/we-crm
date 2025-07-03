@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,8 @@ import {
 } from '@/components/ui/select';
 import { useRoles } from '@/hooks/useRoles';
 import { useInvitations } from '@/hooks/useInvitations';
-import { UserPlus } from 'lucide-react';
+import { useInvitationSettings } from '@/hooks/useInvitationSettings';
+import { UserPlus, Mail, Link2 } from 'lucide-react';
 
 interface InviteUserDialogProps {
   onInviteSent?: () => void;
@@ -30,10 +32,12 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
+  const [sendEmail, setSendEmail] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { roles } = useRoles();
-  const { createInvitation } = useInvitations();
+  const { createNativeInvitation } = useInvitations();
+  const { settings } = useInvitationSettings();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +46,11 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
     
     setIsSubmitting(true);
     try {
-      await createInvitation(email, selectedRole);
+      await createNativeInvitation(email, selectedRole, sendEmail);
       setDialogOpen(false);
       setEmail('');
       setSelectedRole('');
+      setSendEmail(settings.defaultSendEmail);
       onInviteSent?.();
     } catch (error) {
       // Error is handled in the hook
@@ -98,6 +103,46 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {sendEmail ? (
+                  <Mail className="h-4 w-4 text-primary" />
+                ) : (
+                  <Link2 className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label htmlFor="sendEmail" className="font-medium">
+                  Enviar email automaticamente
+                </Label>
+              </div>
+              <Switch
+                id="sendEmail"
+                checked={sendEmail}
+                onCheckedChange={setSendEmail}
+              />
+            </div>
+            
+            <div className="text-sm text-muted-foreground">
+              {sendEmail ? (
+                <div className="flex items-start gap-2">
+                  <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Email automático</p>
+                    <p>O usuário receberá um email de convite do Supabase com um link direto para se registrar.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2">
+                  <Link2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Link manual</p>
+                    <p>Você precisará compartilhar um link de registro manualmente com o usuário.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="flex justify-end gap-2">
             <Button 
@@ -109,7 +154,7 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Enviando...' : 'Enviar Convite'}
+              {isSubmitting ? 'Processando...' : sendEmail ? 'Enviar Convite' : 'Criar Convite'}
             </Button>
           </div>
         </form>
