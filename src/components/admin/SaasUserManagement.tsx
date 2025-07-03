@@ -7,12 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, Search, Edit2, Trash2, Mail, Building2, Shield } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Mail, Building2, Shield, UserCheck } from 'lucide-react';
 import { useSaasProfiles } from '@/hooks/useSaasProfiles';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
 import { useRoles } from '@/hooks/useRoles';
 import { CreateUserDialog } from './CreateUserDialog';
 import { EditUserDialog } from './EditUserDialog';
+import { TransferUserDialog } from './TransferUserDialog';
 
 export const SaasUserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +22,8 @@ export const SaasUserManagement = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferUser, setTransferUser] = useState(null);
 
   const { profiles, loading, deleteProfile, refetch } = useSaasProfiles();
   const { companies } = useAllCompanies();
@@ -55,6 +58,11 @@ export const SaasUserManagement = () => {
 
   const handleDelete = async (id: string) => {
     await deleteProfile(id);
+  };
+
+  const handleTransfer = (user: any) => {
+    setTransferUser(user);
+    setTransferDialogOpen(true);
   };
 
   if (loading) {
@@ -201,6 +209,13 @@ export const SaasUserManagement = () => {
                           >
                             <Edit2 className="w-4 h-4" />
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTransfer(profile)}
+                          >
+                            <UserCheck className="w-4 h-4" />
+                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="outline" size="sm">
@@ -244,6 +259,13 @@ export const SaasUserManagement = () => {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         user={editingUser}
+        onSuccess={refetch}
+      />
+
+      <TransferUserDialog
+        open={transferDialogOpen}
+        onOpenChange={setTransferDialogOpen}
+        user={transferUser}
         onSuccess={refetch}
       />
     </div>

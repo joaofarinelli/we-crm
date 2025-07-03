@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,9 +13,10 @@ interface CreateUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  preselectedCompanyId?: string;
 }
 
-export const CreateUserDialog = ({ open, onOpenChange, onSuccess }: CreateUserDialogProps) => {
+export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCompanyId }: CreateUserDialogProps) => {
   const [formData, setFormData] = useState({
     email: '',
     full_name: '',
@@ -28,6 +29,12 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess }: CreateUserDi
   const { roles } = useRoles();
   const { createUserInvitation } = useSaasProfiles();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (preselectedCompanyId) {
+      setFormData(prev => ({ ...prev, company_id: preselectedCompanyId }));
+    }
+  }, [preselectedCompanyId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

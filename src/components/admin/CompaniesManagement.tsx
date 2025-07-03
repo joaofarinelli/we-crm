@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
 import { CompanyFormDialog } from './CompanyFormDialog';
-import { Building2, Users, Phone, Globe, MapPin, Calendar, Plus, Edit } from 'lucide-react';
+import { Building2, Users, Phone, Globe, MapPin, Calendar, Plus, Edit, UserPlus } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CreateUserDialog } from './CreateUserDialog';
 
 interface CompanyData {
   id: string;
@@ -35,6 +36,8 @@ export const CompaniesManagement = () => {
   const { companies, loading, updateCompanyStatus, refetch } = useAllCompanies();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<CompanyData | null>(null);
+  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+  const [selectedCompanyForUser, setSelectedCompanyForUser] = useState<string>('');
 
   if (loading) {
     return (
@@ -82,6 +85,16 @@ export const CompaniesManagement = () => {
 
   const handleDialogSuccess = () => {
     refetch();
+  };
+
+  const handleAssignUser = (companyId: string) => {
+    setSelectedCompanyForUser(companyId);
+    setCreateUserDialogOpen(true);
+  };
+
+  const handleCreateUserSuccess = () => {
+    refetch();
+    setSelectedCompanyForUser('');
   };
 
   return (
@@ -225,15 +238,26 @@ export const CompaniesManagement = () => {
                   </Select>
                 </div>
                 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => handleEditCompany(company)}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Editar Empresa
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleEditCompany(company)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleAssignUser(company.id)}
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Atribuir Usuário
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -252,6 +276,13 @@ export const CompaniesManagement = () => {
         onOpenChange={setDialogOpen}
         company={editingCompany}
         onSuccess={handleDialogSuccess}
+      />
+
+      <CreateUserDialog
+        open={createUserDialogOpen}
+        onOpenChange={setCreateUserDialogOpen}
+        onSuccess={handleCreateUserSuccess}
+        preselectedCompanyId={selectedCompanyForUser}
       />
     </div>
   );

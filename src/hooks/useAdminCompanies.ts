@@ -30,14 +30,14 @@ export const useAdminCompanies = () => {
         description: "Nome da empresa é obrigatório",
         variant: "destructive"
       });
-      return false;
+      return null;
     }
 
     setLoading(true);
     try {
       console.log('useAdminCompanies: Creating company:', data);
       
-      const { error } = await supabase
+      const { data: companyData, error } = await supabase
         .from('companies')
         .insert({
           name: data.name,
@@ -49,7 +49,9 @@ export const useAdminCompanies = () => {
           phone: data.phone || null,
           plan: data.plan || 'basic',
           status: data.status || 'Prospect'
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('useAdminCompanies: Error creating company:', error);
@@ -61,7 +63,7 @@ export const useAdminCompanies = () => {
         description: "Empresa criada com sucesso"
       });
 
-      return true;
+      return companyData.id;
     } catch (error: any) {
       console.error('Erro ao criar empresa:', error);
       
@@ -78,7 +80,7 @@ export const useAdminCompanies = () => {
           variant: "destructive"
         });
       }
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }
