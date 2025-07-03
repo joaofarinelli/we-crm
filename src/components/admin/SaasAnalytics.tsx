@@ -8,6 +8,7 @@ import { CompaniesAnalytics } from './CompaniesAnalytics';
 import { UsersAnalytics } from './UsersAnalytics';
 import { ActivitiesAnalytics } from './ActivitiesAnalytics';
 import { PerformanceAnalytics } from './PerformanceAnalytics';
+import { ExportSaasDataSection } from './ExportSaasDataSection';
 
 export const SaasAnalytics = () => {
   const [filters, setFilters] = useState<AnalyticsFilters>({ period_days: 30 });
@@ -39,12 +40,13 @@ export const SaasAnalytics = () => {
       <FiltersComponent filters={filters} onFiltersChange={setFilters} />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="companies">Empresas</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="activities">Atividades</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="reports">Relatórios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -65,6 +67,10 @@ export const SaasAnalytics = () => {
 
         <TabsContent value="performance">
           <PerformanceAnalytics data={analytics.top_companies} />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <ExportSaasDataSection analytics={analytics} filters={filters} />
         </TabsContent>
       </Tabs>
     </div>
