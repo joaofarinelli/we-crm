@@ -130,34 +130,31 @@ export const useSaasProfiles = () => {
   };
 
   const createUserInvitation = async (email: string, company_id: string, role_id: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_invitations')
-        .insert({
-          email,
-          company_id,
-          role_id,
-          invited_by: (await supabase.auth.getUser()).data.user?.id
-        })
-        .select()
-        .single();
+    const webhookData = {
+      email,
+      company_id,
+      role_id
+    };
 
-      if (error) throw error;
-      
-      toast({
-        title: "Sucesso",
-        description: "Convite enviado com sucesso"
-      });
-      return data;
-    } catch (error) {
-      console.error('Erro ao criar convite:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível enviar o convite",
-        variant: "destructive"
-      });
-      throw error;
+    const webhookUrl = 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf';
+    
+    console.log('🚀 Enviando para n8n (Admin SaaS):', webhookData);
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(webhookData)
+    });
+
+    console.log('📡 Status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`Erro ${response.status}`);
     }
+
+    console.log('✅ Enviado com sucesso para n8n');
   };
 
   useEffect(() => {
