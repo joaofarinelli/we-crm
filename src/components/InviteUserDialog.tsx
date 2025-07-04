@@ -47,13 +47,15 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
     setIsSubmitting(true);
     try {
       await createN8nInvitation(email, selectedRole, sendEmail);
+      // SÓ fecha se chegou até aqui sem erro
       setDialogOpen(false);
       setEmail('');
       setSelectedRole('');
       setSendEmail(settings.defaultSendEmail);
       onInviteSent?.();
     } catch (error) {
-      // Error is handled in the hook
+      // Error is handled in the hook - dialog permanece aberto
+      console.error('Erro no envio do convite:', error);
     } finally {
       setIsSubmitting(false);
     }

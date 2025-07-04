@@ -178,11 +178,12 @@ export const useInvitations = () => {
         send_email: sendEmail
       };
 
+      const webhookUrl = 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf';
+      
       console.log('🚀 Enviando dados para n8n:', webhookData);
+      console.log('🌐 URL do webhook:', webhookUrl);
 
       // Enviar para n8n
-      const webhookUrl = 'https://n8n.sparkassessoria.com/webhook-test/7fa656f4-29ca-486a-9151-e37dc4860090';
-      
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -192,6 +193,7 @@ export const useInvitations = () => {
       });
 
       console.log('📡 Resposta do n8n:', response.status, response.statusText);
+      console.log('📊 Response headers:', response.headers);
 
       if (!response.ok) {
         throw new Error(`Erro no n8n: ${response.status}`);
