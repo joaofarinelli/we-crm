@@ -170,51 +170,32 @@ export const useInvitations = () => {
       throw new Error('Usuário não autenticado');
     }
 
-    try {
-      // Dados simples do formulário
-      const webhookData = {
-        email,
-        role_id: roleId,
-        send_email: sendEmail
-      };
+    const webhookData = {
+      email,
+      role_id: roleId,
+      send_email: sendEmail
+    };
 
-      const webhookUrl = 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf';
-      
-      console.log('🚀 Enviando dados para n8n:', webhookData);
-      console.log('🌐 URL do webhook:', webhookUrl);
+    const webhookUrl = 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf';
+    
+    console.log('🚀 Enviando para n8n:', webhookData);
+    console.log('🌐 URL:', webhookUrl);
 
-      // Enviar para n8n
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData)
-      });
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(webhookData)
+    });
 
-      console.log('📡 Resposta do n8n:', response.status, response.statusText);
-      console.log('📊 Response headers:', response.headers);
-
-      if (!response.ok) {
-        throw new Error(`Erro no n8n: ${response.status}`);
-      }
-
-      toast({
-        title: "Sucesso",
-        description: "Convite enviado para automação"
-      });
-      
-      console.log('✅ Dados enviados com sucesso para n8n');
-    } catch (error: any) {
-      console.error('❌ Erro ao enviar para n8n:', error);
-      
-      toast({
-        title: "Erro",
-        description: `Falha ao enviar: ${error.message}`,
-        variant: "destructive"
-      });
-      throw error;
+    console.log('📡 Status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`Erro ${response.status}`);
     }
+
+    console.log('✅ Enviado com sucesso');
   };
 
   const createNativeInvitation = async (email: string, roleId: string, sendEmail: boolean = true) => {
