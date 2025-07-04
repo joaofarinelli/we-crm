@@ -36,7 +36,7 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { roles } = useRoles();
-  const { createNativeInvitation } = useInvitations();
+  const { createN8nInvitation } = useInvitations();
   const { settings } = useInvitationSettings();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +46,7 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
     
     setIsSubmitting(true);
     try {
-      await createNativeInvitation(email, selectedRole, sendEmail);
+      await createN8nInvitation(email, selectedRole, sendEmail);
       setDialogOpen(false);
       setEmail('');
       setSelectedRole('');

@@ -165,6 +165,128 @@ export const useInvitations = () => {
     }
   };
 
+  const createN8nInvitation = async (email: string, roleId: string, sendEmail: boolean = true) => {
+    if (!user) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    try {
+      // Obter dados do usuário atual e empresa
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          full_name,
+          company_id,
+          companies (
+            id,
+            name,
+            domain
+          ),
+          roles (
+            name
+          )
+        `)
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Obter dados do cargo selecionado
+      const { data: roleData, error: roleError } = await supabase
+        .from('roles')
+        .select('id, name, description, permissions')
+        .eq('id', roleId)
+        .single();
+
+      if (roleError) throw roleError;
+
+      // Preparar dados para enviar ao n8n
+      const webhookData = {
+        invite: {
+          email,
+          role_id: roleId,
+          send_email: sendEmail
+        },
+        role: {
+          id: roleData.id,
+          name: roleData.name,
+          description: roleData.description,
+          permissions: roleData.permissions
+        },
+        company: {
+          id: profileData.company_id,
+          name: profileData.companies?.name,
+          domain: profileData.companies?.domain
+        },
+        invited_by: {
+          id: profileData.id,
+          email: profileData.email,
+          name: profileData.full_name,
+          role: profileData.roles?.name
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          source: "crm_system"
+        }
+      };
+
+      // Enviar para n8n
+      const response = await fetch('https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro no webhook: ${response.status}`);
+      }
+
+      // Criar registro local na tabela de convites para controle
+      const { data: invitationData, error: invitationError } = await supabase
+        .from('user_invitations')
+        .insert({
+          email,
+          role_id: roleId,
+          invited_by: user.id,
+          company_id: profileData.company_id,
+          sent_via_email: sendEmail
+        })
+        .select(`
+          *,
+          roles (
+            name,
+            description
+          )
+        `)
+        .single();
+
+      if (invitationError) throw invitationError;
+
+      // Atualizar lista local
+      setInvitations(prev => [invitationData, ...prev]);
+      
+      toast({
+        title: "Sucesso",
+        description: "Convite enviado para processamento na automação"
+      });
+      
+      return invitationData;
+    } catch (error: any) {
+      console.error('Erro ao criar convite via n8n:', error);
+      
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível enviar o convite. Tente novamente.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const createNativeInvitation = async (email: string, roleId: string, sendEmail: boolean = true) => {
     if (!user) {
       throw new Error('Usuário não autenticado');
@@ -265,6 +387,7 @@ export const useInvitations = () => {
     invitations,
     loading,
     createInvitation,
+    createN8nInvitation,
     createNativeInvitation,
     resendInvitation,
     deleteInvitation,
