@@ -250,7 +250,7 @@ export const useInvitations = () => {
 
       // Enviar para n8n
       console.log('🌐 Enviando requisição para n8n...');
-      const webhookUrl = 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf';
+      const webhookUrl = 'https://n8n.sparkassessoria.com/webhook-test/7fa656f4-29ca-486a-9151-e37dc4860090';
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
