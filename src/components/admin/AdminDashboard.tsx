@@ -21,60 +21,60 @@ export const AdminDashboard = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard SaaS</h1>
-        <p className="text-gray-600 mt-2">Visão geral do sistema e métricas globais</p>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard SaaS</h1>
+        <p className="text-sm sm:text-base text-gray-600">Visão geral do sistema e métricas globais</p>
       </div>
 
       {/* Métricas Principais */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="min-h-[120px]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Empresas</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Total de Empresas</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.total_companies || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.total_companies || 0}</div>
             <p className="text-xs text-muted-foreground">
               Empresas cadastradas
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-h-[120px]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Total de Usuários</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.total_users || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.total_users || 0}</div>
             <p className="text-xs text-muted-foreground">
               Usuários ativos
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-h-[120px]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Empresas Ativas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Empresas Ativas</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.active_companies || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.active_companies || 0}</div>
             <p className="text-xs text-muted-foreground">
               Últimos 30 dias
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-h-[120px]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Novos Usuários</CardTitle>
-            <UserPlus className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Novos Usuários</CardTitle>
+            <UserPlus className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.new_users_this_month || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.new_users_this_month || 0}</div>
             <p className="text-xs text-muted-foreground">
               Este mês
             </p>
@@ -91,7 +91,7 @@ export const AdminDashboard = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {metrics?.companies_by_plan && Object.entries(metrics.companies_by_plan).map(([plan, count]) => (
               <div key={plan} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
@@ -107,7 +107,7 @@ export const AdminDashboard = () => {
       </Card>
 
       {/* Estatísticas Rápidas */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Crescimento</CardTitle>

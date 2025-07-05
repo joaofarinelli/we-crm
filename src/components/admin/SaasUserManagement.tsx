@@ -74,28 +74,29 @@ export const SaasUserManagement = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Gerenciamento de Usuários
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+                <Shield className="w-5 h-5 flex-shrink-0" />
+                <span className="truncate">Gerenciamento de Usuários</span>
               </CardTitle>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Gerencie todos os usuários do sistema
               </p>
             </div>
-            <Button onClick={() => setCreateDialogOpen(true)}>
+            <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
-              Criar Usuário
+              <span className="sm:hidden">Novo Usuário</span>
+              <span className="hidden sm:inline">Criar Usuário</span>
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -105,36 +106,38 @@ export const SaasUserManagement = () => {
                 className="pl-10"
               />
             </div>
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filtrar por empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as empresas</SelectItem>
-                {companies.map(company => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filtrar por cargo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os cargos</SelectItem>
-                {roles.map(role => (
-                  <SelectItem key={role.id} value={role.id}>
-                    {role.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filtrar por empresa" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <SelectItem value="all">Todas as empresas</SelectItem>
+                  {companies.map(company => (
+                    <SelectItem key={company.id} value={company.id}>
+                      <span className="truncate">{company.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filtrar por cargo" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <SelectItem value="all">Todos os cargos</SelectItem>
+                  {roles.map(role => (
+                    <SelectItem key={role.id} value={role.id}>
+                      <span className="truncate">{role.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Estatísticas */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-muted/50 p-4 rounded-lg">
               <div className="text-2xl font-bold">{profiles.length}</div>
               <div className="text-sm text-muted-foreground">Total de usuários</div>
@@ -152,15 +155,15 @@ export const SaasUserManagement = () => {
           </div>
 
           {/* Tabela */}
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Empresa</TableHead>
-                  <TableHead>Cargo</TableHead>
-                  <TableHead>Criado em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="min-w-[200px]">Usuário</TableHead>
+                  <TableHead className="min-w-[150px]">Empresa</TableHead>
+                  <TableHead className="min-w-[120px]">Cargo</TableHead>
+                  <TableHead className="min-w-[120px]">Criado em</TableHead>
+                  <TableHead className="text-right min-w-[150px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -176,20 +179,20 @@ export const SaasUserManagement = () => {
                   filteredProfiles.map((profile) => (
                     <TableRow key={profile.id}>
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="font-medium">
+                        <div className="space-y-1 min-w-0">
+                          <div className="font-medium truncate">
                             {profile.full_name || 'Nome não informado'}
                           </div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {profile.email}
+                          <div className="text-sm text-muted-foreground flex items-center gap-1 min-w-0">
+                            <Mail className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{profile.email}</span>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
-                          <span>{profile.companies?.name || 'Sem empresa'}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="truncate">{profile.companies?.name || 'Sem empresa'}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -201,11 +204,12 @@ export const SaasUserManagement = () => {
                         {formatDate(profile.created_at)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1 sm:gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(profile)}
+                            className="min-w-0"
                           >
                             <Edit2 className="w-4 h-4" />
                           </Button>
@@ -213,19 +217,20 @@ export const SaasUserManagement = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleTransfer(profile)}
+                            className="min-w-0"
                           >
                             <UserCheck className="w-4 h-4" />
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="min-w-0">
                                 <Trash2 className="w-4 h-4 text-destructive" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="max-w-md">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                <AlertDialogDescription>
+                                <AlertDialogDescription className="text-sm">
                                   Tem certeza que deseja excluir o usuário "{profile.full_name || profile.email}"? 
                                   Esta ação não pode ser desfeita.
                                 </AlertDialogDescription>

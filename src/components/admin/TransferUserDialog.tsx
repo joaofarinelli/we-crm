@@ -60,7 +60,7 @@ export const TransferUserDialog = ({ open, onOpenChange, user, onSuccess }: Tran
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Transferir Usuário</DialogTitle>
         </DialogHeader>
@@ -98,11 +98,11 @@ export const TransferUserDialog = ({ open, onOpenChange, user, onSuccess }: Tran
             </Select>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Transferindo...' : 'Transferir Usuário'}
             </Button>
           </div>

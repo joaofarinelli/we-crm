@@ -98,63 +98,64 @@ export const CompaniesManagement = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Empresas</h1>
-          <p className="text-gray-600 mt-2">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gerenciamento de Empresas</h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Visualize e gerencie todas as empresas cadastradas no sistema
           </p>
         </div>
-        <Button onClick={handleAddCompany} className="flex items-center gap-2">
+        <Button onClick={handleAddCompany} className="flex items-center gap-2 w-full sm:w-auto">
           <Plus className="w-4 h-4" />
-          Adicionar Empresa
+          <span className="sm:hidden">Nova Empresa</span>
+          <span className="hidden sm:inline">Adicionar Empresa</span>
         </Button>
       </div>
 
       {/* Estatísticas Rápidas */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-blue-600" />
-              <span className="text-sm text-gray-600">Total</span>
+              <Building2 className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-600 truncate">Total</span>
             </div>
-            <div className="text-2xl font-bold mt-1">{companies.length}</div>
+            <div className="text-lg sm:text-2xl font-bold mt-1">{companies.length}</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-gray-600">Total Usuários</span>
+              <Users className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-600 truncate">Usuários</span>
             </div>
-            <div className="text-2xl font-bold mt-1">
+            <div className="text-lg sm:text-2xl font-bold mt-1">
               {companies.reduce((sum, company) => sum + company.user_count, 0)}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-purple-600" />
-              <span className="text-sm text-gray-600">Ativas</span>
+              <Building2 className="h-4 w-4 text-purple-600 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-600 truncate">Ativas</span>
             </div>
-            <div className="text-2xl font-bold mt-1">
+            <div className="text-lg sm:text-2xl font-bold mt-1">
               {companies.filter(c => c.status?.toLowerCase() === 'ativa').length}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-orange-600" />
-              <span className="text-sm text-gray-600">Prospects</span>
+              <Building2 className="h-4 w-4 text-orange-600 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-600 truncate">Prospects</span>
             </div>
-            <div className="text-2xl font-bold mt-1">
+            <div className="text-lg sm:text-2xl font-bold mt-1">
               {companies.filter(c => c.status?.toLowerCase() === 'prospect').length}
             </div>
           </CardContent>
@@ -162,20 +163,20 @@ export const CompaniesManagement = () => {
       </div>
 
       {/* Lista de Empresas */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {companies.map((company) => (
           <Card key={company.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">{company.name}</CardTitle>
-                  <CardDescription>{company.domain}</CardDescription>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base sm:text-lg truncate">{company.name}</CardTitle>
+                  <CardDescription className="truncate">{company.domain}</CardDescription>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <Badge className={getStatusColor(company.status)}>
+                <div className="flex flex-row sm:flex-col gap-2 sm:gap-1 flex-shrink-0">
+                  <Badge className={`text-xs ${getStatusColor(company.status)}`}>
                     {company.status || 'Não definido'}
                   </Badge>
-                  <Badge className={getPlanColor(company.plan)}>
+                  <Badge className={`text-xs ${getPlanColor(company.plan)}`}>
                     {company.plan || 'Basic'}
                   </Badge>
                 </div>
@@ -183,51 +184,51 @@ export const CompaniesManagement = () => {
             </CardHeader>
             
             <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-600" />
-                  <span>{company.user_count} usuários</span>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4 text-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Users className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="truncate">{company.user_count} usuários</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-green-600" />
-                  <span>{company.leads_count} leads</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <Building2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <span className="truncate">{company.leads_count} leads</span>
                 </div>
               </div>
 
               {company.phone && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  {company.phone}
+                <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                  <Phone className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{company.phone}</span>
                 </div>
               )}
 
               {company.website && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Globe className="w-4 h-4" />
-                  {company.website}
+                <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                  <Globe className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{company.website}</span>
                 </div>
               )}
 
               {company.location && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="w-4 h-4" />
-                  {company.location}
+                <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{company.location}</span>
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="w-4 h-4" />
-                Criada em {new Date(company.created_at).toLocaleDateString('pt-BR')}
+              <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                <Calendar className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">Criada em {new Date(company.created_at).toLocaleDateString('pt-BR')}</span>
               </div>
 
-              <div className="pt-2 border-t space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Status:</span>
+              <div className="pt-2 border-t space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <span className="text-sm text-gray-600 flex-shrink-0">Status:</span>
                   <Select 
                     value={company.status || ''} 
                     onValueChange={(value) => updateCompanyStatus(company.id, value)}
                   >
-                    <SelectTrigger className="h-8 text-xs">
+                    <SelectTrigger className="h-8 text-xs min-w-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -238,7 +239,7 @@ export const CompaniesManagement = () => {
                   </Select>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -246,7 +247,8 @@ export const CompaniesManagement = () => {
                     onClick={() => handleEditCompany(company)}
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Editar
+                    <span className="hidden sm:inline">Editar</span>
+                    <span className="sm:hidden">Editar</span>
                   </Button>
                   <Button 
                     variant="outline" 
@@ -255,7 +257,8 @@ export const CompaniesManagement = () => {
                     onClick={() => handleAssignUser(company)}
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Atribuir Usuário
+                    <span className="hidden sm:inline">Atribuir Usuário</span>
+                    <span className="sm:hidden">Usuário</span>
                   </Button>
                 </div>
               </div>

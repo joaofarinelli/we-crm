@@ -239,7 +239,7 @@ export const CompanyFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Editar Empresa' : 'Adicionar Nova Empresa'}
@@ -255,30 +255,36 @@ export const CompanyFormDialog = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic" className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  Básico
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  Configurações
-                </TabsTrigger>
-                <TabsTrigger value="whatsapp" className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  WhatsApp
-                </TabsTrigger>
-                {isEditing && (
-                  <TabsTrigger value="stats" className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    Estatísticas
+              <div className="overflow-x-auto">
+                <TabsList className="grid w-full grid-cols-4 min-w-[400px]">
+                  <TabsTrigger value="basic" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Básico</span>
+                    <span className="sm:hidden">Info</span>
                   </TabsTrigger>
-                )}
-              </TabsList>
+                  <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Configurações</span>
+                    <span className="sm:hidden">Config</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="whatsapp" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">WhatsApp</span>
+                    <span className="sm:hidden">WA</span>
+                  </TabsTrigger>
+                  {isEditing && (
+                    <TabsTrigger value="stats" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                      <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Estatísticas</span>
+                      <span className="sm:hidden">Stats</span>
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+              </div>
 
               {/* Aba Básico */}
               <TabsContent value="basic" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -308,7 +314,7 @@ export const CompanyFormDialog = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="industry"
@@ -366,7 +372,7 @@ export const CompanyFormDialog = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="location"
@@ -413,7 +419,7 @@ export const CompanyFormDialog = ({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="plan"

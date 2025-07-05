@@ -31,23 +31,25 @@ export const SaasAnalytics = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Analytics SaaS</h1>
-        <p className="text-gray-600 mt-2">Análise detalhada do desempenho do sistema</p>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics SaaS</h1>
+        <p className="text-sm sm:text-base text-gray-600">Análise detalhada do desempenho do sistema</p>
       </div>
 
       <FiltersComponent filters={filters} onFiltersChange={setFilters} />
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="companies">Empresas</TabsTrigger>
-          <TabsTrigger value="users">Usuários</TabsTrigger>
-          <TabsTrigger value="activities">Atividades</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="reports">Relatórios</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+        <div className="overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-6 min-w-[600px]">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">Visão Geral</TabsTrigger>
+            <TabsTrigger value="companies" className="text-xs sm:text-sm">Empresas</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm">Usuários</TabsTrigger>
+            <TabsTrigger value="activities" className="text-xs sm:text-sm">Atividades</TabsTrigger>
+            <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance</TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs sm:text-sm">Relatórios</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="overview">
           <AnalyticsOverview data={analytics} />

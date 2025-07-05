@@ -72,7 +72,7 @@ const AdminSaas = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex w-full">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row w-full">
       {/* Desktop Sidebar */}
       <AdminSidebar 
         activeTab={activeTab} 
@@ -80,20 +80,20 @@ const AdminSaas = () => {
         onBackToCrm={handleBackToCrm}
       />
       
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto min-w-0">
         {/* Mobile Header */}
-        <div className="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between">
+        <div className="md:hidden bg-slate-900 text-white p-3 sm:p-4 flex items-center justify-between">
           <AdminMobileSidebar 
             activeTab={activeTab} 
             setActiveTab={setActiveTab}
             onBackToCrm={handleBackToCrm}
           />
-          <h1 className="font-semibold text-lg">Admin SaaS</h1>
-          <div className="w-10"></div>
+          <h1 className="font-semibold text-base sm:text-lg truncate px-2">Admin SaaS</h1>
+          <div className="w-8 sm:w-10"></div>
         </div>
         
         {/* Main Content */}
-        <div className="w-full">
+        <div className="w-full min-h-full">
           {renderContent()}
         </div>
       </main>
