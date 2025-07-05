@@ -12,6 +12,7 @@ interface Lead {
   source: string | null;
   company_id: string;
   created_at: string;
+  tags?: Array<{ id: string; name: string; color: string }>;
 }
 
 // Global subscription manager to prevent multiple subscriptions
@@ -100,10 +101,15 @@ export const useLeads = () => {
 
       console.log('User company_id:', profileData.company_id);
 
-      // Agora buscar leads apenas da empresa do usuário
+      // Agora buscar leads apenas da empresa do usuário com suas tags
       const { data, error } = await supabase
         .from('leads')
-        .select('*')
+        .select(`
+          *,
+          lead_tag_assignments(
+            lead_tags(id, name, color)
+          )
+        `)
         .eq('company_id', profileData.company_id)
         .order('created_at', { ascending: false });
 
@@ -112,9 +118,14 @@ export const useLeads = () => {
         throw error;
       }
       
-      console.log('Fetched leads for company:', data?.length || 0, 'leads');
-      console.log('Fetched leads:', data);
-      setLeads(data || []);
+      // Processar dados para incluir tags
+      const processedLeads = (data || []).map(lead => ({
+        ...lead,
+        tags: lead.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || []
+      }));
+      
+      console.log('Fetched leads for company:', processedLeads.length, 'leads');
+      setLeads(processedLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
       toast({

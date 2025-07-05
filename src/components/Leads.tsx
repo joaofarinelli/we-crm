@@ -11,6 +11,7 @@ import { EditLeadDialog } from './EditLeadDialog';
 import { AddLeadDialog } from './AddLeadDialog';
 import { ImportLeadsDialog } from './ImportLeadsDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
+import { TagBadge } from './TagBadge';
 
 export const Leads = () => {
   const [editingLead, setEditingLead] = useState(null);
@@ -21,6 +22,7 @@ export const Leads = () => {
     searchTerm: '',
     status: 'todos',
     source: 'todas',
+    tags: [],
     valueRange: { min: '', max: '' },
     dateRange: { from: '', to: '' }
   });
@@ -51,7 +53,11 @@ export const Leads = () => {
         return leadDate >= fromDate && leadDate <= toDate;
       })();
 
-      return searchMatch && statusMatch && sourceMatch && dateMatch;
+      // Filtro por tags
+      const tagsMatch = filters.tags.length === 0 || 
+        (lead.tags && lead.tags.some(tag => filters.tags.includes(tag.id)));
+
+      return searchMatch && statusMatch && sourceMatch && tagsMatch && dateMatch;
     });
   }, [leads, filters]);
 
@@ -149,6 +155,19 @@ export const Leads = () => {
                     </div>
                   )}
                 </div>
+                
+                {lead.tags && lead.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {lead.tags.map((tag) => (
+                      <TagBadge
+                        key={tag.id}
+                        name={tag.name}
+                        color={tag.color}
+                        size="sm"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

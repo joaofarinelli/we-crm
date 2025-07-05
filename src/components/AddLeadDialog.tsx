@@ -17,6 +17,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { TagSelector } from './TagSelector';
+import { useLeadTagAssignments } from '@/hooks/useLeadTagAssignments';
 
 interface AddLeadDialogProps {
   open: boolean;
@@ -51,13 +53,15 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
     email: '',
     phone: '',
     status: 'Frio',
-    source: '' as string
+    source: '' as string,
+    tags: [] as Array<{ id: string; name: string; color: string }>
   });
+  const { assignTagsToLead } = useLeadTagAssignments();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await onCreateLead({
+    const createdLead = await onCreateLead({
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
@@ -65,13 +69,19 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
       source: formData.source || null
     });
 
+    // Se o lead foi criado com sucesso e há tags selecionadas, associar as tags
+    if (createdLead && formData.tags.length > 0) {
+      await assignTagsToLead(createdLead.id, formData.tags.map(tag => tag.id));
+    }
+
     // Reset form
     setFormData({
       name: '',
       email: '',
       phone: '',
       status: 'Frio',
-      source: ''
+      source: '',
+      tags: []
     });
     
     onOpenChange(false);
@@ -144,6 +154,15 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <TagSelector
+              selectedTags={formData.tags}
+              onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+              placeholder="Selecionar tags..."
+            />
           </div>
           
           <DialogFooter>

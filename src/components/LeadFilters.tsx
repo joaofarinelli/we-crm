@@ -5,11 +5,14 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { TagSelector } from './TagSelector';
+import { useLeadTags } from '@/hooks/useLeadTags';
 
 export interface LeadFilterState {
   searchTerm: string;
   status: string;
   source: string;
+  tags: string[];
   valueRange: { min: string; max: string };
   dateRange: { from: string; to: string };
 }
@@ -25,10 +28,12 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
     searchTerm: '',
     status: 'todos',
     source: 'todas',
+    tags: [],
     valueRange: { min: '', max: '' },
     dateRange: { from: '', to: '' }
   });
   const [isExpanded, setIsExpanded] = useState(false);
+  const { tags: availableTags } = useLeadTags();
 
   const updateFilters = (newFilters: Partial<LeadFilterState>) => {
     const updatedFilters = { ...filters, ...newFilters };
@@ -41,6 +46,7 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
       searchTerm: '',
       status: 'todos',
       source: 'todas',
+      tags: [],
       valueRange: { min: '', max: '' },
       dateRange: { from: '', to: '' }
     };
@@ -53,6 +59,7 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
     if (filters.searchTerm) count++;
     if (filters.status !== 'todos') count++;
     if (filters.source !== 'todas') count++;
+    if (filters.tags.length > 0) count++;
     if (filters.dateRange.from || filters.dateRange.to) count++;
     return count;
   };
@@ -97,7 +104,7 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
       </div>
 
       {isExpanded && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
             <select
@@ -126,6 +133,15 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
               <option value="Telemarketing">Telemarketing</option>
               <option value="Evento">Evento</option>
             </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Tags</label>
+            <TagSelector
+              selectedTags={availableTags.filter(tag => filters.tags.includes(tag.id))}
+              onTagsChange={(selectedTags) => updateFilters({ tags: selectedTags.map(tag => tag.id) })}
+              placeholder="Filtrar por tags..."
+            />
           </div>
 
           <div>
