@@ -1092,6 +1092,10 @@ export type Database = {
         Args: { target_company_id: string }
         Returns: undefined
       }
+      create_default_roles_for_company: {
+        Args: { target_company_id: string }
+        Returns: undefined
+      }
       get_advanced_saas_analytics: {
         Args: Record<PropertyKey, never>
         Returns: {
