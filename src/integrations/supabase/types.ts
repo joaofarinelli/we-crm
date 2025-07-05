@@ -173,45 +173,72 @@ export type Database = {
       companies: {
         Row: {
           created_at: string
+          currency: string | null
+          date_format: string | null
           domain: string | null
+          email_notifications: boolean | null
           id: string
           industry: string | null
           location: string | null
+          logo_url: string | null
           name: string
           phone: string | null
           plan: string | null
           size: string | null
           status: string | null
+          timezone: string | null
           updated_at: string
           website: string | null
+          whatsapp_enabled: boolean | null
+          whatsapp_message: string | null
+          whatsapp_notifications: boolean | null
+          whatsapp_phone: string | null
         }
         Insert: {
           created_at?: string
+          currency?: string | null
+          date_format?: string | null
           domain?: string | null
+          email_notifications?: boolean | null
           id?: string
           industry?: string | null
           location?: string | null
+          logo_url?: string | null
           name: string
           phone?: string | null
           plan?: string | null
           size?: string | null
           status?: string | null
+          timezone?: string | null
           updated_at?: string
           website?: string | null
+          whatsapp_enabled?: boolean | null
+          whatsapp_message?: string | null
+          whatsapp_notifications?: boolean | null
+          whatsapp_phone?: string | null
         }
         Update: {
           created_at?: string
+          currency?: string | null
+          date_format?: string | null
           domain?: string | null
+          email_notifications?: boolean | null
           id?: string
           industry?: string | null
           location?: string | null
+          logo_url?: string | null
           name?: string
           phone?: string | null
           plan?: string | null
           size?: string | null
           status?: string | null
+          timezone?: string | null
           updated_at?: string
           website?: string | null
+          whatsapp_enabled?: boolean | null
+          whatsapp_message?: string | null
+          whatsapp_notifications?: boolean | null
+          whatsapp_phone?: string | null
         }
         Relationships: []
       }

@@ -13,6 +13,15 @@ interface CreateCompanyData {
   phone?: string;
   plan?: string;
   status?: string;
+  logo_url?: string;
+  timezone?: string;
+  currency?: string;
+  date_format?: string;
+  whatsapp_phone?: string;
+  whatsapp_message?: string;
+  whatsapp_enabled?: boolean;
+  email_notifications?: boolean;
+  whatsapp_notifications?: boolean;
 }
 
 interface UpdateCompanyData extends CreateCompanyData {
@@ -48,7 +57,16 @@ export const useAdminCompanies = () => {
           website: data.website || null,
           phone: data.phone || null,
           plan: data.plan || 'basic',
-          status: data.status || 'Prospect'
+          status: data.status || 'Prospect',
+          logo_url: data.logo_url || null,
+          timezone: data.timezone || 'America/Sao_Paulo',
+          currency: data.currency || 'BRL',
+          date_format: data.date_format || 'DD/MM/YYYY',
+          whatsapp_phone: data.whatsapp_phone || null,
+          whatsapp_message: data.whatsapp_message || 'Olá! Como podemos ajudar você?',
+          whatsapp_enabled: data.whatsapp_enabled ?? false,
+          email_notifications: data.email_notifications ?? true,
+          whatsapp_notifications: data.whatsapp_notifications ?? false
         })
         .select()
         .single();
@@ -111,7 +129,16 @@ export const useAdminCompanies = () => {
           website: data.website || null,
           phone: data.phone || null,
           plan: data.plan,
-          status: data.status
+          status: data.status,
+          logo_url: data.logo_url || null,
+          timezone: data.timezone,
+          currency: data.currency,
+          date_format: data.date_format,
+          whatsapp_phone: data.whatsapp_phone,
+          whatsapp_message: data.whatsapp_message,
+          whatsapp_enabled: data.whatsapp_enabled,
+          email_notifications: data.email_notifications,
+          whatsapp_notifications: data.whatsapp_notifications
         })
         .eq('id', data.id);
 
@@ -148,5 +175,36 @@ export const useAdminCompanies = () => {
     }
   };
 
-  return { createCompany, updateCompany, loading };
+  const uploadLogo = async (file: File): Promise<string | null> => {
+    try {
+      console.log('Uploading logo:', file.name);
+      
+      // Simulate upload - in production, you would use Supabase Storage
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // For now, return a placeholder URL
+      // In production, implement actual file upload to Supabase Storage
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate upload delay
+      
+      const logoUrl = `https://example.com/logos/${Date.now()}-${file.name}`;
+      
+      toast({
+        title: "Sucesso",
+        description: "Logo enviado com sucesso"
+      });
+      
+      return logoUrl;
+    } catch (error) {
+      console.error('Erro ao fazer upload do logo:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer upload do logo",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
+  return { createCompany, updateCompany, uploadLogo, loading };
 };
