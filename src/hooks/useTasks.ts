@@ -11,8 +11,7 @@ interface Task {
   due_date: string | null;
   priority: string | null;
   status: string | null;
-  assignee_id: string | null;
-  task_type: string | null;
+  assigned_to: string | null;
   company_id: string;
   created_at: string;
   created_by: string | null;
@@ -50,11 +49,11 @@ export const useTasks = () => {
       // Then fetch assignee data separately and merge it
       const tasksWithAssignees = await Promise.all(
         (tasksData || []).map(async (task) => {
-          if (task.assignee_id) {
+          if (task.assigned_to) {
             const { data: assigneeData } = await supabase
               .from('profiles')
               .select('id, full_name, email')
-              .eq('id', task.assignee_id)
+              .eq('id', task.assigned_to)
               .single();
             
             return {
@@ -141,11 +140,11 @@ export const useTasks = () => {
       if (data) {
         // Fetch assignee data if there is one
         let assigneeData = null;
-        if (data.assignee_id) {
+        if (data.assigned_to) {
           const { data: assignee } = await supabase
             .from('profiles')
             .select('id, full_name, email')
-            .eq('id', data.assignee_id)
+            .eq('id', data.assigned_to)
             .single();
           assigneeData = assignee;
         }
@@ -185,11 +184,11 @@ export const useTasks = () => {
       if (data) {
         // Fetch assignee data if there is one
         let assigneeData = null;
-        if (data.assignee_id) {
+        if (data.assigned_to) {
           const { data: assignee } = await supabase
             .from('profiles')
             .select('id, full_name, email')
-            .eq('id', data.assignee_id)
+            .eq('id', data.assigned_to)
             .single();
           assigneeData = assignee;
         }

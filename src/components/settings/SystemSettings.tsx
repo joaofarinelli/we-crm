@@ -67,7 +67,7 @@ export const SystemSettings = () => {
       await createColumn({
         name: newColumnName,
         color: '#3B82F6',
-        order_index: columns.length,
+        position: columns.length,
       });
       setNewColumnName('');
       toast({
@@ -107,7 +107,10 @@ export const SystemSettings = () => {
 
   const saveNotifications = () => {
     updateCompany.mutate({
-      notification_settings: notifications,
+      notification_settings: {
+        email_notifications: notifications.email,
+        whatsapp_notifications: notifications.sms
+      }
     });
   };
 

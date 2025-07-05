@@ -389,6 +389,7 @@ export type Database = {
           assigned_to: string | null
           company_id: string
           created_at: string
+          created_by: string | null
           email: string | null
           id: string
           name: string
@@ -401,6 +402,7 @@ export type Database = {
           assigned_to?: string | null
           company_id: string
           created_at?: string
+          created_by?: string | null
           email?: string | null
           id?: string
           name: string
@@ -413,6 +415,7 @@ export type Database = {
           assigned_to?: string | null
           company_id?: string
           created_at?: string
+          created_by?: string | null
           email?: string | null
           id?: string
           name?: string
@@ -441,6 +444,170 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_agendas: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          meeting_id: string
+          order_index: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_id: string
+          order_index?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_id?: string
+          order_index?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_agendas_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_attachments: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_size: number | null
+          id: string
+          meeting_id: string
+          mime_type: string | null
+          name: string
+          type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          file_size?: number | null
+          id?: string
+          meeting_id: string
+          mime_type?: string | null
+          name: string
+          type?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_size?: number | null
+          id?: string
+          meeting_id?: string
+          mime_type?: string | null
+          name?: string
+          type?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_attachments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_attachments_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_minutes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          meeting_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          meeting_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_minutes_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_participants: {
+        Row: {
+          created_at: string
+          id: string
+          meeting_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meeting_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_participants_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -816,7 +983,21 @@ export type Database = {
       }
     }
     Functions: {
+      create_default_pipeline_columns: {
+        Args: { target_company_id: string }
+        Returns: undefined
+      }
       get_advanced_saas_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_companies: number
+          total_users: number
+          total_leads: number
+          total_appointments: number
+          active_companies: number
+        }[]
+      }
+      get_saas_metrics: {
         Args: Record<PropertyKey, never>
         Returns: {
           total_companies: number
@@ -837,6 +1018,10 @@ export type Database = {
       is_saas_admin_for_company_management: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      sync_appointment_status_with_pipeline: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

@@ -45,21 +45,7 @@ export const CompanyInfoSettings = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateCompany.mutate(formData, {
-      onSuccess: () => {
-        toast({
-          title: "Sucesso",
-          description: "Informações da empresa atualizadas com sucesso!",
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: "Erro",
-          description: "Erro ao atualizar informações da empresa.",
-          variant: "destructive",
-        });
-      },
-    });
+    updateCompany.mutate(formData);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -94,21 +80,7 @@ export const CompanyInfoSettings = () => {
       return;
     }
 
-    uploadLogo.mutate(file, {
-      onSuccess: () => {
-        toast({
-          title: "Sucesso",
-          description: "Logo atualizado com sucesso!",
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: "Erro",
-          description: "Erro ao fazer upload do logo.",
-          variant: "destructive",
-        });
-      },
-    });
+    uploadLogo(file);
   };
 
   return (

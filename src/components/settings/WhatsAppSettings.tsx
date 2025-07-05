@@ -43,20 +43,6 @@ export const WhatsAppSettings = () => {
 
     updateCompany.mutate({
       whatsapp_support: whatsappConfig,
-    }, {
-      onSuccess: () => {
-        toast({
-          title: "Sucesso",
-          description: "Configurações do WhatsApp atualizadas com sucesso!",
-        });
-      },
-      onError: () => {
-        toast({
-          title: "Erro",
-          description: "Erro ao atualizar configurações do WhatsApp.",
-          variant: "destructive",
-        });
-      },
     });
   };
 

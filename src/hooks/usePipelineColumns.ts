@@ -8,7 +8,7 @@ interface PipelineColumn {
   id: string;
   company_id: string;
   name: string;
-  order_index: number;
+  position: number;
   color: string;
   created_at: string;
   updated_at: string;
@@ -32,7 +32,7 @@ export const usePipelineColumns = () => {
       const { data, error } = await supabase
         .from('pipeline_columns')
         .select('*')
-        .order('order_index', { ascending: true });
+        .order('position', { ascending: true });
 
       if (error) {
         console.error('Error fetching pipeline columns:', error);
@@ -93,7 +93,7 @@ export const usePipelineColumns = () => {
       }
       
       console.log('Pipeline column created successfully:', data);
-      setColumns(prev => [...prev, data].sort((a, b) => a.order_index - b.order_index));
+      setColumns(prev => [...prev, data].sort((a, b) => a.position - b.position));
       toast({
         title: "Sucesso",
         description: "Coluna criada com sucesso"
@@ -135,7 +135,7 @@ export const usePipelineColumns = () => {
       }
       
       console.log('Pipeline column updated successfully:', data);
-      setColumns(prev => prev.map(col => col.id === id ? data : col).sort((a, b) => a.order_index - b.order_index));
+      setColumns(prev => prev.map(col => col.id === id ? data : col).sort((a, b) => a.position - b.position));
       toast({
         title: "Sucesso",
         description: "Coluna atualizada com sucesso"
@@ -196,13 +196,13 @@ export const usePipelineColumns = () => {
       
       const updates = newOrder.map((col, index) => ({
         id: col.id,
-        order_index: index + 1
+        position: index + 1
       }));
 
       for (const update of updates) {
         await supabase
           .from('pipeline_columns')
-          .update({ order_index: update.order_index })
+          .update({ position: update.position })
           .eq('id', update.id);
       }
       

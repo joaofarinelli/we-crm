@@ -59,7 +59,7 @@ export const useCompanySettings = () => {
 
   const uploadLogo = async (file: File) => {
     console.log('Would upload logo:', file.name);
-    return Promise.resolve('https://example.com/logo.png');
+    return 'https://example.com/logo.png';
   };
 
   return {
@@ -70,9 +70,9 @@ export const useCompanySettings = () => {
     // Legacy API compatibility
     company: settings,
     isLoading: false,
-    updateCompany: { 
+    updateCompany: {
       mutate: updateCompanySettings,
-      isPending: false 
+      isPending: false
     },
     isUploadingLogo: false
   };

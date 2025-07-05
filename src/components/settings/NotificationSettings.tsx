@@ -31,7 +31,10 @@ export const NotificationSettings = () => {
 
   const handleSave = () => {
     updateCompany.mutate({
-      notification_settings: settings,
+      notification_settings: {
+        email_notifications: settings.email,
+        whatsapp_notifications: settings.sms
+      }
     });
   };
 

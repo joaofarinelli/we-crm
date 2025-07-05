@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus, Edit2, Trash2, GripVertical, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -12,7 +11,7 @@ import { usePipelineSync } from '@/hooks/usePipelineSync';
 interface PipelineColumn {
   id: string;
   name: string;
-  order_index: number;
+  position: number;
   color: string;
 }
 
@@ -28,11 +27,11 @@ export const PipelineColumnManager = () => {
   const handleCreateColumn = async () => {
     if (!newColumn.name.trim()) return;
     
-    const maxOrder = Math.max(...columns.map(col => col.order_index), 0);
+    const maxOrder = Math.max(...columns.map(col => col.position), 0);
     await createColumn({
       name: newColumn.name,
       color: newColumn.color,
-      order_index: maxOrder + 1
+      position: maxOrder + 1
     });
     
     setNewColumn({ name: '', color: '#3B82F6' });
@@ -84,7 +83,7 @@ export const PipelineColumnManager = () => {
     }
 
     // Criar nova ordem das colunas
-    const sortedColumns = [...columns].sort((a, b) => a.order_index - b.order_index);
+    const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
     const draggedIndex = sortedColumns.findIndex(col => col.id === draggedColumnId);
     const targetIndex = sortedColumns.findIndex(col => col.id === targetColumnId);
 
@@ -96,7 +95,7 @@ export const PipelineColumnManager = () => {
     // Atualizar os índices
     const updatedColumns = reorderedColumns.map((col, index) => ({
       ...col,
-      order_index: index + 1
+      position: index + 1
     }));
 
     await reorderColumns(updatedColumns);
@@ -215,7 +214,7 @@ export const PipelineColumnManager = () => {
               style={{ backgroundColor: column.color }}
             />
             <span className="flex-1 font-medium">{column.name}</span>
-            <span className="text-sm text-gray-500">Ordem: {column.order_index}</span>
+            <span className="text-sm text-gray-500">Ordem: {column.position}</span>
             <Button
               variant="ghost"
               size="sm"
