@@ -5,6 +5,7 @@ import { Building2, Users, Calendar, Target, Plus, ArrowRight } from 'lucide-rea
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useTasks } from '@/hooks/useTasks';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useLeads } from '@/hooks/useLeads';
 import { InitialSetupCard } from '@/components/InitialSetupCard';
 import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
@@ -15,6 +16,7 @@ export const WelcomeMessage = () => {
   const { userInfo } = useCurrentUser();
   const { createTask } = useTasks();
   const { profiles } = useProfiles();
+  const { createLead } = useLeads();
   
   // Estados para controlar os diálogos
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
@@ -144,6 +146,7 @@ export const WelcomeMessage = () => {
       <AddLeadDialog 
         open={leadDialogOpen} 
         onOpenChange={setLeadDialogOpen} 
+        onCreateLead={createLead}
       />
       
       <AddAppointmentDialog 

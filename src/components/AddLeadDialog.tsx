@@ -17,11 +17,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { useLeads } from '@/hooks/useLeads';
 
 interface AddLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreateLead: (leadData: {
+    name: string;
+    email: string | null;
+    phone: string | null;
+    status: string;
+    source: string | null;
+  }) => Promise<any>;
 }
 
 const LEAD_SOURCES = [
@@ -39,8 +45,7 @@ const LEAD_SOURCES = [
   'Outros'
 ];
 
-export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
-  const { createLead } = useLeads();
+export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialogProps) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -52,7 +57,7 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await createLead({
+    await onCreateLead({
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,

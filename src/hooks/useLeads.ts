@@ -14,14 +14,50 @@ interface Lead {
   created_at: string;
 }
 
+// Global subscription manager to prevent multiple subscriptions
+const subscriptionManager = {
+  activeChannels: new Map<string, any>(),
+  
+  createChannel: (channelName: string, callback: (payload: any) => void) => {
+    // Clean up existing channel if it exists
+    if (subscriptionManager.activeChannels.has(channelName)) {
+      const existingChannel = subscriptionManager.activeChannels.get(channelName);
+      supabase.removeChannel(existingChannel);
+      subscriptionManager.activeChannels.delete(channelName);
+    }
+
+    // Create new channel
+    const channel = supabase.channel(channelName);
+    subscriptionManager.activeChannels.set(channelName, channel);
+    
+    channel
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, callback)
+      .subscribe((status) => {
+        console.log(`Realtime leads subscription status: ${status}`);
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn(`Realtime subscription failed: ${status}`);
+        }
+      });
+
+    return channel;
+  },
+
+  cleanup: (channelName: string) => {
+    if (subscriptionManager.activeChannels.has(channelName)) {
+      const channel = subscriptionManager.activeChannels.get(channelName);
+      supabase.removeChannel(channel);
+      subscriptionManager.activeChannels.delete(channelName);
+    }
+  }
+};
+
 export const useLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const channelRef = useRef<any>(null);
-  const isSubscribedRef = useRef(false);
+  const channelNameRef = useRef<string | null>(null);
 
   const fetchLeads = useCallback(async () => {
     if (!user) {
@@ -97,61 +133,30 @@ export const useLeads = () => {
     
     fetchLeads();
 
-    // Cleanup function to remove channel
-    const cleanup = () => {
-      if (channelRef.current && isSubscribedRef.current) {
-        console.log('Cleaning up realtime leads channel');
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        isSubscribedRef.current = false;
-      }
+    // Create unique channel name using user ID
+    const channelName = `leads-${user.id}`;
+    channelNameRef.current = channelName;
+
+    // Use subscription manager to handle the channel
+    const handleRealtimeChange = (payload: any) => {
+      console.log('Realtime lead change detected:', payload);
+      setIsUpdating(true);
+      
+      // Use a small delay to prevent excessive calls
+      setTimeout(() => {
+        fetchLeads().finally(() => {
+          setIsUpdating(false);
+        });
+      }, 100);
     };
 
-    // Clean up any existing channel first
-    cleanup();
+    subscriptionManager.createChannel(channelName, handleRealtimeChange);
 
-    // Guard: Only create subscription if user is still available
-    if (!user?.id) return cleanup;
-
-    // Create unique channel name using user ID and timestamp
-    const channelName = `realtime-leads-${user.id}-${Date.now()}`;
-    
-    // Setup realtime subscription
-    const channel = supabase.channel(channelName);
-    
-    channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'leads'
-        },
-        (payload) => {
-          console.log('Realtime lead change detected:', payload);
-          setIsUpdating(true);
-          
-          // Use a small delay to prevent excessive calls
-          setTimeout(() => {
-            fetchLeads().finally(() => {
-              setIsUpdating(false);
-            });
-          }, 100);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Realtime leads subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          isSubscribedRef.current = true;
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn('Realtime subscription failed:', status);
-          // Don't retry immediately to avoid infinite loops
-        }
-      });
-
-    channelRef.current = channel;
-
-    return cleanup;
+    return () => {
+      if (channelNameRef.current) {
+        subscriptionManager.cleanup(channelNameRef.current);
+      }
+    };
   }, [user?.id, fetchLeads]);
 
   const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'>) => {

@@ -25,7 +25,7 @@ export const Leads = () => {
     dateRange: { from: '', to: '' }
   });
   
-  const { leads, loading, isUpdating, deleteLead } = useLeads();
+  const { leads, loading, isUpdating, deleteLead, createLead } = useLeads();
 
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
@@ -221,6 +221,7 @@ export const Leads = () => {
       <AddLeadDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
+        onCreateLead={createLead}
       />
 
       <ImportLeadsDialog
