@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -14,7 +14,7 @@ export const useRealtimeAppointments = () => {
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -67,7 +67,7 @@ export const useRealtimeAppointments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   useEffect(() => {
     if (!user) return;

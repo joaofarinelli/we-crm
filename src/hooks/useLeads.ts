@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -23,7 +23,7 @@ export const useLeads = () => {
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -90,7 +90,60 @@ export const useLeads = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    fetchLeads();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
+      if (channelRef.current && isSubscribedRef.current) {
+        console.log('Cleaning up realtime leads channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        isSubscribedRef.current = false;
+      }
+    };
+
+    // Clean up any existing channel first
+    cleanup();
+
+    // Create unique channel name using user ID and timestamp
+    const channelName = `realtime-leads-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase.channel(channelName);
+    
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads'
+        },
+        (payload) => {
+          console.log('Realtime lead change detected:', payload);
+          setIsUpdating(true);
+          
+          fetchLeads().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime leads subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
+
+    channelRef.current = channel;
+
+    return cleanup;
+  }, [user, fetchLeads]);
 
   const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'>) => {
     if (!user) {
@@ -311,59 +364,6 @@ export const useLeads = () => {
       });
     }
   };
-
-  useEffect(() => {
-    if (!user) return;
-    
-    fetchLeads();
-
-    // Cleanup function to remove channel
-    const cleanup = () => {
-      if (channelRef.current && isSubscribedRef.current) {
-        console.log('Cleaning up realtime leads channel');
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        isSubscribedRef.current = false;
-      }
-    };
-
-    // Clean up any existing channel first
-    cleanup();
-
-    // Create unique channel name using user ID and timestamp
-    const channelName = `realtime-leads-${user.id}-${Date.now()}`;
-    
-    // Setup realtime subscription
-    const channel = supabase.channel(channelName);
-    
-    channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'leads'
-        },
-        (payload) => {
-          console.log('Realtime lead change detected:', payload);
-          setIsUpdating(true);
-          
-          fetchLeads().finally(() => {
-            setIsUpdating(false);
-          });
-        }
-      )
-      .subscribe((status) => {
-        console.log('Realtime leads subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          isSubscribedRef.current = true;
-        }
-      });
-
-    channelRef.current = channel;
-
-    return cleanup;
-  }, [user]);
 
   const importLeadsFromCSV = async (
     csvLeads: Array<{

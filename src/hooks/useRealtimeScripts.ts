@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +24,7 @@ export const useRealtimeScripts = () => {
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
 
-  const fetchScripts = async () => {
+  const fetchScripts = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -63,7 +63,7 @@ export const useRealtimeScripts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   useEffect(() => {
     if (!user) return;
