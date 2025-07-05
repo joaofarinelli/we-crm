@@ -138,7 +138,7 @@ export const useTasks = () => {
     }
   };
 
-  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'company_id' | 'created_by' | 'assignee'>): Promise<void> => {
+  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'company_id' | 'created_by' | 'assignee' | 'updated_at'>): Promise<void> => {
     if (!user) return;
 
     try {
