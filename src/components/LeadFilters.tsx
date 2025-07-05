@@ -138,7 +138,7 @@ export const LeadFilters = ({ onFiltersChange, totalLeads, filteredCount }: Lead
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Tags</label>
             <TagSelector
-              selectedTags={availableTags.filter(tag => filters.tags.includes(tag.id))}
+              selectedTags={(availableTags || []).filter(tag => filters.tags.includes(tag.id))}
               onTagsChange={(selectedTags) => updateFilters({ tags: selectedTags.map(tag => tag.id) })}
               placeholder="Filtrar por tags..."
             />

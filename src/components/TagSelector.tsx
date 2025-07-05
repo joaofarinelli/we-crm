@@ -19,14 +19,14 @@ const TAG_COLORS = [
   '#EC4899', '#F97316', '#84CC16', '#06B6D4', '#6366F1'
 ];
 
-export const TagSelector = ({ selectedTags, onTagsChange, placeholder = "Selecionar tags..." }: TagSelectorProps) => {
+export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Selecionar tags..." }: TagSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState(TAG_COLORS[0]);
   
-  const { tags, createTag } = useLeadTags();
+  const { tags = [], createTag } = useLeadTags();
 
   const handleCreateTag = async () => {
     if (!newTagName.trim()) return;
