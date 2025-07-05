@@ -7,8 +7,11 @@ export interface Meeting {
   time: string;
   duration: number;
   status: 'Agendada' | 'Em andamento' | 'Finalizada';
+  organizer_id: string;
   company_id: string;
-  created_by: string;
+  location?: string;
+  meeting_type?: string;
+  meeting_url?: string;
   created_at: string;
   updated_at: string;
 }

@@ -141,17 +141,11 @@ export const Contacts = () => {
                     <span>{contact.phone}</span>
                   </div>
                 )}
-                {contact.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>{contact.location}</span>
-                  </div>
-                )}
               </div>
 
               <div className="pt-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
-                  Último contato: {formatDate(contact.last_contact)}
+                  Criado em: {formatDate(contact.created_at)}
                 </p>
               </div>
 

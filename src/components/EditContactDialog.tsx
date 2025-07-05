@@ -18,9 +18,7 @@ interface Contact {
   email: string | null;
   phone: string | null;
   position: string | null;
-  location: string | null;
   company_id: string | null;
-  last_contact: string | null;
   created_at: string;
   companies?: {
     name: string;
@@ -39,9 +37,7 @@ export const EditContactDialog = ({ contact, open, onOpenChange }: EditContactDi
     name: '',
     email: '',
     phone: '',
-    position: '',
-    location: '',
-    last_contact: ''
+    position: ''
   });
 
   useEffect(() => {
@@ -50,9 +46,7 @@ export const EditContactDialog = ({ contact, open, onOpenChange }: EditContactDi
         name: contact.name || '',
         email: contact.email || '',
         phone: contact.phone || '',
-        position: contact.position || '',
-        location: contact.location || '',
-        last_contact: contact.last_contact || ''
+        position: contact.position || ''
       });
     }
   }, [contact]);
@@ -65,9 +59,7 @@ export const EditContactDialog = ({ contact, open, onOpenChange }: EditContactDi
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      position: formData.position || null,
-      location: formData.location || null,
-      last_contact: formData.last_contact || null
+      position: formData.position || null
     });
 
     onOpenChange(false);
@@ -118,24 +110,6 @@ export const EditContactDialog = ({ contact, open, onOpenChange }: EditContactDi
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="location">Localização</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="last_contact">Último Contato</Label>
-            <Input
-              id="last_contact"
-              type="date"
-              value={formData.last_contact}
-              onChange={(e) => setFormData(prev => ({ ...prev, last_contact: e.target.value }))}
-            />
-          </div>
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -47,7 +47,7 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
     setIsSubmitting(true);
     
     try {
-      await createN8nInvitation(email, selectedRole, sendEmail);
+      await createN8nInvitation(email, selectedRole);
       console.log('Convite enviado!');
     } catch (error) {
       console.error('Erro:', error);

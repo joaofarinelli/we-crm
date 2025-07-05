@@ -113,7 +113,7 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
           time: values.time,
           duration: values.duration,
           company_id: currentUserProfile.company_id,
-          created_by: user.id,
+          organizer_id: user?.id || '',
           status: 'Agendada',
         });
       }
