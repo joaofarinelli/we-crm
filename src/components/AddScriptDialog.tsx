@@ -46,7 +46,9 @@ export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) =>
       description: formData.description || undefined
     });
 
-    setCreatedScriptId(result.id);
+    if (result?.id) {
+      setCreatedScriptId(result.id);
+    }
   };
 
   const handleClose = () => {

@@ -59,11 +59,11 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .eq('id', user.id)
         .single();
 
-      if (profileError) {
-        throw profileError;
+      if (profileError || !profileData) {
+        throw profileError || new Error('Profile not found');
       }
 
-      const userRole = profileData?.roles?.name;
+      const userRole = profileData.roles?.name;
 
       let query = supabase
         .from('appointments')
@@ -109,7 +109,9 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .eq('id', user?.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError || !profileData) {
+        throw profileError || new Error('Profile not found');
+      }
 
       const { data, error } = await supabase
         .from('appointments')

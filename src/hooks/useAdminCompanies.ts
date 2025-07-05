@@ -53,9 +53,9 @@ export const useAdminCompanies = () => {
         .select()
         .single();
 
-      if (error) {
+      if (error || !companyData) {
         console.error('useAdminCompanies: Error creating company:', error);
-        throw error;
+        throw error || new Error('Failed to create company');
       }
 
       toast({
