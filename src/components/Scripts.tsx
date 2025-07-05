@@ -5,12 +5,27 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2, FileText, Eye, Paperclip } from 'lucide-react';
-import { useScripts, Script } from '@/hooks/useScripts';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useRealtimeScripts } from '@/hooks/useRealtimeScripts';
 import { useScriptAttachments } from '@/hooks/useScriptAttachments';
 import { AddScriptDialog } from '@/components/AddScriptDialog';
 import { EditScriptDialog } from '@/components/EditScriptDialog';
 import { ViewScriptDialog } from '@/components/ViewScriptDialog';
+import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { useAuth } from '@/hooks/useAuth';
+
+interface Script {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  description?: string;
+  created_by: string;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const ScriptCard = ({ script, onEdit, onDelete, onView, canEdit }: {
   script: Script;
@@ -93,8 +108,9 @@ const ScriptCard = ({ script, onEdit, onDelete, onView, canEdit }: {
 };
 
 export const Scripts = () => {
-  const { scripts, isLoading, deleteScript } = useScripts();
+  const { scripts, loading, isUpdating } = useRealtimeScripts();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -118,7 +134,26 @@ export const Scripts = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este material?')) {
-      await deleteScript.mutateAsync(id);
+      try {
+        const { error } = await supabase
+          .from('scripts')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        toast({
+          title: "Sucesso",
+          description: "Material excluído com sucesso"
+        });
+      } catch (error) {
+        console.error('Erro ao excluir material:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir o material",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -131,7 +166,7 @@ export const Scripts = () => {
     setViewDialogOpen(true);
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="p-8">
         <div className="text-center">Carregando materiais...</div>
@@ -147,10 +182,13 @@ export const Scripts = () => {
             <h1 className="text-3xl font-bold text-gray-900">Materiais</h1>
             <p className="text-gray-600">Gerencie seus materiais de vendas e atendimento</p>
           </div>
-          <Button onClick={() => setAddDialogOpen(true)} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Novo Material
-          </Button>
+          <div className="flex items-center gap-4">
+            <RealtimeBadge isUpdating={isUpdating} />
+            <Button onClick={() => setAddDialogOpen(true)} className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Novo Material
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-4 mb-6">

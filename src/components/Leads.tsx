@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, Phone, Mail, Upload } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useLeads } from '@/hooks/useLeads';
 import { EditLeadDialog } from './EditLeadDialog';
@@ -24,7 +25,7 @@ export const Leads = () => {
     dateRange: { from: '', to: '' }
   });
   
-  const { leads, loading, deleteLead } = useLeads();
+  const { leads, loading, isUpdating, deleteLead } = useLeads();
 
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
@@ -95,7 +96,9 @@ export const Leads = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
           <p className="text-gray-600 mt-1">Gerencie seus prospects e oportunidades</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-4">
+          <RealtimeBadge isUpdating={isUpdating} />
+          <div className="flex gap-2 w-full sm:w-auto">
           <Button 
             variant="outline"
             onClick={() => setImportDialogOpen(true)}
@@ -111,6 +114,7 @@ export const Leads = () => {
             <Plus className="w-4 h-4 mr-2" />
             Novo Lead
           </Button>
+          </div>
         </div>
       </div>
 
