@@ -10,11 +10,13 @@ interface Contact {
   email: string | null;
   phone: string | null;
   position: string | null;
-  location: string | null;
-  company_id: string | null;
-  last_contact: string | null;
+  notes: string | null;
+  company_name: string | null;
+  source: string | null;
+  status: string | null;
+  assigned_to: string | null;
+  company_id: string;
   created_at: string;
-  created_by: string | null;
   updated_at: string;
   companies?: {
     name: string;
@@ -67,7 +69,7 @@ export const useContacts = () => {
     }
   };
 
-  const createContact = async (contactData: Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'companies'>) => {
+  const createContact = async (contactData: Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'companies'>) => {
     try {
       // Obter o company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
@@ -89,7 +91,6 @@ export const useContacts = () => {
         .from('contacts')
         .insert([{ 
           ...contactData, 
-          created_by: user?.id,
           company_id: profileData.company_id
         }])
         .select(`
@@ -117,7 +118,7 @@ export const useContacts = () => {
     }
   };
 
-  const updateContact = async (id: string, updates: Partial<Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'companies'>>) => {
+  const updateContact = async (id: string, updates: Partial<Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'companies'>>) => {
     try {
       const { data, error } = await supabase
         .from('contacts')

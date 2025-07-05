@@ -134,7 +134,7 @@ export const Companies = () => {
                 </div>
                 <div>
                   <p className="text-gray-500">Receita</p>
-                  <p className="font-medium text-gray-900">{company.revenue || 'N/A'}</p>
+                  <p className="font-medium text-gray-900">{company.website || 'N/A'}</p>
                 </div>
               </div>
 

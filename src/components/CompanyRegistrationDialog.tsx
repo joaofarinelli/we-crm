@@ -82,7 +82,6 @@ export const CompanyRegistrationDialog = ({ open, onOpenChange }: CompanyRegistr
         name: data.name,
         industry: data.industry,
         size: data.size,
-        revenue: data.revenue || null,
         location: data.location,
         website: data.website || null,
         status: 'Prospect',

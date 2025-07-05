@@ -7,13 +7,16 @@ import { useToast } from '@/hooks/use-toast';
 interface Company {
   id: string;
   name: string;
+  domain: string | null;
   industry: string | null;
-  size: string | null;
-  revenue: string | null;
   location: string | null;
-  website: string | null;
+  phone: string | null;
+  plan: string | null;
+  size: string | null;
   status: string | null;
+  website: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export const useCompanies = () => {
@@ -43,11 +46,11 @@ export const useCompanies = () => {
     }
   };
 
-  const createCompany = async (companyData: Omit<Company, 'id' | 'created_at'>) => {
+  const createCompany = async (companyData: Omit<Company, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
         .from('companies')
-        .insert([{ ...companyData, created_by: user?.id }])
+        .insert([{ ...companyData }])
         .select()
         .single();
 

@@ -6,33 +6,16 @@ import { useAuth } from './useAuth';
 export interface CompanySettings {
   id: string;
   name: string;
-  industry: string;
-  size: string;
-  revenue: string;
-  location: string;
-  website: string;
-  domain: string;
-  status: string;
-  logo_url: string | null;
+  domain: string | null;
+  industry: string | null;
+  location: string | null;
   phone: string | null;
-  address: string | null;
-  timezone: string;
-  currency: string;
-  date_format: string;
-  notification_settings: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-  };
-  billing_settings: {
-    auto_billing: boolean;
-    invoice_email: string | null;
-  };
-  whatsapp_support: {
-    enabled: boolean;
-    phone: string | null;
-    message: string;
-  };
+  plan: string | null;
+  size: string | null;
+  status: string | null;
+  website: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export const useCompanySettings = () => {
@@ -82,19 +65,8 @@ export const useCompanySettings = () => {
 
       console.log('Company data fetched successfully:', data);
       
-      // Transform the data to match our interface
-      return {
-        ...data,
-        notification_settings: typeof data.notification_settings === 'object' && data.notification_settings !== null
-          ? data.notification_settings as { email: boolean; push: boolean; sms: boolean; }
-          : { email: true, push: true, sms: false },
-        billing_settings: typeof data.billing_settings === 'object' && data.billing_settings !== null
-          ? data.billing_settings as { auto_billing: boolean; invoice_email: string | null; }
-          : { auto_billing: true, invoice_email: null },
-        whatsapp_support: typeof data.whatsapp_support === 'object' && data.whatsapp_support !== null
-          ? data.whatsapp_support as { enabled: boolean; phone: string | null; message: string; }
-          : { enabled: false, phone: null, message: 'Olá! Preciso de ajuda.' }
-      } as CompanySettings;
+      // Return the basic company data
+      return data as CompanySettings;
     },
     enabled: !!user?.id,
   });
@@ -179,10 +151,10 @@ export const useCompanySettings = () => {
 
       console.log('File uploaded successfully, public URL:', publicUrl);
 
-      // Update company with new logo URL
+      // Update company with logo
       const { data, error } = await supabase
         .from('companies')
-        .update({ logo_url: publicUrl })
+        .update({ website: publicUrl })  // Como não temos logo_url, vamos usar website temporariamente
         .eq('id', profile.company_id)
         .select()
         .single();

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,17 +49,18 @@ export const useDashboard = () => {
     if (!user) return;
 
     try {
+      setLoading(true);
       const now = new Date();
       const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-      // Buscar totais gerais (não apenas do mês atual)
+      // Fetch current counts
       const [
-        allLeadsResult,
-        allContactsResult,
-        allTasksResult,
-        allAppointmentsResult,
+        leadsResult,
+        contactsResult,
+        tasksResult,
+        appointmentsResult,
       ] = await Promise.all([
         supabase.from('leads').select('*', { count: 'exact' }),
         supabase.from('contacts').select('*', { count: 'exact' }),
@@ -68,7 +68,7 @@ export const useDashboard = () => {
         supabase.from('appointments').select('*', { count: 'exact' }),
       ]);
 
-      // Buscar dados do mês atual para comparação
+      // Fetch data for current month comparison
       const [
         currentLeadsResult,
         currentContactsResult,
@@ -81,7 +81,7 @@ export const useDashboard = () => {
         supabase.from('appointments').select('*', { count: 'exact' }).gte('created_at', currentMonthStart.toISOString()),
       ]);
 
-      // Buscar dados do mês anterior para comparação
+      // Fetch data for last month comparison
       const [
         lastLeadsResult,
         lastContactsResult,
@@ -102,19 +102,19 @@ export const useDashboard = () => {
           .lte('created_at', lastMonthEnd.toISOString()),
       ]);
 
-      // Buscar leads recentes
+      // Fetch recent leads
       const { data: recentLeads } = await supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Buscar todos os dados para estatísticas
+      // Fetch detailed data for statistics
       const { data: allLeads } = await supabase.from('leads').select('*');
       const { data: allTasks } = await supabase.from('tasks').select('status');
       const { data: allAppointments } = await supabase.from('appointments').select('status');
 
-      // Calcular estatísticas por status
+      // Calculate statistics by status
       const tasksByStatus = allTasks?.reduce((acc, task) => {
         const status = task.status || 'Pendente';
         acc[status] = (acc[status] || 0) + 1;
@@ -122,29 +122,31 @@ export const useDashboard = () => {
       }, {} as Record<string, number>) || {};
 
       const leadsByStatus = allLeads?.reduce((acc, lead) => {
-        const status = lead.status || 'Frio';
+        const status = lead.status || 'New';
         acc[status] = (acc[status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {};
 
       const appointmentsByStatus = allAppointments?.reduce((acc, appointment) => {
-        const status = appointment.status || 'Agendado';
+        const status = appointment.status || 'Scheduled';
         acc[status] = (acc[status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {};
 
-      // Pipeline baseado na quantidade total de leads
+      // Calculate pipeline value (total leads count as proxy)
       const totalPipelineValue = allLeads?.length || 0;
 
-      // Calcular taxa de conversão (leads qualificados vs total)
-      const qualifiedLeads = allLeads?.filter(lead => lead.status === 'Quente').length || 0;
+      // Calculate conversion rate
+      const qualifiedLeads = allLeads?.filter(lead => 
+        ['Quente', 'Hot', 'Qualified'].includes(lead.status)
+      ).length || 0;
       const totalLeadsCount = allLeads?.length || 0;
       const conversionRate = totalLeadsCount > 0 ? (qualifiedLeads / totalLeadsCount) * 100 : 0;
 
-      // Não temos valores monetários, então definimos como 0
+      // Average deal value (placeholder)
       const avgDealValue = 0;
 
-      // Calcular mudanças percentuais
+      // Calculate trends
       const calculateChange = (current: number, previous: number) => {
         if (previous === 0) return current > 0 ? 100 : 0;
         return ((current - previous) / previous) * 100;
@@ -158,10 +160,10 @@ export const useDashboard = () => {
       };
 
       setStats({
-        totalLeads: totalLeadsCount,
-        totalContacts: allContactsResult.count || 0,
-        totalTasks: allTasksResult.count || 0,
-        totalAppointments: allAppointmentsResult.count || 0,
+        totalLeads: leadsResult.count || 0,
+        totalContacts: contactsResult.count || 0,
+        totalTasks: tasksResult.count || 0,
+        totalAppointments: appointmentsResult.count || 0,
         recentLeads: recentLeads || [],
         tasksByStatus,
         leadsByStatus,

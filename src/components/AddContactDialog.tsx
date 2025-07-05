@@ -36,9 +36,12 @@ export const AddContactDialog = ({ open, onOpenChange }: AddContactDialogProps) 
       email: formData.email || null,
       phone: formData.phone || null,
       position: formData.position || null,
-      location: formData.location || null,
-      company_id: null, // Will be set by the hook
-      last_contact: formData.last_contact || null
+      notes: formData.notes || null,
+      company_name: formData.company_name || null,
+      source: formData.source || null,
+      status: 'Ativo',
+      assigned_to: null,
+      company_id: ''
     });
 
     // Reset form
