@@ -9,6 +9,83 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointment_records: {
+        Row: {
+          appointment_id: string
+          company_id: string
+          created_at: string
+          created_by: string
+          end_time: string
+          id: string
+          next_steps: string | null
+          notes: string | null
+          objections: string | null
+          outcome: string | null
+          start_time: string
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          end_time: string
+          id?: string
+          next_steps?: string | null
+          notes?: string | null
+          objections?: string | null
+          outcome?: string | null
+          start_time: string
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          end_time?: string
+          id?: string
+          next_steps?: string | null
+          notes?: string | null
+          objections?: string | null
+          outcome?: string | null
+          start_time?: string
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_records_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           assigned_to: string
@@ -61,6 +138,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
             referencedColumns: ["id"]
           },
           {
@@ -131,6 +215,105 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_ups: {
+        Row: {
+          appointment_id: string
+          appointment_record_id: string | null
+          channel: string
+          company_id: string
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          message_sent: string | null
+          notes: string | null
+          response_date: string | null
+          response_received: string | null
+          result: string | null
+          scheduled_date: string
+          scheduled_time: string
+          sequence_number: number
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          appointment_record_id?: string | null
+          channel: string
+          company_id: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          message_sent?: string | null
+          notes?: string | null
+          response_date?: string | null
+          response_received?: string | null
+          result?: string | null
+          scheduled_date: string
+          scheduled_time: string
+          sequence_number?: number
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          appointment_record_id?: string | null
+          channel?: string
+          company_id?: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          message_sent?: string | null
+          notes?: string | null
+          response_date?: string | null
+          response_received?: string | null
+          result?: string | null
+          scheduled_date?: string
+          scheduled_time?: string
+          sequence_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_appointment_record_id_fkey"
+            columns: ["appointment_record_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_to: string | null
@@ -180,6 +363,13 @@ export type Database = {
             foreignKeyName: "leads_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -214,6 +404,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_company_id_fkey"
             columns: ["company_id"]
@@ -266,6 +463,13 @@ export type Database = {
             foreignKeyName: "roles_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -310,6 +514,13 @@ export type Database = {
             foreignKeyName: "scripts_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scripts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -324,10 +535,32 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_companies_view: {
+        Row: {
+          appointments_count: number | null
+          created_at: string | null
+          domain: string | null
+          id: string | null
+          industry: string | null
+          leads_count: number | null
+          location: string | null
+          name: string | null
+          phone: string | null
+          plan: string | null
+          size: string | null
+          status: string | null
+          updated_at: string | null
+          user_count: number | null
+          website: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
