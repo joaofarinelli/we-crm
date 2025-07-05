@@ -17,7 +17,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { TagSelector } from './TagSelector';
 import { useLeads } from '@/hooks/useLeads';
+import { useLeadTagAssignments } from '@/hooks/useLeadTagAssignments';
 
 interface Lead {
   id: string;
@@ -52,13 +54,16 @@ const LEAD_SOURCES = [
 
 export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
   const { updateLead } = useLeads();
+  const { assignTagsToLead, getLeadTags } = useLeadTagAssignments();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     status: 'Frio',
-    source: '' as string
+    source: '' as string,
+    tags: [] as Array<{ id: string; name: string; color: string }>
   });
+  const [loadingTags, setLoadingTags] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -67,10 +72,26 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         email: lead.email || '',
         phone: lead.phone || '',
         status: lead.status || 'Frio',
-        source: lead.source || ''
+        source: lead.source || '',
+        tags: []
       });
+      
+      // Carregar tags do lead
+      const loadTags = async () => {
+        setLoadingTags(true);
+        try {
+          const leadTags = await getLeadTags(lead.id);
+          setFormData(prev => ({ ...prev, tags: leadTags }));
+        } catch (error) {
+          console.error('Erro ao carregar tags do lead:', error);
+        } finally {
+          setLoadingTags(false);
+        }
+      };
+      
+      loadTags();
     }
-  }, [lead]);
+  }, [lead, getLeadTags]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +104,9 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       status: formData.status,
       source: formData.source || null
     });
+
+    // Atualizar tags do lead
+    await assignTagsToLead(lead.id, formData.tags.map(tag => tag.id));
 
     onOpenChange(false);
   };
@@ -154,6 +178,19 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            {loadingTags ? (
+              <div className="text-sm text-muted-foreground">Carregando tags...</div>
+            ) : (
+              <TagSelector
+                selectedTags={formData.tags}
+                onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                placeholder="Selecionar tags..."
+              />
+            )}
           </div>
           
           <DialogFooter>

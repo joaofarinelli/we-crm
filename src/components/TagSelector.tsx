@@ -3,7 +3,7 @@ import { Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { TagBadge } from './TagBadge';
 import { useLeadTags } from '@/hooks/useLeadTags';
 import { cn } from '@/lib/utils';
@@ -95,51 +95,53 @@ export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Se
               value={searchValue}
               onValueChange={setSearchValue}
             />
-            <CommandEmpty>
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground mb-2">Nenhuma tag encontrada</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCreateForm(true)}
-                  className="gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Criar nova tag
-                </Button>
-              </div>
-            </CommandEmpty>
-            
-            {!showCreateForm && (
-              <CommandGroup>
-                {filteredTags.map((tag) => (
-                  <CommandItem
-                    key={tag.id}
-                    onSelect={() => handleToggleTag(tag)}
-                    className="flex items-center gap-2"
+            <CommandList>
+              <CommandEmpty>
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground mb-2">Nenhuma tag encontrada</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCreateForm(true)}
+                    className="gap-2"
                   >
-                    <div
-                      className="w-3 h-3 rounded-full border"
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    <span className="flex-1">{tag.name}</span>
-                    <Check
-                      className={cn(
-                        "w-4 h-4",
-                        selectedTags.some(t => t.id === tag.id) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-                
-                {filteredTags.length > 0 && (
-                  <CommandItem onSelect={() => setShowCreateForm(true)} className="border-t">
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-4 h-4" />
                     Criar nova tag
-                  </CommandItem>
-                )}
-              </CommandGroup>
-            )}
+                  </Button>
+                </div>
+              </CommandEmpty>
+              
+              {!showCreateForm && (
+                <CommandGroup>
+                  {filteredTags.map((tag) => (
+                    <CommandItem
+                      key={tag.id}
+                      onSelect={() => handleToggleTag(tag)}
+                      className="flex items-center gap-2"
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full border"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      <span className="flex-1">{tag.name}</span>
+                      <Check
+                        className={cn(
+                          "w-4 h-4",
+                          selectedTags.some(t => t.id === tag.id) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                  
+                  {filteredTags.length > 0 && (
+                    <CommandItem onSelect={() => setShowCreateForm(true)} className="border-t">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Criar nova tag
+                    </CommandItem>
+                  )}
+                </CommandGroup>
+              )}
+            </CommandList>
             
             {showCreateForm && (
               <div className="p-3 border-t">
