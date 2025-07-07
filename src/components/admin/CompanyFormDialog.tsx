@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, Building2, Users, Calendar, MapPin, Globe, Phone, MessageSquare, Settings, BarChart3 } from 'lucide-react';
 import { useAdminCompanies } from '@/hooks/useAdminCompanies';
 import { useToast } from '@/hooks/use-toast';
+import { AdminUserRoleManagement } from './AdminUserRoleManagement';
 
 const companySchema = z.object({
   name: z.string().min(2, 'Nome da empresa deve ter pelo menos 2 caracteres'),
@@ -256,7 +257,7 @@ export const CompanyFormDialog = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Tabs defaultValue="basic" className="w-full">
               <div className="overflow-x-auto">
-                <TabsList className="grid w-full grid-cols-4 min-w-[400px]">
+                <TabsList className={`grid w-full ${isEditing ? 'grid-cols-5 min-w-[500px]' : 'grid-cols-3 min-w-[300px]'}`}>
                   <TabsTrigger value="basic" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                     <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">Básico</span>
@@ -273,11 +274,18 @@ export const CompanyFormDialog = ({
                     <span className="sm:hidden">WA</span>
                   </TabsTrigger>
                   {isEditing && (
-                    <TabsTrigger value="stats" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                      <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Estatísticas</span>
-                      <span className="sm:hidden">Stats</span>
-                    </TabsTrigger>
+                    <>
+                      <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Usuários & Cargos</span>
+                        <span className="sm:hidden">Users</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="stats" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                        <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Estatísticas</span>
+                        <span className="sm:hidden">Stats</span>
+                      </TabsTrigger>
+                    </>
                   )}
                 </TabsList>
               </div>
@@ -708,6 +716,13 @@ export const CompanyFormDialog = ({
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              {/* Aba Usuários & Cargos - Apenas para Edição */}
+              {isEditing && company && (
+                <TabsContent value="users" className="space-y-4">
+                  <AdminUserRoleManagement companyId={company.id} companyName={company.name} />
+                </TabsContent>
+              )}
 
               {/* Aba Estatísticas - Apenas para Edição */}
               {isEditing && company && (
