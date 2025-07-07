@@ -119,6 +119,42 @@ export const useProfiles = () => {
     }
   };
 
+  const deleteProfile = async (id: string) => {
+    try {
+      // Verificar se não está tentando deletar a si mesmo
+      if (id === user?.id) {
+        toast({
+          title: "Erro",
+          description: "Você não pode deletar seu próprio perfil",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Atualizar estado local removendo o perfil deletado
+      setProfiles(prev => prev.filter(profile => profile.id !== id));
+      
+      toast({
+        title: "Sucesso",
+        description: "Usuário removido com sucesso"
+      });
+    } catch (error) {
+      console.error('Erro ao deletar perfil:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o usuário",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchProfiles();
@@ -129,6 +165,7 @@ export const useProfiles = () => {
     profiles,
     loading,
     updateProfile,
+    deleteProfile,
     refetch: fetchProfiles
   };
 };
