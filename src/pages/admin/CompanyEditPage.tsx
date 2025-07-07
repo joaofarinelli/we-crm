@@ -14,6 +14,8 @@ import { useAllCompanies } from '@/hooks/useAllCompanies';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AdminUserRoleManagement } from '@/components/admin/AdminUserRoleManagement';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminMobileSidebar } from '@/components/admin/AdminMobileSidebar';
 
 // Import form components from the original dialog
 import {
@@ -22,6 +24,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
@@ -33,9 +36,10 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { MapPin, Globe, Phone, Upload } from 'lucide-react';
+import { MapPin, Globe, Phone, Upload, Clock, DollarSign, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRef } from 'react';
+import { Switch } from '@/components/ui/switch';
 
 const companySchema = z.object({
   name: z.string().min(2, 'Nome da empresa deve ter pelo menos 2 caracteres'),
@@ -302,66 +306,76 @@ export const CompanyEditPage = () => {
     );
   }
 
+  const handleBackToCrm = () => {
+    navigate('/admin?tab=companies');
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin?tab=companies')}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Voltar</span>
-              </Button>
-              <div className="text-sm text-gray-500">
-                Admin &gt; Empresas &gt; {company.name}
-              </div>
-            </div>
-            <Button onClick={form.handleSubmit(onSubmit)} disabled={loading}>
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Alterações
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Company Header */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={company.logo_url || ''} />
-                <AvatarFallback className="text-lg">
-                  <Building2 className="h-8 w-8" />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{company.name}</h1>
-                <p className="text-gray-600">{company.domain || 'Sem domínio definido'}</p>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Badge className={getStatusColor(company.status)}>
-                {company.status || 'Prospect'}
-              </Badge>
-              <Badge className={getPlanColor(company.plan)}>
-                {company.plan || 'Basic'}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-background flex">
+      {/* Admin Sidebar */}
+      <AdminSidebar activeTab="companies" setActiveTab={() => {}} onBackToCrm={handleBackToCrm} />
+      <AdminMobileSidebar activeTab="companies" setActiveTab={() => {}} onBackToCrm={handleBackToCrm} />
+      
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <div className="border-b bg-white">
+          <div className="px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/admin?tab=companies')}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Voltar</span>
+                </Button>
+                <div className="text-sm text-gray-500">
+                  Admin &gt; Empresas &gt; {company.name}
+                </div>
+              </div>
+              <Button onClick={form.handleSubmit(onSubmit)} disabled={loading}>
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Company Header */}
+        <div className="bg-white border-b">
+          <div className="px-4 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={company.logo_url || ''} />
+                  <AvatarFallback className="text-lg">
+                    <Building2 className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{company.name}</h1>
+                  <p className="text-gray-600">{company.domain || 'Sem domínio definido'}</p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Badge className={getStatusColor(company.status)}>
+                  {company.status || 'Prospect'}
+                </Badge>
+                <Badge className={getPlanColor(company.plan)}>
+                  {company.plan || 'Basic'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 px-4 py-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="basic" className="flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
@@ -616,35 +630,284 @@ export const CompanyEditPage = () => {
 
               {/* Other tabs would be implemented here similarly */}
               <TabsContent value="settings">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Configurações do Sistema</CardTitle>
-                    <CardDescription>
-                      Configurações técnicas e preferências da empresa
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-gray-500">
-                      Configurações em desenvolvimento...
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Clock className="w-5 h-5" />
+                        Configurações Regionais
+                      </CardTitle>
+                      <CardDescription>
+                        Configurações de timezone, moeda e formato de data
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="timezone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Timezone</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o timezone" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="America/Sao_Paulo">São Paulo (GMT-3)</SelectItem>
+                                  <SelectItem value="America/Manaus">Manaus (GMT-4)</SelectItem>
+                                  <SelectItem value="America/Rio_Branco">Rio Branco (GMT-5)</SelectItem>
+                                  <SelectItem value="America/Noronha">Fernando de Noronha (GMT-2)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="currency"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2">
+                                <DollarSign className="w-4 h-4" />
+                                Moeda
+                              </FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a moeda" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="BRL">Real (R$)</SelectItem>
+                                  <SelectItem value="USD">Dólar ($)</SelectItem>
+                                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="date_format"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4" />
+                                Formato de Data
+                              </FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o formato" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Preferências de Notificação</CardTitle>
+                      <CardDescription>
+                        Configure como a empresa receberá notificações
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="email_notifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Notificações por Email</FormLabel>
+                                <FormDescription>
+                                  Receber notificações importantes por email
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="whatsapp_notifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Notificações por WhatsApp</FormLabel>
+                                <FormDescription>
+                                  Receber notificações via WhatsApp Business
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
 
               <TabsContent value="whatsapp">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Configurações WhatsApp</CardTitle>
-                    <CardDescription>
-                      Configure a integração com WhatsApp
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-gray-500">
-                      Configurações WhatsApp em desenvolvimento...
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5" />
+                        Configurações WhatsApp Business
+                      </CardTitle>
+                      <CardDescription>
+                        Configure a integração com WhatsApp para suporte e notificações
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Toggle Principal */}
+                      <FormField
+                        control={form.control}
+                        name="whatsapp_enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Ativar WhatsApp Business</FormLabel>
+                              <FormDescription>
+                                Habilita o botão de WhatsApp e notificações via WhatsApp
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Configurações do WhatsApp (aparecem apenas se ativado) */}
+                      {form.watch('whatsapp_enabled') && (
+                        <div className="space-y-6 p-4 border rounded-lg bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                              control={form.control}
+                              name="whatsapp_phone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Número do WhatsApp *</FormLabel>
+                                  <div className="relative">
+                                    <Phone className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                                    <Input 
+                                      placeholder="(11) 99999-9999" 
+                                      className="pl-10" 
+                                      {...field}
+                                    />
+                                  </div>
+                                  <FormDescription>
+                                    Número no formato brasileiro com DDD
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Preview do Botão</label>
+                              <div className="p-4 border rounded-lg bg-white">
+                                <div className="flex items-center gap-2 text-green-600">
+                                  <MessageSquare className="w-4 h-4" />
+                                  <span className="text-sm">
+                                    Falar no WhatsApp
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {form.watch('whatsapp_phone') || '(11) 99999-9999'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <FormField
+                            control={form.control}
+                            name="whatsapp_message"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mensagem Padrão</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Digite a mensagem que será enviada automaticamente quando alguém clicar no botão WhatsApp..."
+                                    className="min-h-[100px]"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Esta mensagem aparecerá automaticamente no WhatsApp quando alguém clicar no botão
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Preview da mensagem */}
+                          {form.watch('whatsapp_message') && (
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Preview da Mensagem</label>
+                              <div className="p-4 border rounded-lg bg-green-50 max-w-md">
+                                <div className="bg-white p-3 rounded-lg shadow-sm">
+                                  <p className="text-sm text-gray-800">
+                                    {form.watch('whatsapp_message')}
+                                  </p>
+                                  <span className="text-xs text-gray-500 mt-2 block">
+                                    {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Dicas de uso */}
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2">💡 Dicas de uso:</h4>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li>• Use um número comercial verificado no WhatsApp Business</li>
+                          <li>• Personalize a mensagem para seu tipo de negócio</li>
+                          <li>• Teste o funcionamento antes de publicar</li>
+                          <li>• Monitore as conversas que chegam via site</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
 
               <TabsContent value="stats">
@@ -674,8 +937,9 @@ export const CompanyEditPage = () => {
                 </Card>
               </TabsContent>
             </Tabs>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </div>
     </div>
   );

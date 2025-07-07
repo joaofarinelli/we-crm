@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAdminProfiles } from '@/hooks/useAdminProfiles';
 import { useAdminRoles } from '@/hooks/useAdminRoles';
 import { Edit, Building2, Mail, Crown } from 'lucide-react';
+import { InviteUserDialog } from './InviteUserDialog';
 import {
   Dialog,
   DialogContent,
@@ -79,6 +80,14 @@ export const AdminUserManagement = ({ companyId, companyName }: AdminUserManagem
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Usuários da Empresa</h3>
+        <InviteUserDialog 
+          companyId={companyId} 
+          companyName={companyName} 
+          onSuccess={() => window.location.reload()} 
+        />
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {profiles.map((profile) => (
           <Card key={profile.id} className="hover:shadow-lg transition-shadow duration-200">
