@@ -1,6 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Building2, 
@@ -18,6 +19,8 @@ interface AdminSidebarProps {
 }
 
 export const AdminSidebar = ({ activeTab, setActiveTab, onBackToCrm }: AdminSidebarProps) => {
+  const navigate = useNavigate();
+  
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'companies', label: 'Empresas', icon: Building2 },
@@ -25,6 +28,14 @@ export const AdminSidebar = ({ activeTab, setActiveTab, onBackToCrm }: AdminSide
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
+
+  const handleMenuClick = (itemId: string) => {
+    if (setActiveTab && typeof setActiveTab === 'function') {
+      setActiveTab(itemId);
+    } else {
+      navigate(`/admin?tab=${itemId}`);
+    }
+  };
 
   return (
     <div className="hidden md:flex w-64 bg-slate-900 text-white shadow-lg flex-col">
@@ -49,7 +60,7 @@ export const AdminSidebar = ({ activeTab, setActiveTab, onBackToCrm }: AdminSide
                 "w-full justify-start text-white hover:bg-slate-700",
                 activeTab === item.id && "bg-slate-700 text-white"
               )}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleMenuClick(item.id)}
             >
               <Icon className="mr-2 h-4 w-4" />
               {item.label}

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Shield, ArrowLeft } from 'lucide-react';
 import {
   LayoutDashboard,
@@ -20,6 +21,7 @@ interface AdminMobileSidebarProps {
 
 export const AdminMobileSidebar = ({ activeTab, setActiveTab, onBackToCrm }: AdminMobileSidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -30,7 +32,11 @@ export const AdminMobileSidebar = ({ activeTab, setActiveTab, onBackToCrm }: Adm
   ];
 
   const handleItemClick = (tab: string) => {
-    setActiveTab(tab);
+    if (setActiveTab && typeof setActiveTab === 'function') {
+      setActiveTab(tab);
+    } else {
+      navigate(`/admin?tab=${tab}`);
+    }
     setIsOpen(false);
   };
 

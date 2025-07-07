@@ -53,6 +53,12 @@ export const CompaniesManagement = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCompanyForAction, setSelectedCompanyForAction] = useState<{ id: string; name: string } | null>(null);
 
+  // Debug logs
+  console.log('CompaniesManagement - companies:', companies);
+  console.log('CompaniesManagement - loading:', loading);
+  console.log('CompaniesManagement - deactivateCompany:', typeof deactivateCompany);
+  console.log('CompaniesManagement - deleteCompany:', typeof deleteCompany);
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
