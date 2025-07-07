@@ -35,8 +35,8 @@ export const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUser
       setFormData({
         email: user.email || '',
         full_name: user.full_name || '',
-        company_id: user.company_id || '',
-        role_id: user.role_id || ''
+        company_id: user.company_id || 'none',
+        role_id: user.role_id || 'none'
       });
     }
   }, [user]);
@@ -48,7 +48,14 @@ export const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUser
 
     setLoading(true);
     try {
-      await updateProfile(user.id, formData);
+      // Converter "none" de volta para valores vazios antes de enviar
+      const dataToSend = {
+        ...formData,
+        company_id: formData.company_id === 'none' ? null : formData.company_id,
+        role_id: formData.role_id === 'none' ? null : formData.role_id
+      };
+      
+      await updateProfile(user.id, dataToSend);
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -99,7 +106,7 @@ export const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUser
                 <SelectValue placeholder="Selecione uma empresa" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem empresa</SelectItem>
+                <SelectItem value="none">Sem empresa</SelectItem>
                 {companies.map(company => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
@@ -119,7 +126,7 @@ export const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUser
                 <SelectValue placeholder="Selecione um cargo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem cargo</SelectItem>
+                <SelectItem value="none">Sem cargo</SelectItem>
                 {roles.map(role => (
                   <SelectItem key={role.id} value={role.id}>
                     {role.name} {role.is_system_role && '(Sistema)'}

@@ -317,6 +317,95 @@ export type Database = {
           },
         ]
       }
+      courses: {
+        Row: {
+          category: string | null
+          created_at: string
+          duration: string | null
+          id: string
+          institution_id: string
+          name: string
+          price: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          institution_id: string
+          name: string
+          price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          institution_id?: string
+          name?: string
+          price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          semester: string
+          status: string
+          student_id: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          semester: string
+          status?: string
+          student_id: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          semester?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follow_ups: {
         Row: {
           appointment_id: string
@@ -415,6 +504,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      institutions: {
+        Row: {
+          address: string | null
+          code: string
+          created_at: string
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       lead_tag_assignments: {
         Row: {
@@ -795,6 +923,60 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          enrollment_id: string
+          id: string
+          payment_date: string | null
+          status: string
+          student_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          enrollment_id: string
+          id?: string
+          payment_date?: string | null
+          status?: string
+          student_id: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          enrollment_id?: string
+          id?: string
+          payment_date?: string | null
+          status?: string
+          student_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pipeline_columns: {
         Row: {
           color: string | null
@@ -994,6 +1176,120 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_proof_url: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
+          birth_date: string | null
+          course_id: string | null
+          cpf: string
+          cpf_document_url: string | null
+          created_at: string
+          documents_status: Json | null
+          email: string
+          enrollment_date: string
+          enrollment_number: string
+          id: string
+          institution_id: string
+          name: string
+          payment_proof_url: string | null
+          phone: string | null
+          photo_url: string | null
+          rg_document_url: string | null
+          rg_issuer: string | null
+          rg_number: string | null
+          rg_state: string | null
+          school_certificate_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_proof_url?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
+          course_id?: string | null
+          cpf: string
+          cpf_document_url?: string | null
+          created_at?: string
+          documents_status?: Json | null
+          email: string
+          enrollment_date?: string
+          enrollment_number: string
+          id?: string
+          institution_id: string
+          name: string
+          payment_proof_url?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          rg_document_url?: string | null
+          rg_issuer?: string | null
+          rg_number?: string | null
+          rg_state?: string | null
+          school_certificate_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_proof_url?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
+          course_id?: string | null
+          cpf?: string
+          cpf_document_url?: string | null
+          created_at?: string
+          documents_status?: Json | null
+          email?: string
+          enrollment_date?: string
+          enrollment_number?: string
+          id?: string
+          institution_id?: string
+          name?: string
+          payment_proof_url?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          rg_document_url?: string | null
+          rg_issuer?: string | null
+          rg_number?: string | null
+          rg_state?: string | null
+          school_certificate_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
         ]
