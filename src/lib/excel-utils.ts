@@ -93,6 +93,7 @@ export const parseExcel = (file: File): Promise<any[]> => {
             else if (normalized?.includes('telefone') || normalized?.includes('phone') || normalized?.includes('celular')) key = 'telefone';
             else if (normalized?.includes('status')) key = 'status';
             else if (normalized?.includes('origem') || normalized?.includes('source')) key = 'origem';
+            else if (normalized?.includes('parceiro') || normalized?.includes('partner')) key = 'parceiro';
             
             obj[key] = normalizeExcelValue(row[index]);
           });
@@ -135,8 +136,9 @@ export const generateExcelTemplate = (templateData: { headers: string[], sampleD
     ['2. Nome é obrigatório'],
     ['3. Email deve ter formato válido (exemplo@dominio.com)'],
     ['4. Status pode ser: Quente, Morno, Frio'],
-    ['5. Origem pode ser: Instagram, Facebook, WhatsApp, Site, etc.'],
-    ['6. Salve o arquivo e faça a importação'],
+    ['5. Origem pode ser: Instagram, Facebook, WhatsApp, Site, Parceiro, etc.'],
+    ['6. Parceiro: Nome exato do parceiro (deve existir no sistema)'],
+    ['7. Salve o arquivo e faça a importação'],
     [''],
     ['COLUNAS OBRIGATÓRIAS:'],
     ['- Nome: Nome completo do lead'],
@@ -145,7 +147,8 @@ export const generateExcelTemplate = (templateData: { headers: string[], sampleD
     ['- Email: Email de contato'],
     ['- Telefone: Telefone com DDD'],
     ['- Status: Status do lead (padrão: Frio)'],
-    ['- Origem: Origem do lead']
+    ['- Origem: Origem do lead'],
+    ['- Parceiro: Nome do parceiro (se origem for "Parceiro")']
   ];
   
   const instructionsSheet = XLSX.utils.aoa_to_sheet(instructionsData);

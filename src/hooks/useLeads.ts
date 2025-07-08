@@ -10,9 +10,11 @@ interface Lead {
   phone: string | null;
   status: string | null;
   source: string | null;
+  partner_id: string | null;
   company_id: string;
   created_at: string;
   tags?: Array<{ id: string; name: string; color: string }>;
+  partner?: { id: string; name: string; } | null;
 }
 
 // Global subscription manager to prevent multiple subscriptions
@@ -101,14 +103,15 @@ export const useLeads = () => {
 
       console.log('User company_id:', profileData.company_id);
 
-      // Agora buscar leads apenas da empresa do usuário com suas tags
+      // Agora buscar leads apenas da empresa do usuário com suas tags e parceiro
       const { data, error } = await supabase
         .from('leads')
         .select(`
           *,
           lead_tag_assignments(
             lead_tags(id, name, color)
-          )
+          ),
+          partners(id, name)
         `)
         .eq('company_id', profileData.company_id)
         .order('created_at', { ascending: false });
@@ -118,10 +121,11 @@ export const useLeads = () => {
         throw error;
       }
       
-      // Processar dados para incluir tags
+      // Processar dados para incluir tags e parceiro
       const processedLeads = (data || []).map(lead => ({
         ...lead,
-        tags: lead.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || []
+        tags: lead.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || [],
+        partner: lead.partners || null
       }));
       
       console.log('Fetched leads for company:', processedLeads.length, 'leads');
@@ -397,6 +401,7 @@ export const useLeads = () => {
       telefone?: string;
       status?: string;
       origem?: string;
+      parceiro?: string;
     }>,
     onProgress?: (progress: number) => void
   ) => {
@@ -432,6 +437,12 @@ export const useLeads = () => {
 
       const defaultStatus = firstColumn?.name || 'Frio';
 
+      // Buscar todos os parceiros ativos para matching por nome
+      const { data: partnersData } = await supabase
+        .from('partners')
+        .select('id, name')
+        .eq('status', 'ativo');
+
       let successCount = 0;
       let errorCount = 0;
       const total = csvLeads.length;
@@ -452,15 +463,34 @@ export const useLeads = () => {
         const batch = csvLeads.slice(i, i + batchSize);
         console.log(`Processing batch ${Math.floor(i / batchSize) + 1}: ${batch.length} leads`);
         
-        const leadsToInsert = batch.map(csvLead => ({
-          name: processLeadValue(csvLead.nome),
-          email: processLeadValue(csvLead.email),
-          phone: processLeadValue(csvLead.telefone),
-          status: processLeadValue(csvLead.status) || defaultStatus,
-          source: processLeadValue(csvLead.origem),
-          created_by: user.id,
-          company_id: profileData.company_id
-        }));
+        const leadsToInsert = batch.map(csvLead => {
+          let partnerId = null;
+          let source = processLeadValue(csvLead.origem);
+          
+          // Se há um parceiro especificado, procurar pelo nome
+          if (csvLead.parceiro && processLeadValue(csvLead.parceiro)) {
+            const partnerName = processLeadValue(csvLead.parceiro);
+            const partner = partnersData?.find(p => 
+              p.name.toLowerCase().trim() === partnerName.toLowerCase().trim()
+            );
+            
+            if (partner) {
+              partnerId = partner.id;
+              source = 'Parceiro'; // Definir origem como Parceiro quando há um parceiro
+            }
+          }
+          
+          return {
+            name: processLeadValue(csvLead.nome),
+            email: processLeadValue(csvLead.email),
+            phone: processLeadValue(csvLead.telefone),
+            status: processLeadValue(csvLead.status) || defaultStatus,
+            source: source,
+            partner_id: partnerId,
+            created_by: user.id,
+            company_id: profileData.company_id
+          };
+        });
 
         let retryCount = 0;
         const maxRetries = 3;

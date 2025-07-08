@@ -10,6 +10,7 @@ interface Lead {
   source: string | null;
   created_at: string;
   tags?: Array<{ id: string; name: string; color: string }>;
+  partner?: { id: string; name: string; } | null;
 }
 
 export const useExportLeads = () => {
@@ -56,6 +57,7 @@ export const useExportLeads = () => {
       telefone: lead.phone || '',
       status: lead.status || '',
       origem: lead.source || '',
+      parceiro: lead.partner?.name || '',
       tags: lead.tags?.map(tag => tag.name).join('; ') || '',
       cores_tags: lead.tags?.map(tag => tag.color).join('; ') || '',
       data_criacao: new Date(lead.created_at).toLocaleDateString('pt-BR')
@@ -67,6 +69,7 @@ export const useExportLeads = () => {
       telefone: 'Telefone',
       status: 'Status',
       origem: 'Origem',
+      parceiro: 'Parceiro',
       tags: 'Tags',
       cores_tags: 'Cores das Tags',
       data_criacao: 'Data de Criação'
@@ -93,6 +96,7 @@ export const useExportLeads = () => {
       telefone: lead.phone || '',
       status: lead.status || '',
       origem: lead.source || '',
+      parceiro: lead.partner?.name || '',
       tags: lead.tags?.map(tag => tag.name).join('; ') || '',
       cores_tags: lead.tags?.map(tag => tag.color).join('; ') || '',
       data_criacao: new Date(lead.created_at).toLocaleDateString('pt-BR')
@@ -104,6 +108,7 @@ export const useExportLeads = () => {
       telefone: 'Telefone',
       status: 'Status',
       origem: 'Origem',
+      parceiro: 'Parceiro',
       tags: 'Tags',
       cores_tags: 'Cores das Tags',
       data_criacao: 'Data de Criação'

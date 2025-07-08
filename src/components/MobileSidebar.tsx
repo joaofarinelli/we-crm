@@ -44,6 +44,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'scripts', label: 'Materiais', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
+    { id: 'partners', label: 'Parceiros', icon: Users },
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];

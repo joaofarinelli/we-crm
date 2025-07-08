@@ -631,6 +631,7 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          partner_id: string | null
           phone: string | null
           source: string | null
           status: string | null
@@ -644,6 +645,7 @@ export type Database = {
           email?: string | null
           id?: string
           name: string
+          partner_id?: string | null
           phone?: string | null
           source?: string | null
           status?: string | null
@@ -657,6 +659,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string
+          partner_id?: string | null
           phone?: string | null
           source?: string | null
           status?: string | null
@@ -689,6 +692,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]

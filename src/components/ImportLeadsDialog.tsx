@@ -26,6 +26,7 @@ interface ExcelLead {
   telefone?: string;
   status?: string;
   origem?: string;
+  parceiro?: string;
 }
 
 interface ValidationError {
@@ -134,10 +135,10 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
 
   const downloadTemplate = () => {
     const templateData = {
-      headers: ['nome', 'email', 'telefone', 'status', 'origem'],
+      headers: ['nome', 'email', 'telefone', 'status', 'origem', 'parceiro'],
       sampleData: [
-        ['João Silva', 'joao@email.com', '(11) 99999-9999', 'Quente', 'Instagram'],
-        ['Maria Santos', 'maria@email.com', '(11) 88888-8888', 'Morno', 'Facebook']
+        ['João Silva', 'joao@email.com', '(11) 99999-9999', 'Quente', 'Parceiro', 'João Farinelli'],
+        ['Maria Santos', 'maria@email.com', '(11) 88888-8888', 'Morno', 'Instagram', '']
       ]
     };
     
@@ -193,7 +194,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
 
             <div className="flex items-center justify-between text-sm">
               <div className="text-muted-foreground">
-                Formato esperado: nome, email, telefone, status, origem
+                Formato esperado: nome, email, telefone, status, origem, parceiro
               </div>
               <Button
                 variant="outline"
@@ -249,6 +250,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
                     <th className="p-2 text-left">Telefone</th>
                     <th className="p-2 text-left">Status</th>
                     <th className="p-2 text-left">Origem</th>
+                    <th className="p-2 text-left">Parceiro</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,6 +261,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
                       <td className="p-2">{lead.telefone || '-'}</td>
                       <td className="p-2">{lead.status || 'Frio'}</td>
                       <td className="p-2">{lead.origem || '-'}</td>
+                      <td className="p-2">{lead.parceiro || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

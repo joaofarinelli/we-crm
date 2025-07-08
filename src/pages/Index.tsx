@@ -13,6 +13,7 @@ import { Scripts } from '@/components/Scripts';
 import { Reports } from '@/components/Reports';
 import { UserManagement } from '@/components/UserManagement';
 import { Settings } from '@/components/Settings';
+import { Partners } from '@/components/Partners';
 import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -51,6 +52,8 @@ const Index = () => {
         return <Scripts />;
       case 'reports':
         return <Reports />;
+      case 'partners':
+        return <Partners />;
       case 'users':
         return <UserManagement />;
       case 'settings':

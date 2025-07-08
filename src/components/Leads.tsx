@@ -186,6 +186,9 @@ export const Leads = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="text-left sm:text-right">
                   <p className="text-sm text-gray-500">Origem: {lead.source || 'N/A'}</p>
+                  {lead.partner && (
+                    <p className="text-sm text-blue-600">Parceiro: {lead.partner.name}</p>
+                  )}
                   <p className="text-xs text-gray-400 mt-1">Criado: {formatDate(lead.created_at)}</p>
                 </div>
                 
