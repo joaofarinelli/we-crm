@@ -13,6 +13,7 @@ import { ViewAppointmentDialog } from '@/components/ViewAppointmentDialog';
 import { PipelineStatusIndicator } from '@/components/PipelineStatusIndicator';
 import { PipelineColumnManager } from '@/components/PipelineColumnManager';
 import { Appointment } from '@/types/appointment';
+import { TagBadge } from '@/components/TagBadge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -233,13 +234,27 @@ export const Kanban = () => {
                                     </div>
                                   )}
 
-                                  {appointment.leads && (
-                                    <div className="flex items-center gap-2">
-                                      <User className="w-3 h-3" />
-                                      Lead: {appointment.leads.name}
-                                    </div>
-                                  )}
-                                </div>
+                                   {appointment.leads && (
+                                     <div className="flex items-center gap-2">
+                                       <User className="w-3 h-3" />
+                                       Lead: {appointment.leads.name}
+                                     </div>
+                                   )}
+                                 </div>
+
+                                 {/* Tags do Lead */}
+                                 {appointment.leads?.tags && appointment.leads.tags.length > 0 && (
+                                   <div className="flex flex-wrap gap-1 mt-2">
+                                     {appointment.leads.tags.map((tag) => (
+                                       <TagBadge
+                                         key={tag.id}
+                                         name={tag.name}
+                                         color={tag.color}
+                                         size="sm"
+                                       />
+                                     ))}
+                                   </div>
+                                 )}
 
                                 {appointment.description && (
                                   <p className="text-xs text-gray-500 line-clamp-2">

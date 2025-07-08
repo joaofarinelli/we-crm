@@ -18,6 +18,11 @@ export interface Appointment {
   leads?: {
     name: string;
     phone?: string | null;
+    tags?: Array<{
+      id: string;
+      name: string;
+      color: string;
+    }>;
   };
   assigned_closer?: {
     full_name: string | null;

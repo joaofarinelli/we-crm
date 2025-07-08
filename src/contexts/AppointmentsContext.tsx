@@ -71,7 +71,10 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
           *,
           leads (
             name,
-            phone
+            phone,
+            lead_tag_assignments(
+              lead_tags(id, name, color)
+            )
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -89,7 +92,17 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
 
       if (error) throw error;
       
-      setAppointments(data || []);
+      // Processar dados para incluir tags do lead de forma estruturada
+      const processedAppointments = (data || []).map(appointment => ({
+        ...appointment,
+        leads: appointment.leads ? {
+          name: appointment.leads.name,
+          phone: appointment.leads.phone,
+          tags: appointment.leads.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || []
+        } : undefined
+      }));
+      
+      setAppointments(processedAppointments);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
       toast({
@@ -124,7 +137,10 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
           *,
           leads (
             name,
-            phone
+            phone,
+            lead_tag_assignments(
+              lead_tags(id, name, color)
+            )
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -135,13 +151,23 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
 
       if (error) throw error;
       
+      // Processar dados para incluir tags do lead
+      const processedData = data ? {
+        ...data,
+        leads: data.leads ? {
+          name: data.leads.name,
+          phone: data.leads.phone,
+          tags: data.leads.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || []
+        } : undefined
+      } : data;
+      
       toast({
         title: "Sucesso",
         description: "Agendamento criado com sucesso"
       });
       
       // Realtime will handle the update automatically
-      return data;
+      return processedData;
     } catch (error) {
       console.error('Erro ao criar agendamento:', error);
       toast({
@@ -163,7 +189,10 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
           *,
           leads (
             name,
-            phone
+            phone,
+            lead_tag_assignments(
+              lead_tags(id, name, color)
+            )
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -174,13 +203,23 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
 
       if (error) throw error;
       
+      // Processar dados para incluir tags do lead
+      const processedData = data ? {
+        ...data,
+        leads: data.leads ? {
+          name: data.leads.name,
+          phone: data.leads.phone,
+          tags: data.leads.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || []
+        } : undefined
+      } : data;
+      
       toast({
         title: "Sucesso",
         description: "Agendamento atualizado com sucesso"
       });
       
       // Realtime will handle the update automatically
-      return data;
+      return processedData;
     } catch (error) {
       console.error('Erro ao atualizar agendamento:', error);
       toast({
