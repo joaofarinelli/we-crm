@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, Phone, Mail, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, Phone, Mail, Upload, Download } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { ImportLeadsDialog } from './ImportLeadsDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
 import { TagBadge } from './TagBadge';
 import { WhatsAppLeadButton } from './WhatsAppLeadButton';
+import { useExportLeads } from '@/hooks/useExportLeads';
 
 export const Leads = () => {
   const [editingLead, setEditingLead] = useState(null);
@@ -29,6 +30,7 @@ export const Leads = () => {
   });
   
   const { leads, loading, isUpdating, deleteLead, createLead } = useLeads();
+  const { exportFilteredLeads } = useExportLeads();
 
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
@@ -113,6 +115,15 @@ export const Leads = () => {
           >
             <Upload className="w-4 h-4 mr-2" />
             Importar CSV
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => exportFilteredLeads(filteredLeads, filters)}
+            className="flex-1 sm:flex-none"
+            disabled={filteredLeads.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
           </Button>
           <Button 
             className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
