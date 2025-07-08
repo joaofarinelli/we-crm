@@ -70,7 +70,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .select(`
           *,
           leads (
-            name
+            name,
+            phone
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -122,7 +123,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .select(`
           *,
           leads (
-            name
+            name,
+            phone
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,
@@ -160,7 +162,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .select(`
           *,
           leads (
-            name
+            name,
+            phone
           ),
           assigned_closer:profiles!appointments_assigned_to_fkey (
             full_name,

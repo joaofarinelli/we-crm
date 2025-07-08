@@ -1,10 +1,11 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, UserCheck, FileText } from 'lucide-react';
+import { Calendar, Clock, User, UserCheck, FileText, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment } from '@/types/appointment';
+import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 
 interface ViewAppointmentDialogProps {
   open: boolean;
@@ -73,12 +74,30 @@ export const ViewAppointmentDialog = ({ open, onOpenChange, appointment }: ViewA
           </div>
 
           {appointment.leads && (
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="font-medium text-gray-900">Lead</p>
-                <p className="text-gray-600 text-sm">{appointment.leads.name}</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <User className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="font-medium text-gray-900">Lead</p>
+                  <p className="text-gray-600 text-sm">{appointment.leads.name}</p>
+                </div>
               </div>
+              {appointment.leads.phone && (
+                <div className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-gray-500" />
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">Telefone</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-gray-600 text-sm">{appointment.leads.phone}</p>
+                      <WhatsAppLeadButton 
+                        phone={appointment.leads.phone} 
+                        leadName={appointment.leads.name}
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

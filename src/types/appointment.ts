@@ -17,6 +17,7 @@ export interface Appointment {
   meeting_url?: string | null;
   leads?: {
     name: string;
+    phone?: string | null;
   };
   assigned_closer?: {
     full_name: string | null;

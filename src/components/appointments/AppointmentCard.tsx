@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Clock, User, Eye, Edit, Trash2, CheckCircle, MessageSquare, History, MoreVertical } from 'lucide-react';
+import { Calendar, Clock, User, Eye, Edit, Trash2, CheckCircle, MessageSquare, History, MoreVertical, Phone } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import { AddFollowUpDialog } from '@/components/AddFollowUpDialog';
 import { useAppointmentRecords } from '@/hooks/useAppointmentRecords';
 import { useFollowUps } from '@/hooks/useFollowUps';
 import { Appointment } from '@/types/appointment';
+import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -149,9 +150,22 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
             </div>
 
             {appointment.leads?.name && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <User className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate font-medium">{appointment.leads.name}</span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate font-medium">{appointment.leads.name}</span>
+                </div>
+                {appointment.leads.phone && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Phone className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{appointment.leads.phone}</span>
+                    <WhatsAppLeadButton 
+                      phone={appointment.leads.phone} 
+                      leadName={appointment.leads.name}
+                      size="sm"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
