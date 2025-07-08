@@ -11,6 +11,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useLeads } from '@/hooks/useLeads';
 import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
+import { RescheduleAppointmentDialog } from './RescheduleAppointmentDialog';
 
 interface Appointment {
   id: string;
@@ -50,6 +51,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
   const [assignedTo, setAssignedTo] = useState<string>('');
   const [status, setStatus] = useState('Agendado');
   const [loading, setLoading] = useState(false);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
 
   const { updateAppointment } = useAppointments();
   const { leads } = useLeads();
@@ -90,16 +92,21 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
     const result = await updateAppointment(appointment.id, updatedData);
     
     if (result) {
-      onOpenChange(false);
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setDate('');
-      setTime('');
-      setDuration(60);
-      setLeadId('');
-      setAssignedTo('');
-      setStatus('Agendado');
+      // Se status é "Reagendar", abrir dialog de reagendamento
+      if (status === 'Reagendar') {
+        setRescheduleDialogOpen(true);
+      } else {
+        onOpenChange(false);
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setDate('');
+        setTime('');
+        setDuration(60);
+        setLeadId('');
+        setAssignedTo('');
+        setStatus('Agendado');
+      }
     }
 
     setLoading(false);
@@ -233,6 +240,26 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
           </div>
         </form>
       </DialogContent>
+
+      <RescheduleAppointmentDialog
+        open={rescheduleDialogOpen}
+        onOpenChange={(open) => {
+          setRescheduleDialogOpen(open);
+          if (!open) {
+            onOpenChange(false);
+            // Reset form
+            setTitle('');
+            setDescription('');
+            setDate('');
+            setTime('');
+            setDuration(60);
+            setLeadId('');
+            setAssignedTo('');
+            setStatus('Agendado');
+          }
+        }}
+        appointment={appointment}
+      />
     </Dialog>
   );
 };

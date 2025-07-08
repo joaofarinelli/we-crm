@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { useAppointments } from '@/hooks/useAppointments';
 import { Appointment } from '@/types/appointment';
+import { RescheduleAppointmentDialog } from './RescheduleAppointmentDialog';
 
 interface EditAppointmentKanbanDialogProps {
   appointment: Appointment | null;
@@ -22,6 +23,7 @@ interface EditAppointmentKanbanDialogProps {
 
 export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }: EditAppointmentKanbanDialogProps) => {
   const { updateAppointment } = useAppointments();
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -48,7 +50,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
     e.preventDefault();
     if (!appointment) return;
 
-    await updateAppointment(appointment.id, {
+    const result = await updateAppointment(appointment.id, {
       title: formData.title,
       description: formData.description || null,
       date: formData.date,
@@ -57,7 +59,11 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
       status: formData.status
     });
 
-    onOpenChange(false);
+    if (result && formData.status === 'Reagendar') {
+      setRescheduleDialogOpen(true);
+    } else {
+      onOpenChange(false);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -165,6 +171,17 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <RescheduleAppointmentDialog
+        open={rescheduleDialogOpen}
+        onOpenChange={(open) => {
+          setRescheduleDialogOpen(open);
+          if (!open) {
+            onOpenChange(false);
+          }
+        }}
+        appointment={appointment}
+      />
     </Dialog>
   );
 };
