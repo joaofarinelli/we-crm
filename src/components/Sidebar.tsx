@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { useCompanySettings } from "@/hooks/useCompanySettings";
+import { useCurrentCompany } from "@/hooks/useCurrentCompany";
 import { useSaasAdmin } from "@/hooks/useSaasAdmin";
 import { useNavigate } from "react-router-dom";
 import {
@@ -29,7 +29,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { signOut } = useAuth();
-  const { company, isLoading } = useCompanySettings();
+  const { company, loading } = useCurrentCompany();
   const { isSaasAdmin } = useSaasAdmin();
   const navigate = useNavigate();
 
@@ -65,7 +65,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
           </Avatar>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold text-gray-900 truncate">
-              {isLoading ? 'Carregando...' : company?.name || 'CRM System'}
+              {loading ? 'Carregando...' : company?.name || 'CRM System'}
             </h1>
           </div>
         </div>
