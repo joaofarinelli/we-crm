@@ -144,6 +144,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
               <option value="Confirmado">Confirmado</option>
               <option value="Cancelado">Cancelado</option>
               <option value="Realizado">Realizado</option>
+              <option value="Reagendar">Reagendar</option>
             </select>
           </div>
 

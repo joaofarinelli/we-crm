@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppointmentRecords } from '@/hooks/useAppointmentRecords';
+import { RescheduleAppointmentDialog } from './RescheduleAppointmentDialog';
 import { Appointment } from '@/types/appointment';
 
 interface RecordAttendanceDialogProps {
@@ -24,6 +25,7 @@ export const RecordAttendanceDialog = ({ open, onOpenChange, appointment }: Reco
   const [outcome, setOutcome] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
 
   const { createRecord } = useAppointmentRecords();
 
@@ -45,7 +47,12 @@ export const RecordAttendanceDialog = ({ open, onOpenChange, appointment }: Reco
         notes: notes || null
       });
 
-      onOpenChange(false);
+      // If outcome is "Reagendar", open reschedule dialog
+      if (outcome === 'Reagendar') {
+        setRescheduleDialogOpen(true);
+      } else {
+        onOpenChange(false);
+      }
       // Reset form
       setStartTime('');
       setEndTime('');
@@ -171,6 +178,17 @@ export const RecordAttendanceDialog = ({ open, onOpenChange, appointment }: Reco
           </div>
         </form>
       </DialogContent>
+
+      <RescheduleAppointmentDialog
+        open={rescheduleDialogOpen}
+        onOpenChange={(open) => {
+          setRescheduleDialogOpen(open);
+          if (!open) {
+            onOpenChange(false);
+          }
+        }}
+        appointment={appointment}
+      />
     </Dialog>
   );
 };

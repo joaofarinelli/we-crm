@@ -12,6 +12,8 @@ export interface Appointment {
   status: string;
   created_at: string;
   updated_at: string;
+  rescheduled_from_id?: string | null;
+  reschedule_reason?: string | null;
   leads?: {
     name: string;
   };

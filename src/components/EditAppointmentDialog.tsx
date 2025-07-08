@@ -109,7 +109,8 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
     'Agendado',
     'Confirmado', 
     'Realizado',
-    'Cancelado'
+    'Cancelado',
+    'Reagendar'
   ];
 
   return (
