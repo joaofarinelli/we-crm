@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { LeadSelector } from '@/components/LeadSelector';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useLeads } from '@/hooks/useLeads';
 import { useClosers } from '@/hooks/useClosers';
@@ -188,18 +189,12 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
 
           <div className="space-y-2">
             <Label>Lead</Label>
-            <Select value={formData.lead_id} onValueChange={(value) => setFormData(prev => ({ ...prev, lead_id: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um lead" />
-              </SelectTrigger>
-              <SelectContent>
-                {leads.map((lead) => (
-                  <SelectItem key={lead.id} value={lead.id}>
-                    {lead.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <LeadSelector
+              leads={leads}
+              value={formData.lead_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, lead_id: value }))}
+              placeholder="Selecione um lead"
+            />
           </div>
 
           <div className="space-y-2">

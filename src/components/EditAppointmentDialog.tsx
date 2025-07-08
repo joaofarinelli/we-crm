@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LeadSelector } from '@/components/LeadSelector';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useLeads } from '@/hooks/useLeads';
 import { useClosers } from '@/hooks/useClosers';
@@ -196,21 +197,12 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="lead">Lead</Label>
-              <Select 
-                value={leadId || undefined} 
+              <LeadSelector
+                leads={leads}
+                value={leadId || undefined}
                 onValueChange={(value) => setLeadId(value || '')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um lead (opcional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {leads.map((lead) => (
-                    <SelectItem key={lead.id} value={lead.id}>
-                      {lead.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Selecione um lead (opcional)"
+              />
             </div>
 
             <div className="space-y-2">
