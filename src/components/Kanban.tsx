@@ -14,6 +14,7 @@ import { PipelineStatusIndicator } from '@/components/PipelineStatusIndicator';
 import { PipelineColumnManager } from '@/components/PipelineColumnManager';
 import { Appointment } from '@/types/appointment';
 import { TagBadge } from '@/components/TagBadge';
+import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 export const Kanban = () => {
@@ -182,9 +183,16 @@ export const Kanban = () => {
                                     </div>}
 
                                    {appointment.leads && <div className="flex items-center gap-2">
-                                       <User className="w-3 h-3" />
-                                       Lead: {appointment.leads.name}
-                                     </div>}
+                                        <User className="w-3 h-3" />
+                                        <span>Lead: {appointment.leads.name}</span>
+                                        {appointment.leads.phone && (
+                                          <WhatsAppLeadButton 
+                                            phone={appointment.leads.phone} 
+                                            leadName={appointment.leads.name} 
+                                            size="sm" 
+                                          />
+                                        )}
+                                      </div>}
                                  </div>
 
                                  {/* Tags do Lead */}
