@@ -1,11 +1,14 @@
 
 import { useState } from 'react';
-import { Plus, Calendar, Clock, Users, FileText } from 'lucide-react';
+import { Plus, Calendar, Clock, Users, FileText, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 import { useRealtimeMeetings } from '@/hooks/useRealtimeMeetings';
+import { useMeetings } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
 import { MeetingDialog } from './MeetingDialog';
@@ -15,10 +18,13 @@ import { ptBR } from 'date-fns/locale';
 
 export const Meetings = () => {
   const { meetings, loading, isUpdating } = useRealtimeMeetings();
+  const { deleteMeeting } = useMeetings();
   const { user } = useAuth();
   const { profiles } = useProfiles();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
 
   const currentUserProfile = profiles.find(p => p.id === user?.id);
   
@@ -47,6 +53,20 @@ export const Meetings = () => {
         return 'bg-gray-500';
       default:
         return 'bg-gray-500';
+    }
+  };
+
+  const handleDeleteMeeting = (meetingId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMeetingToDelete(meetingId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (meetingToDelete) {
+      deleteMeeting.mutate(meetingToDelete);
+      setDeleteDialogOpen(false);
+      setMeetingToDelete(null);
     }
   };
 
@@ -133,10 +153,32 @@ export const Meetings = () => {
                   </div>
                   
                   <div className="flex flex-col items-end gap-2">
-                    <Button variant="outline" size="sm">
-                      <FileText className="w-4 h-4 mr-1" />
-                      Ver Detalhes
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">
+                        <FileText className="w-4 h-4 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => handleDeleteMeeting(meeting.id, e)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Excluir reunião
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -149,6 +191,26 @@ export const Meetings = () => {
         open={dialogOpen} 
         onOpenChange={setDialogOpen}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir reunião</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta reunião? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
