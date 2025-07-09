@@ -185,9 +185,10 @@ export const useLeadsPipeline = () => {
             setIsUpdating(true);
             
             setTimeout(() => {
-              fetchLeads();
-              setIsUpdating(false);
-            }, 500);
+              fetchLeads().finally(() => {
+                setIsUpdating(false);
+              });
+            }, 200);
           }
         )
         .subscribe();
