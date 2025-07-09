@@ -48,20 +48,39 @@ export const useCompanies = () => {
 
   const createCompany = async (companyData: Omit<Company, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Criando empresa com dados:', companyData);
+      console.log('Usuário logado:', user?.id);
+
       const { data, error } = await supabase
         .from('companies')
         .insert([companyData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro SQL ao criar empresa:', error);
+        throw error;
+      }
 
-      // Se há usuário logado, associar à empresa como admin
-      if (user) {
-        await supabase.rpc('setup_company_admin', {
-          user_id: user.id,
-          company_id: data.id
-        });
+      console.log('Empresa criada:', data);
+
+      // Atualizar o perfil do usuário para associá-lo à empresa
+      if (user && data.id) {
+        console.log('Atualizando perfil do usuário:', user.id, 'para empresa:', data.id);
+        
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ 
+            company_id: data.id 
+          })
+          .eq('id', user.id);
+
+        if (profileError) {
+          console.error('Erro ao atualizar perfil:', profileError);
+          // Não falhar se o perfil não for atualizado, a empresa já foi criada
+        } else {
+          console.log('Perfil atualizado com sucesso');
+        }
       }
 
       setCompanies(prev => [data, ...prev]);
