@@ -11,7 +11,6 @@ interface Partner {
   contact_person: string | null;
   description: string | null;
   status: string;
-  target_value: number;
   created_at: string;
   updated_at: string;
 }

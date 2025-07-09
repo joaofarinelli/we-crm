@@ -30,13 +30,6 @@ export const Partners = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
   const handleDelete = async (id: string) => {
     await deletePartner(id);
   };
@@ -110,7 +103,6 @@ export const Partners = () => {
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="text-left sm:text-right">
-                  <p className="text-sm text-gray-500">Meta: {formatCurrency(partner.target_value)}</p>
                   <p className="text-xs text-gray-400 mt-1">Criado: {formatDate(partner.created_at)}</p>
                 </div>
                 

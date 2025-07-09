@@ -27,8 +27,7 @@ export const EditPartnerDialog = ({ partner, open, onOpenChange }: EditPartnerDi
     phone: '',
     contact_person: '',
     description: '',
-    status: 'ativo',
-    target_value: 0
+    status: 'ativo'
   });
   const [updating, setUpdating] = useState(false);
 
@@ -40,8 +39,7 @@ export const EditPartnerDialog = ({ partner, open, onOpenChange }: EditPartnerDi
         phone: partner.phone || '',
         contact_person: partner.contact_person || '',
         description: partner.description || '',
-        status: partner.status || 'ativo',
-        target_value: partner.target_value || 0
+        status: partner.status || 'ativo'
       });
     }
   }, [partner]);
@@ -52,10 +50,7 @@ export const EditPartnerDialog = ({ partner, open, onOpenChange }: EditPartnerDi
 
     setUpdating(true);
     try {
-      await updatePartner(partner.id, {
-        ...formData,
-        target_value: Number(formData.target_value) || 0
-      });
+      await updatePartner(partner.id, formData);
       onOpenChange(false);
     } catch (error) {
       console.error('Erro ao atualizar parceiro:', error);
@@ -121,31 +116,17 @@ export const EditPartnerDialog = ({ partner, open, onOpenChange }: EditPartnerDi
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={handleChange('status')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="inativo">Inativo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="target_value">Meta de Valor (R$)</Label>
-                <Input
-                  id="target_value"
-                  type="number"
-                  step="0.01"
-                  value={formData.target_value}
-                  onChange={(e) => handleChange('target_value')(e.target.value)}
-                  placeholder="0,00"
-                />
-              </div>
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={handleChange('status')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="inativo">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

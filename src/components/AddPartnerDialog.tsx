@@ -25,8 +25,7 @@ export const AddPartnerDialog = ({ open, onOpenChange, onCreatePartner }: AddPar
     phone: '',
     contact_person: '',
     description: '',
-    status: 'ativo',
-    target_value: 0
+    status: 'ativo'
   });
   const [creating, setCreating] = useState(false);
 
@@ -36,10 +35,7 @@ export const AddPartnerDialog = ({ open, onOpenChange, onCreatePartner }: AddPar
 
     setCreating(true);
     try {
-      await onCreatePartner({
-        ...formData,
-        target_value: Number(formData.target_value) || 0
-      });
+      await onCreatePartner(formData);
       
       // Reset form
       setFormData({
@@ -48,8 +44,7 @@ export const AddPartnerDialog = ({ open, onOpenChange, onCreatePartner }: AddPar
         phone: '',
         contact_person: '',
         description: '',
-        status: 'ativo',
-        target_value: 0
+        status: 'ativo'
       });
       onOpenChange(false);
     } catch (error) {
@@ -116,31 +111,17 @@ export const AddPartnerDialog = ({ open, onOpenChange, onCreatePartner }: AddPar
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={handleChange('status')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="inativo">Inativo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="target_value">Meta de Valor (R$)</Label>
-                <Input
-                  id="target_value"
-                  type="number"
-                  step="0.01"
-                  value={formData.target_value}
-                  onChange={(e) => handleChange('target_value')(e.target.value)}
-                  placeholder="0,00"
-                />
-              </div>
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={handleChange('status')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="inativo">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
