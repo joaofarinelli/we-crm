@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import { useLeads } from '@/hooks/useLeads';
 import { useExcelUtils } from '@/lib/excel-utils';
@@ -165,7 +174,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[900px] lg:max-w-[1000px]">
         <DialogHeader>
           <DialogTitle>Importar Leads via Excel</DialogTitle>
         </DialogHeader>
@@ -241,33 +250,59 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
               </div>
             )}
 
-            <div className="max-h-64 overflow-y-auto border rounded-lg">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="p-2 text-left">Nome</th>
-                    <th className="p-2 text-left">Email</th>
-                    <th className="p-2 text-left">Telefone</th>
-                    <th className="p-2 text-left">Status</th>
-                    <th className="p-2 text-left">Origem</th>
-                    <th className="p-2 text-left">Parceiro</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leads.slice(0, 10).map((lead, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="p-2">{lead.nome}</td>
-                      <td className="p-2">{lead.email || '-'}</td>
-                      <td className="p-2">{lead.telefone || '-'}</td>
-                      <td className="p-2">{lead.status || 'Frio'}</td>
-                      <td className="p-2">{lead.origem || '-'}</td>
-                      <td className="p-2">{lead.parceiro || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="border rounded-lg overflow-hidden">
+              <ScrollArea className="h-64 w-full">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    <TableRow>
+                      <TableHead className="min-w-[120px] font-medium">Nome</TableHead>
+                      <TableHead className="min-w-[180px] font-medium">Email</TableHead>
+                      <TableHead className="min-w-[120px] font-medium">Telefone</TableHead>
+                      <TableHead className="min-w-[80px] font-medium">Status</TableHead>
+                      <TableHead className="min-w-[100px] font-medium">Origem</TableHead>
+                      <TableHead className="min-w-[100px] font-medium">Parceiro</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {leads.slice(0, 10).map((lead, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">
+                          <div className="truncate max-w-[120px]" title={lead.nome}>
+                            {lead.nome}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="truncate max-w-[180px]" title={lead.email || '-'}>
+                            {lead.email || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="truncate max-w-[120px]" title={lead.telefone || '-'}>
+                            {lead.telefone || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="truncate max-w-[80px]" title={lead.status || 'Frio'}>
+                            {lead.status || 'Frio'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="truncate max-w-[100px]" title={lead.origem || '-'}>
+                            {lead.origem || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="truncate max-w-[100px]" title={lead.parceiro || '-'}>
+                            {lead.parceiro || '-'}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
               {leads.length > 10 && (
-                <div className="p-2 text-center text-muted-foreground">
+                <div className="p-3 text-center text-sm text-muted-foreground border-t bg-muted/30">
                   ... e mais {leads.length - 10} lead(s)
                 </div>
               )}
