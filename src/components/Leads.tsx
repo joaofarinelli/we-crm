@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, Phone, Mail, Upload, Download } from 'lucide-react';
+import { Plus, Edit2, Trash2, Phone, Mail, Upload, Download, Route } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { useLeads } from '@/hooks/useLeads';
 import { EditLeadDialog } from './EditLeadDialog';
 import { AddLeadDialog } from './AddLeadDialog';
 import { ImportLeadsDialog } from './ImportLeadsDialog';
+import { ViewLeadJourneyDialog } from './ViewLeadJourneyDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
 import { TagBadge } from './TagBadge';
 import { WhatsAppLeadButton } from './WhatsAppLeadButton';
@@ -20,6 +21,8 @@ export const Leads = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [journeyDialogOpen, setJourneyDialogOpen] = useState(false);
+  const [selectedLeadForJourney, setSelectedLeadForJourney] = useState<{id: string, name: string} | null>(null);
   const [filters, setFilters] = useState<LeadFilterState>({
     searchTerm: '',
     status: 'todos',
@@ -88,6 +91,11 @@ export const Leads = () => {
   const handleEdit = (lead: any) => {
     setEditingLead(lead);
     setEditDialogOpen(true);
+  };
+
+  const handleViewJourney = (lead: any) => {
+    setSelectedLeadForJourney({ id: lead.id, name: lead.name });
+    setJourneyDialogOpen(true);
   };
 
   if (loading) {
@@ -196,6 +204,15 @@ export const Leads = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => handleViewJourney(lead)}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Route className="w-4 h-4 mr-1" />
+                    <span className="sm:hidden">Jornada</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleEdit(lead)}
                     className="flex-1 sm:flex-none"
                   >
@@ -262,6 +279,13 @@ export const Leads = () => {
       <ImportLeadsDialog
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}
+      />
+
+      <ViewLeadJourneyDialog
+        leadId={selectedLeadForJourney?.id || null}
+        leadName={selectedLeadForJourney?.name || ''}
+        open={journeyDialogOpen}
+        onOpenChange={setJourneyDialogOpen}
       />
     </div>
   );
