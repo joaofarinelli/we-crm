@@ -4,11 +4,48 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface SaasMetrics {
-  total_companies: number;
-  total_users: number;
-  active_companies: number;
-  new_users_this_month: number;
-  companies_by_plan: Record<string, number>;
+  overview: {
+    total_companies: number;
+    total_users: number;
+    active_companies: number;
+    new_users_this_period: number;
+  };
+  companies: {
+    by_plan: Record<string, number>;
+    by_industry: Record<string, number>;
+    by_size: Record<string, number>;
+    growth: Array<{ date: string; count: number }>;
+  };
+  users: {
+    by_role: Record<string, number>;
+    growth: Array<{ date: string; count: number }>;
+  };
+  activities: {
+    leads: {
+      total: number;
+      by_status: Record<string, number>;
+    };
+    appointments: {
+      total: number;
+      by_status: Record<string, number>;
+    };
+    meetings: {
+      total: number;
+      by_status: Record<string, number>;
+    };
+    tasks: {
+      total: number;
+      by_status: Record<string, number>;
+    };
+  };
+  top_companies: Array<{
+    id: string;
+    name: string;
+    users_count: number;
+    leads_count: number;
+    appointments_count: number;
+    activity_score: number;
+  }>;
 }
 
 export const useSaasMetrics = () => {
@@ -18,11 +55,11 @@ export const useSaasMetrics = () => {
 
   const fetchMetrics = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_saas_metrics');
+      const { data, error } = await supabase.rpc('get_advanced_saas_analytics', { period_days: 30 });
       if (error) throw error;
       
-      // Type cast the Json response to our SaasMetrics interface
-      setMetrics(data as unknown as SaasMetrics);
+      // A função retorna um array com um objeto que contém as métricas
+      setMetrics(data?.[0] as unknown as SaasMetrics);
     } catch (error) {
       console.error('Erro ao buscar métricas SaaS:', error);
       toast({

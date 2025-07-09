@@ -35,7 +35,7 @@ export const AdminDashboard = () => {
             <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{metrics?.total_companies || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.overview?.total_companies || 0}</div>
             <p className="text-xs text-muted-foreground">
               Empresas cadastradas
             </p>
@@ -48,7 +48,7 @@ export const AdminDashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{metrics?.total_users || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.overview?.total_users || 0}</div>
             <p className="text-xs text-muted-foreground">
               Usuários ativos
             </p>
@@ -61,7 +61,7 @@ export const AdminDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{metrics?.active_companies || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.overview?.active_companies || 0}</div>
             <p className="text-xs text-muted-foreground">
               Últimos 30 dias
             </p>
@@ -74,7 +74,7 @@ export const AdminDashboard = () => {
             <UserPlus className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{metrics?.new_users_this_month || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{metrics?.overview?.new_users_this_period || 0}</div>
             <p className="text-xs text-muted-foreground">
               Este mês
             </p>
@@ -92,14 +92,14 @@ export const AdminDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {metrics?.companies_by_plan && Object.entries(metrics.companies_by_plan).map(([plan, count]) => (
+            {metrics?.companies?.by_plan && Object.entries(metrics.companies.by_plan).map(([plan, count]) => (
               <div key={plan} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${planColors[plan] || 'bg-gray-100 text-gray-800'}`}>
                     {plan.charAt(0).toUpperCase() + plan.slice(1)}
                   </span>
                 </div>
-                <div className="text-2xl font-bold">{count}</div>
+                <div className="text-2xl font-bold">{count as number}</div>
               </div>
             ))}
           </div>
@@ -111,17 +111,25 @@ export const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle>Crescimento</CardTitle>
-            <CardDescription>Métricas de crescimento mensal</CardDescription>
+            <CardDescription>Métricas de crescimento dos últimos 30 dias</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Novas empresas este mês</span>
-                <span className="font-semibold">{metrics?.active_companies || 0}</span>
+                <span className="text-sm text-gray-600">Novas empresas (30 dias)</span>
+                <span className="font-semibold">{(metrics?.companies?.growth?.length || 0)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Novos usuários este mês</span>
-                <span className="font-semibold">{metrics?.new_users_this_month || 0}</span>
+                <span className="text-sm text-gray-600">Novos usuários (30 dias)</span>
+                <span className="font-semibold">{metrics?.overview?.new_users_this_period || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Total de leads</span>
+                <span className="font-semibold">{metrics?.activities?.leads?.total || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Total de reuniões</span>
+                <span className="font-semibold">{metrics?.activities?.meetings?.total || 0}</span>
               </div>
             </div>
           </CardContent>
@@ -146,6 +154,41 @@ export const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Top Empresas */}
+      {metrics?.top_companies && metrics.top_companies.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Empresas</CardTitle>
+            <CardDescription>
+              Empresas com melhor performance nos últimos 30 dias
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {metrics.top_companies.slice(0, 5).map((company, index) => (
+                <div key={company.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-blue-600">#{index + 1}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">{company.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {company.users_count} usuários • {company.leads_count} leads • {company.appointments_count} agendamentos
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold">{company.activity_score}</p>
+                    <p className="text-xs text-gray-500">Score</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
