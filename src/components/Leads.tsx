@@ -69,6 +69,31 @@ export const Leads = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'Novo Lead':
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'Atendimento':
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Agendamento':
+        return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'Reagendamento':
+        return 'bg-orange-200 text-orange-800 border-orange-300';
+      case 'No Show':
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 'Follow up':
+        return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'Negociação':
+        return 'bg-cyan-100 text-cyan-700 border-cyan-200';
+      case 'Vendido':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'Perdido':
+        return 'bg-red-200 text-red-800 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getTemperatureColor = (temperature: string) => {
+    switch (temperature) {
       case 'Quente':
         return 'bg-red-100 text-red-700 border-red-200';
       case 'Morno':
@@ -159,7 +184,12 @@ export const Leads = () => {
               <div className="flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                   <h3 className="text-lg font-semibold text-gray-900">{lead.name}</h3>
-                  <Badge className={getStatusColor(lead.status || 'Frio')}>{lead.status || 'Frio'}</Badge>
+                  <Badge className={getStatusColor(lead.status || 'Novo Lead')}>{lead.status || 'Novo Lead'}</Badge>
+                  {lead.temperature && (
+                    <Badge className={getTemperatureColor(lead.temperature)} variant="outline">
+                      {lead.temperature}
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 text-sm text-gray-500">
                   {lead.email && (

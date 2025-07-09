@@ -204,7 +204,7 @@ export const useLeads = () => {
         throw new Error('Company ID not found for user');
       }
 
-      // SEMPRE usar "Novo Lead" como status inicial
+      // SEMPRE usar "Novo Lead" como status inicial, garantir temperatura padrão
       let finalLeadData = { ...leadData };
       finalLeadData.status = 'Novo Lead';
       if (!finalLeadData.temperature) {

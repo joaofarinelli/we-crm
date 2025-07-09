@@ -31,6 +31,7 @@ interface AddLeadDialogProps {
     status: string;
     source: string | null;
     partner_id: string | null;
+    temperature: string | null;
   }) => Promise<any>;
 }
 
@@ -58,6 +59,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
     status: '',
     source: '' as string,
     partner_id: '' as string,
+    temperature: 'Frio' as string,
     tags: [] as Array<{ id: string; name: string; color: string }>
   });
   const { assignTagsToLead } = useLeadTagAssignments();
@@ -72,7 +74,8 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
       phone: formData.phone || null,
       status: formData.status || '', // será definido automaticamente pela primeira coluna do pipeline
       source: formData.source || null,
-      partner_id: formData.partner_id || null
+      partner_id: formData.partner_id || null,
+      temperature: formData.temperature || 'Frio'
     });
 
     // Se o lead foi criado com sucesso e há tags selecionadas, associar as tags
@@ -88,6 +91,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
       status: '',
       source: '',
       partner_id: '',
+      temperature: 'Frio',
       tags: []
     });
     
@@ -186,6 +190,23 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
               )}
             </div>
           )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="temperature">Temperatura</Label>
+            <Select
+              value={formData.temperature}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, temperature: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a temperatura" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Quente">Quente</SelectItem>
+                <SelectItem value="Morno">Morno</SelectItem>
+                <SelectItem value="Frio">Frio</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>

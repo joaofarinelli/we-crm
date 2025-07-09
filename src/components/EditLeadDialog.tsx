@@ -159,6 +159,26 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
           </div>
           
           <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <select
+              id="status"
+              value={formData.status}
+              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Novo Lead">Novo Lead</option>
+              <option value="Atendimento">Atendimento</option>
+              <option value="Agendamento">Agendamento</option>
+              <option value="Reagendamento">Reagendamento</option>
+              <option value="No Show">No Show</option>
+              <option value="Follow up">Follow up</option>
+              <option value="Negociação">Negociação</option>
+              <option value="Vendido">Vendido</option>
+              <option value="Perdido">Perdido</option>
+            </select>
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="temperature">Temperatura</Label>
             <select
               id="temperature"
