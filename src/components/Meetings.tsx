@@ -184,7 +184,14 @@ export const Meetings = () => {
                            Reagendar
                          </Button>
                        )}
-                       <Button variant="outline" size="sm">
+                       <Button 
+                         variant="outline" 
+                         size="sm"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           setSelectedMeetingId(meeting.id);
+                         }}
+                       >
                          <FileText className="w-4 h-4 mr-1" />
                          Ver Detalhes
                        </Button>
