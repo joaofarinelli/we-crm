@@ -58,10 +58,13 @@ export const useSaasMetrics = () => {
       const { data, error } = await supabase.rpc('get_advanced_saas_analytics', { period_days: 30 });
       if (error) throw error;
       
-      // A função retorna um array com um objeto que contém as métricas
-      setMetrics(data?.[0] as unknown as SaasMetrics);
+      console.log('Raw data from get_advanced_saas_analytics:', data);
+      
+      // A função retorna diretamente o objeto JSON com as métricas
+      setMetrics(data as unknown as SaasMetrics);
     } catch (error) {
       console.error('Erro ao buscar métricas SaaS:', error);
+      console.error('Error details:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as métricas",
