@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { WelcomeMessage } from '@/components/WelcomeMessage';
 import { useRevenue } from '@/hooks/useRevenue';
+import { GoalsWidget } from '@/components/dashboard/GoalsWidget';
 
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,7 +159,15 @@ export const Dashboard = () => {
       {isNewCompany ? (
         <WelcomeMessage />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <>
+          {/* Widget de Metas - Para closers */}
+          {userInfo?.role_name === 'Closer' && (
+            <div className="mb-6">
+              <GoalsWidget />
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Agendamentos Recentes */}
           <Card className="h-full">
             <CardHeader>
@@ -291,7 +300,8 @@ export const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

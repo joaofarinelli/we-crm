@@ -14,6 +14,7 @@ import { SystemSettings } from './settings/SystemSettings';
 import { UserRoleManagement } from './settings/UserRoleManagement';
 import { AdvancedSettings } from './settings/AdvancedSettings';
 import { InvitationSettings } from './settings/InvitationSettings';
+import { UserGoalsSettings } from './settings/UserGoalsSettings';
 
 export const Settings = () => {
   const [activeTab, setActiveTab] = useState('company');
@@ -36,6 +37,12 @@ export const Settings = () => {
       label: 'Convites',
       icon: Mail,
       component: InvitationSettings,
+    },
+    {
+      id: 'goals',
+      label: 'Metas',
+      icon: Shield,
+      component: UserGoalsSettings,
     },
     {
       id: 'system',
@@ -61,7 +68,7 @@ export const Settings = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

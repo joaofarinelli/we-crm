@@ -1536,6 +1536,83 @@ export type Database = {
           },
         ]
       }
+      user_goals: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          current_value: number
+          end_date: string
+          goal_type: string
+          id: string
+          period: string
+          start_date: string
+          status: string
+          target_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          current_value?: number
+          end_date: string
+          goal_type: string
+          id?: string
+          period?: string
+          start_date: string
+          status?: string
+          target_value?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          current_value?: number
+          end_date?: string
+          goal_type?: string
+          id?: string
+          period?: string
+          start_date?: string
+          status?: string
+          target_value?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_goals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_goals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_goals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_invitations: {
         Row: {
           accepted_at: string | null
@@ -1670,6 +1747,10 @@ export type Database = {
         Returns: undefined
       }
       sync_appointment_status_with_pipeline: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_goal_progress: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
