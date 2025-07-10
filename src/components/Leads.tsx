@@ -19,6 +19,8 @@ import { useExportLeads } from '@/hooks/useExportLeads';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const Leads = () => {
+  console.log('🔍 Leads component rendering');
+  
   const [editingLead, setEditingLead] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -39,6 +41,15 @@ export const Leads = () => {
   const { leads, loading, isUpdating, deleteLead, createLead } = useLeads();
   const { exportFilteredLeads } = useExportLeads();
   const { userInfo } = useCurrentUser();
+  
+  // Debug logs importantes
+  console.log('🔍 Leads component state:', {
+    leadsCount: leads?.length || 0,
+    loading,
+    editDialogOpen,
+    editingLead: editingLead?.id || null,
+    userInfo: userInfo ? { id: userInfo.user_id, companyId: userInfo.company_id, hasCompany: userInfo.has_company } : null
+  });
 
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
@@ -120,9 +131,32 @@ export const Leads = () => {
 
   const handleEdit = (lead: any) => {
     console.log('Handle edit clicked, lead:', lead);
-    setEditingLead(lead);
-    setEditDialogOpen(true);
-    console.log('Edit dialog state set to true');
+    console.log('Current editDialogOpen state:', editDialogOpen);
+    console.log('Current editingLead state:', editingLead);
+    
+    try {
+      if (!lead) {
+        console.error('Lead is null or undefined');
+        return;
+      }
+      
+      if (!lead.id) {
+        console.error('Lead ID is missing');
+        return;
+      }
+      
+      setEditingLead(lead);
+      setEditDialogOpen(true);
+      console.log('Edit dialog state set to true, lead set to:', lead);
+      
+      // Force re-render check
+      setTimeout(() => {
+        console.log('After timeout - editDialogOpen:', editDialogOpen, 'editingLead:', editingLead);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error in handleEdit:', error);
+    }
   };
 
   const handleViewJourney = (lead: any) => {
@@ -281,15 +315,19 @@ export const Leads = () => {
                       <span className="sm:hidden">Atribuir</span>
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(lead)}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Edit2 className="w-4 h-4 mr-1" />
-                    <span className="sm:hidden">Editar</span>
-                  </Button>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => {
+                       console.log('🔥 LEADS EDIT BUTTON CLICKED for lead:', lead.id);
+                       handleEdit(lead);
+                     }}
+                     className="flex-1 sm:flex-none bg-blue-100 hover:bg-blue-200"
+                     title="Editar Lead"
+                   >
+                     <Edit2 className="w-4 h-4 mr-1" />
+                     <span className="sm:hidden">Editar</span>
+                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button

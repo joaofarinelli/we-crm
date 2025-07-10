@@ -65,6 +65,8 @@ const LEAD_SOURCES = [
 ];
 
 const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
+  console.log('🔍 EditLeadDialogContent rendering with props:', { lead, open });
+  
   const { updateLead } = useLeads();
   const { assignTagsToLead, getLeadTags } = useLeadTagAssignments();
   const { partners = [], loading: partnersLoading } = usePartners();
@@ -415,6 +417,8 @@ const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps
 };
 
 export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
+  console.log('🔍 EditLeadDialog rendering with props:', { lead, open, onOpenChange });
+  
   return (
     <ErrorBoundary>
       <EditLeadDialogContent lead={lead} open={open} onOpenChange={onOpenChange} />

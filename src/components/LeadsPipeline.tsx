@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const LeadsPipeline = () => {
+  console.log('🔍 LeadsPipeline component rendering');
+  
   const {
     leadsByStatus,
     columns,
@@ -34,10 +36,45 @@ export const LeadsPipeline = () => {
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [showColumnManager, setShowColumnManager] = useState(false);
+  
+  // Debug logs importantes para o pipeline
+  console.log('🔍 LeadsPipeline component state:', {
+    columnsCount: columns?.length || 0,
+    leadsCount: Object.keys(leadsByStatus || {}).reduce((total, status) => total + (leadsByStatus[status]?.length || 0), 0),
+    loading,
+    editLeadDialogOpen,
+    selectedLead: selectedLead?.id || null,
+    dragLoading
+  });
 
   const handleEditLead = (lead: any) => {
-    setSelectedLead(lead);
-    setEditLeadDialogOpen(true);
+    console.log('Pipeline - Handle edit lead clicked, lead:', lead);
+    console.log('Current editLeadDialogOpen state:', editLeadDialogOpen);
+    console.log('Current selectedLead state:', selectedLead);
+    
+    try {
+      if (!lead) {
+        console.error('Pipeline - Lead is null or undefined');
+        return;
+      }
+      
+      if (!lead.id) {
+        console.error('Pipeline - Lead ID is missing');
+        return;
+      }
+      
+      setSelectedLead(lead);
+      setEditLeadDialogOpen(true);
+      console.log('Pipeline - Edit dialog state set to true, lead set to:', lead);
+      
+      // Force re-render check
+      setTimeout(() => {
+        console.log('Pipeline - After timeout - editLeadDialogOpen:', editLeadDialogOpen, 'selectedLead:', selectedLead);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Pipeline - Error in handleEditLead:', error);
+    }
   };
 
   const handleAddAppointment = (lead: any) => {
@@ -150,17 +187,19 @@ export const LeadsPipeline = () => {
                                     {lead.name}
                                   </h3>
                                   <div className="flex gap-1 ml-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-6 w-6 p-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleEditLead(lead);
-                                      }}
-                                    >
-                                      <Edit className="w-3 h-3" />
-                                    </Button>
+                                     <Button
+                                       variant="ghost"
+                                       size="sm"
+                                       className="h-6 w-6 p-0 bg-blue-100 hover:bg-blue-200"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         console.log('🔥 PIPELINE EDIT BUTTON CLICKED for lead:', lead.id);
+                                         handleEditLead(lead);
+                                       }}
+                                       title="Editar Lead"
+                                     >
+                                       <Edit className="w-3 h-3" />
+                                     </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"
