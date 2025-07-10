@@ -83,11 +83,12 @@ export const useReports = () => {
       // Calcular métricas
       const totalLeads = allLeads?.length || 0;
       const qualifiedLeads = allLeads?.filter(lead => lead.status === 'Quente').length || 0;
+      const soldLeads = allLeads?.filter(lead => lead.status === 'Vendido') || [];
       const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0;
       
-      // Remover cálculo de ticket médio já que não temos mais valores
-      const avgDealValue = 0;
-      const totalRevenue = 0;
+      // Calcular receita total dos leads vendidos
+      const totalRevenue = soldLeads.reduce((sum, lead) => sum + (lead.revenue_generated || 0), 0);
+      const avgDealValue = soldLeads.length > 0 ? totalRevenue / soldLeads.length : 0;
 
       // Calcular ciclo de vendas médio (diferença entre criação e última atualização dos leads quentes)
       const hotLeads = allLeads?.filter(lead => lead.status === 'Quente') || [];
