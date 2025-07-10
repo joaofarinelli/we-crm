@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export interface ReportData {
   salesByMonth: { month: string; value: number; count: number }[];
@@ -21,12 +21,12 @@ export interface ReportData {
 }
 
 export const useReports = () => {
-  const { user } = useAuth();
+  const { userInfo, loading: userLoading } = useCurrentUser();
 
   const { data: reportData, isLoading, error } = useQuery({
-    queryKey: ['reports'],
+    queryKey: ['reports', userInfo?.company_id],
     queryFn: async (): Promise<ReportData> => {
-      if (!user) throw new Error('Usuário não autenticado');
+      if (!userInfo?.company_id) throw new Error('Usuário sem empresa');
 
       const now = new Date();
       const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -34,23 +34,31 @@ export const useReports = () => {
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
       const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
-      // Buscar todos os leads
+      // Buscar todos os leads da empresa
       const { data: allLeads } = await supabase
         .from('leads')
-        .select('*');
+        .select('*')
+        .eq('company_id', userInfo.company_id);
 
       // Buscar leads do mês atual e anterior para comparação
       const [currentMonthLeads, lastMonthLeads] = await Promise.all([
-        supabase.from('leads').select('*').gte('created_at', currentMonth.toISOString()),
         supabase.from('leads').select('*')
+          .eq('company_id', userInfo.company_id)
+          .gte('created_at', currentMonth.toISOString()),
+        supabase.from('leads').select('*')
+          .eq('company_id', userInfo.company_id)
           .gte('created_at', lastMonth.toISOString())
           .lte('created_at', lastMonthEnd.toISOString())
       ]);
 
-      // Buscar tarefas e agendamentos dos últimos 6 meses
+      // Buscar tarefas e agendamentos dos últimos 6 meses da empresa
       const [tasksData, appointmentsData] = await Promise.all([
-        supabase.from('tasks').select('*').gte('created_at', sixMonthsAgo.toISOString()),
-        supabase.from('appointments').select('*').gte('created_at', sixMonthsAgo.toISOString())
+        supabase.from('tasks').select('*')
+          .eq('company_id', userInfo.company_id)
+          .gte('created_at', sixMonthsAgo.toISOString()),
+        supabase.from('appointments').select('*')
+          .eq('company_id', userInfo.company_id)
+          .gte('created_at', sixMonthsAgo.toISOString())
       ]);
 
       // Calcular vendas por mês (últimos 6 meses) - agora baseado apenas na quantidade
@@ -164,12 +172,12 @@ export const useReports = () => {
         activitiesByMonth
       };
     },
-    enabled: !!user,
+    enabled: !!userInfo?.company_id && !userLoading,
   });
 
   return {
     reportData,
-    isLoading,
+    isLoading: isLoading || userLoading,
     error
   };
 };
