@@ -3,10 +3,11 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { WelcomeMessage } from '@/components/WelcomeMessage';
+import { useRevenue } from '@/hooks/useRevenue';
 
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target, User, MessageSquare } from 'lucide-react';
+import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target, User, MessageSquare, DollarSign, TrendingDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +16,7 @@ export const Dashboard = () => {
   const { user } = useAuth();
   const { userInfo } = useCurrentUser();
   const { stats, loading } = useDashboard();
+  const { metrics: revenueMetrics, loading: revenueLoading } = useRevenue();
 
   // Se não há dados ainda (empresa nova), mostrar mensagem de boas-vindas
   const isNewCompany = stats.totalLeads === 0 && stats.totalAppointments === 0 && stats.totalTasks === 0;
@@ -80,6 +82,22 @@ export const Dashboard = () => {
       color: 'text-red-600',
       bgColor: 'bg-red-50',
       description: 'Tarefas em aberto'
+    },
+    {
+      title: 'Receita Total',
+      value: `R$ ${revenueLoading ? '0,00' : revenueMetrics.totalRevenue.toFixed(2)}`,
+      icon: DollarSign,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      description: 'Receita gerada'
+    },
+    {
+      title: 'Receita Perdida',
+      value: `R$ ${revenueLoading ? '0,00' : revenueMetrics.totalLost.toFixed(2)}`,
+      icon: TrendingDown,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      description: 'Receita perdida'
     }
   ];
 
@@ -111,7 +129,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Grid de KPIs - Responsivo */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
         {dashboardStats.map((stat, index) => (
           <Card key={index} className="hover:shadow-md transition-all duration-200 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

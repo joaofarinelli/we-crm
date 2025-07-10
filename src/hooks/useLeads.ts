@@ -12,6 +12,10 @@ interface Lead {
   source: string | null;
   partner_id: string | null;
   temperature: string | null;
+  product_name: string | null;
+  product_value: number | null;
+  revenue_generated: number | null;
+  revenue_lost: number | null;
   company_id: string;
   created_at: string;
   tags?: Array<{ id: string; name: string; color: string }>;

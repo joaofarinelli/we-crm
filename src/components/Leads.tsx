@@ -189,7 +189,17 @@ export const Leads = () => {
                       {lead.temperature}
                     </Badge>
                   )}
+                  {lead.product_value && (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      R$ {lead.product_value.toFixed(2)}
+                    </Badge>
+                  )}
                 </div>
+                {lead.product_name && (
+                  <div className="text-sm text-gray-600 mb-2">
+                    Produto: {lead.product_name}
+                  </div>
+                )}
                 <div className="flex flex-col sm:flex-row gap-2 text-sm text-gray-500">
                   {lead.email && (
                     <div className="flex items-center gap-1">

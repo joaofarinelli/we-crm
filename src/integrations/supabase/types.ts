@@ -652,6 +652,10 @@ export type Database = {
           name: string
           partner_id: string | null
           phone: string | null
+          product_name: string | null
+          product_value: number | null
+          revenue_generated: number | null
+          revenue_lost: number | null
           source: string | null
           status: string | null
           temperature: string | null
@@ -667,6 +671,10 @@ export type Database = {
           name: string
           partner_id?: string | null
           phone?: string | null
+          product_name?: string | null
+          product_value?: number | null
+          revenue_generated?: number | null
+          revenue_lost?: number | null
           source?: string | null
           status?: string | null
           temperature?: string | null
@@ -682,6 +690,10 @@ export type Database = {
           name?: string
           partner_id?: string | null
           phone?: string | null
+          product_name?: string | null
+          product_value?: number | null
+          revenue_generated?: number | null
+          revenue_lost?: number | null
           source?: string | null
           status?: string | null
           temperature?: string | null
@@ -1086,6 +1098,54 @@ export type Database = {
           },
           {
             foreignKeyName: "pipeline_columns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
