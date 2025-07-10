@@ -52,16 +52,29 @@ export const useClosers = () => {
           )
         `)
         .eq('company_id', currentUserProfile.company_id)
-        .not('roles', 'is', null)
         .order('full_name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar closers:', error);
+        // Se há erro na query com roles, buscar sem roles como fallback
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .eq('company_id', currentUserProfile.company_id)
+          .order('full_name', { ascending: true });
+          
+        if (fallbackError) throw fallbackError;
+        setClosers(fallbackData || []);
+        return;
+      }
       
       // Filtrar apenas roles que podem gerenciar agendamentos
       const validRoles = ['Admin', 'Gerente', 'Closer', 'Vendedor', 'Coordenador'];
-      const filteredUsers = (data || []).filter(user => 
-        user.roles && validRoles.includes(user.roles.name)
-      );
+      const filteredUsers = (data || []).filter(user => {
+        // Se user.roles é null ou undefined, incluir o usuário (pode ser admin sem role definido)
+        if (!user.roles) return true;
+        return validRoles.includes(user.roles.name);
+      });
       
       setClosers(filteredUsers);
     } catch (error) {

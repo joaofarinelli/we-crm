@@ -24,6 +24,8 @@ import { usePartners } from '@/hooks/usePartners';
 import { useProducts } from '@/hooks/useProducts';
 import { useClosers } from '@/hooks/useClosers';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { ErrorBoundary } from './ErrorBoundary';
+import { useToast } from '@/hooks/use-toast';
 
 interface Lead {
   id: string;
@@ -62,13 +64,15 @@ const LEAD_SOURCES = [
   'Outros'
 ];
 
-export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
+const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
   const { updateLead } = useLeads();
   const { assignTagsToLead, getLeadTags } = useLeadTagAssignments();
-  const { partners, loading: partnersLoading } = usePartners();
-  const { products, loading: productsLoading } = useProducts();
-  const { closers, loading: closersLoading } = useClosers();
+  const { partners = [], loading: partnersLoading } = usePartners();
+  const { products = [], loading: productsLoading } = useProducts();
+  const { closers = [], loading: closersLoading } = useClosers();
   const { userInfo } = useCurrentUser();
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -84,6 +88,19 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     product_value: ''
   });
   const [loadingTags, setLoadingTags] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Log debug para identificar problemas
+  console.log('EditLeadDialog Debug:', {
+    lead,
+    partnersCount: partners?.length || 0,
+    productsCount: products?.length || 0,
+    closersCount: closers?.length || 0,
+    userInfo,
+    partnersLoading,
+    productsLoading,
+    closersLoading
+  });
 
   useEffect(() => {
     if (lead) {
@@ -123,23 +140,39 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     e.preventDefault();
     if (!lead) return;
 
-    await updateLead(lead.id, {
-      name: formData.name,
-      email: formData.email || null,
-      phone: formData.phone || null,
-      status: formData.status,
-      source: formData.source || null,
-      partner_id: formData.partner_id || null,
-      assigned_to: formData.assigned_to || null,
-      temperature: formData.temperature,
-      product_name: formData.product_name || null,
-      product_value: formData.product_value ? parseFloat(formData.product_value) : null
-    });
+    setIsSubmitting(true);
+    try {
+      await updateLead(lead.id, {
+        name: formData.name,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        status: formData.status,
+        source: formData.source || null,
+        partner_id: formData.partner_id || null,
+        assigned_to: formData.assigned_to || null,
+        temperature: formData.temperature,
+        product_name: formData.product_name || null,
+        product_value: formData.product_value ? parseFloat(formData.product_value) : null
+      });
 
-    // Atualizar tags do lead
-    await assignTagsToLead(lead.id, formData.tags.map(tag => tag.id));
+      // Atualizar tags do lead
+      await assignTagsToLead(lead.id, formData.tags.map(tag => tag.id));
 
-    onOpenChange(false);
+      onOpenChange(false);
+      toast({
+        title: "Sucesso",
+        description: "Lead atualizado com sucesso"
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar lead:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o lead",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -358,19 +391,33 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
           </div>
           
           <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              className="w-full sm:w-auto"
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
             <Button 
               type="submit"
-              disabled={formData.source === 'Parceiro' && !formData.partner_id}
+              disabled={isSubmitting || (formData.source === 'Parceiro' && !formData.partner_id)}
               className="w-full sm:w-auto"
             >
-              Salvar Alterações
+              {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
+  );
+};
+
+export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
+  return (
+    <ErrorBoundary>
+      <EditLeadDialogContent lead={lead} open={open} onOpenChange={onOpenChange} />
+    </ErrorBoundary>
   );
 };
