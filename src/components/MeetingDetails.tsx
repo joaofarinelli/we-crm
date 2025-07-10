@@ -9,6 +9,7 @@ import { useMeetingDetails } from '@/hooks/useMeetingDetails';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AgendaItem } from './AgendaItem';
@@ -166,6 +167,19 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
               <Clock className="w-4 h-4" />
               {meeting.time} ({meeting.duration}min)
             </div>
+            {meeting.meeting_url && (
+              <div className="flex items-center gap-1">
+                <ExternalLink className="w-4 h-4" />
+                <a 
+                  href={meeting.meeting_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Acessar reunião
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>

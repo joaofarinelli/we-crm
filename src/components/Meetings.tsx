@@ -11,6 +11,7 @@ import { useRealtimeMeetings } from '@/hooks/useRealtimeMeetings';
 import { useMeetings } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
+import { ExternalLink } from 'lucide-react';
 import { MeetingDialog } from './MeetingDialog';
 import { MeetingDetails } from './MeetingDetails';
 import { RescheduleMeetingDialog } from './RescheduleMeetingDialog';
@@ -166,6 +167,20 @@ export const Meetings = () => {
                         <Clock className="w-4 h-4" />
                         {meeting.time} ({meeting.duration}min)
                       </div>
+                      {meeting.meeting_url && (
+                        <div className="flex items-center gap-1">
+                          <ExternalLink className="w-4 h-4" />
+                          <a 
+                            href={meeting.meeting_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Link da reunião
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

@@ -31,6 +31,7 @@ const formSchema = z.object({
   date: z.string().min(1, 'Data é obrigatória'),
   time: z.string().min(1, 'Horário é obrigatório'),
   duration: z.number().min(15, 'Duração mínima de 15 minutos'),
+  meeting_url: z.string().optional(),
 });
 
 interface MeetingDialogProps {
@@ -57,6 +58,7 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
       date: '',
       time: '',
       duration: 60,
+      meeting_url: '',
     },
   });
 
@@ -68,6 +70,7 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
         date: meeting.date,
         time: meeting.time,
         duration: meeting.duration,
+        meeting_url: meeting.meeting_url || '',
       });
     } else {
       form.reset({
@@ -76,6 +79,7 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
         date: '',
         time: '',
         duration: 60,
+        meeting_url: '',
       });
     }
   }, [meeting, form]);
@@ -104,6 +108,7 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
           date: values.date,
           time: values.time,
           duration: values.duration,
+          meeting_url: values.meeting_url || null,
         });
       } else {
         await createMeeting.mutateAsync({
@@ -115,6 +120,7 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
           company_id: currentUserProfile.company_id,
           organizer_id: user?.id || '',
           status: 'Agendada',
+          meeting_url: values.meeting_url || null,
         });
       }
       onOpenChange(false);
@@ -210,6 +216,24 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
                       step="15"
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="meeting_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link da Reunião</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="url"
+                      placeholder="https://meet.google.com/... ou https://zoom.us/..."
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Clock, Users, FileText } from 'lucide-react';
+import { Calendar, Clock, Users, FileText, ExternalLink } from 'lucide-react';
 import { Meeting } from '@/types/meeting';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -106,6 +106,28 @@ export const ViewMeetingDialog = ({ open, onOpenChange, meeting }: ViewMeetingDi
               </CardContent>
             </Card>
           </div>
+
+          {/* Link da Reunião */}
+          {meeting.meeting_url && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4 text-purple-500" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 mb-1">Link da Reunião</h4>
+                    <a 
+                      href={meeting.meeting_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline break-all"
+                    >
+                      {meeting.meeting_url}
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </DialogContent>
     </Dialog>
