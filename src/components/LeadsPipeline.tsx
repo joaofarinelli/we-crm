@@ -190,7 +190,7 @@ export const LeadsPipeline = () => {
                                      <Button
                                        variant="ghost"
                                        size="sm"
-                                       className="h-6 w-6 p-0 bg-blue-100 hover:bg-blue-200"
+                                       className="h-6 w-6 p-0"
                                        onClick={(e) => {
                                          e.stopPropagation();
                                          console.log('🔥 PIPELINE EDIT BUTTON CLICKED for lead:', lead.id);

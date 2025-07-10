@@ -322,7 +322,7 @@ export const Leads = () => {
                        console.log('🔥 LEADS EDIT BUTTON CLICKED for lead:', lead.id);
                        handleEdit(lead);
                      }}
-                     className="flex-1 sm:flex-none bg-blue-100 hover:bg-blue-200"
+                     className="flex-1 sm:flex-none"
                      title="Editar Lead"
                    >
                      <Edit2 className="w-4 h-4 mr-1" />
