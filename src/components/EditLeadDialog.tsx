@@ -22,6 +22,8 @@ import { useLeads } from '@/hooks/useLeads';
 import { useLeadTagAssignments } from '@/hooks/useLeadTagAssignments';
 import { usePartners } from '@/hooks/usePartners';
 import { useProducts } from '@/hooks/useProducts';
+import { useClosers } from '@/hooks/useClosers';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface Lead {
   id: string;
@@ -31,6 +33,7 @@ interface Lead {
   status: string | null;
   source: string | null;
   partner_id: string | null;
+  assigned_to: string | null;
   temperature: string | null;
   product_name: string | null;
   product_value: number | null;
@@ -64,6 +67,8 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
   const { assignTagsToLead, getLeadTags } = useLeadTagAssignments();
   const { partners, loading: partnersLoading } = usePartners();
   const { products, loading: productsLoading } = useProducts();
+  const { closers, loading: closersLoading } = useClosers();
+  const { userInfo } = useCurrentUser();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -71,6 +76,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     status: 'Novo Lead',
     source: '' as string,
     partner_id: '' as string,
+    assigned_to: '' as string,
     temperature: 'Frio' as string,
     tags: [] as Array<{ id: string; name: string; color: string }>,
     product_id: '' as string,
@@ -88,6 +94,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         status: lead.status || 'Novo Lead',
         source: lead.source || '',
         partner_id: lead.partner_id || '',
+        assigned_to: lead.assigned_to || '',
         temperature: lead.temperature || 'Frio',
         tags: [],
         product_id: '',
@@ -123,6 +130,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       status: formData.status,
       source: formData.source || null,
       partner_id: formData.partner_id || null,
+      assigned_to: formData.assigned_to || null,
       temperature: formData.temperature,
       product_name: formData.product_name || null,
       product_value: formData.product_value ? parseFloat(formData.product_value) : null
@@ -309,6 +317,32 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
               placeholder="0,00"
             />
           </div>
+          
+          {(userInfo?.role_name === 'Admin' || userInfo?.role_name === 'Gerente') && (
+            <div className="space-y-2">
+              <Label htmlFor="assigned_to">Atribuído para</Label>
+              {closersLoading ? (
+                <div className="text-sm text-muted-foreground">Carregando closers...</div>
+              ) : (
+                <Select
+                  value={formData.assigned_to || undefined}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value || '' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um closer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Sem atribuição</SelectItem>
+                    {closers.map((closer) => (
+                      <SelectItem key={closer.id} value={closer.id}>
+                        {closer.full_name || closer.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          )}
           
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>

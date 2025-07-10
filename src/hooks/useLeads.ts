@@ -11,6 +11,7 @@ interface Lead {
   status: string | null;
   source: string | null;
   partner_id: string | null;
+  assigned_to: string | null;
   temperature: string | null;
   product_name: string | null;
   product_value: number | null;
@@ -20,6 +21,7 @@ interface Lead {
   created_at: string;
   tags?: Array<{ id: string; name: string; color: string }>;
   partner?: { id: string; name: string; } | null;
+  assigned_user?: { id: string; full_name: string | null; } | null;
 }
 
 // Global subscription manager to prevent multiple subscriptions
@@ -108,29 +110,59 @@ export const useLeads = () => {
 
       console.log('User company_id:', profileData.company_id);
 
-      // Agora buscar leads apenas da empresa do usuário com suas tags e parceiro
-      const { data, error } = await supabase
+      // Buscar leads baseado no role do usuário
+      const { data: userProfile, error: userError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          roles(name)
+        `)
+        .eq('id', user.id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user role:', userError);
+        throw userError;
+      }
+
+      const userRole = userProfile?.roles?.name;
+      console.log('User role:', userRole);
+
+      let query = supabase
         .from('leads')
         .select(`
           *,
           lead_tag_assignments(
             lead_tags(id, name, color)
           ),
-          partners(id, name)
+          partners(id, name),
+          assigned_user:profiles!leads_assigned_to_fkey(id, full_name)
         `)
-        .eq('company_id', profileData.company_id)
-        .order('created_at', { ascending: false });
+        .eq('company_id', profileData.company_id);
+
+      // Aplicar filtro baseado no role
+      if (userRole === 'Closer') {
+        // Closers veem apenas leads atribuídos a eles
+        query = query.eq('assigned_to', user.id);
+        console.log('Filtering leads for Closer - showing only assigned leads');
+      } else {
+        // Admins, SDRs e outros roles veem todos os leads da empresa
+        console.log('User is Admin/SDR - showing all company leads');
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching leads:', error);
         throw error;
       }
       
-      // Processar dados para incluir tags e parceiro
+      // Processar dados para incluir tags, parceiro e usuário atribuído
       const processedLeads = (data || []).map(lead => ({
         ...lead,
         tags: lead.lead_tag_assignments?.map((assignment: any) => assignment.lead_tags).filter(Boolean) || [],
-        partner: lead.partners || null
+        partner: lead.partners || null,
+        assigned_user: lead.assigned_user || null
       }));
       
       console.log('Fetched leads for company:', processedLeads.length, 'leads');

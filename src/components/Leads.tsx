@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, Phone, Mail, Upload, Download, Route } from 'lucide-react';
+import { Plus, Edit2, Trash2, Phone, Mail, Upload, Download, Route, UserPlus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,10 +11,12 @@ import { EditLeadDialog } from './EditLeadDialog';
 import { AddLeadDialog } from './AddLeadDialog';
 import { ImportLeadsDialog } from './ImportLeadsDialog';
 import { ViewLeadJourneyDialog } from './ViewLeadJourneyDialog';
+import { TransferLeadDialog } from './TransferLeadDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
 import { TagBadge } from './TagBadge';
 import { WhatsAppLeadButton } from './WhatsAppLeadButton';
 import { useExportLeads } from '@/hooks/useExportLeads';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const Leads = () => {
   const [editingLead, setEditingLead] = useState(null);
@@ -23,6 +25,8 @@ export const Leads = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [journeyDialogOpen, setJourneyDialogOpen] = useState(false);
   const [selectedLeadForJourney, setSelectedLeadForJourney] = useState<{id: string, name: string} | null>(null);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [selectedLeadForTransfer, setSelectedLeadForTransfer] = useState<{id: string, name: string, assignedTo: string | null} | null>(null);
   const [filters, setFilters] = useState<LeadFilterState>({
     searchTerm: '',
     status: 'todos',
@@ -34,6 +38,7 @@ export const Leads = () => {
   
   const { leads, loading, isUpdating, deleteLead, createLead } = useLeads();
   const { exportFilteredLeads } = useExportLeads();
+  const { userInfo } = useCurrentUser();
 
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
@@ -123,6 +128,15 @@ export const Leads = () => {
     setJourneyDialogOpen(true);
   };
 
+  const handleTransferLead = (lead: any) => {
+    setSelectedLeadForTransfer({ 
+      id: lead.id, 
+      name: lead.name, 
+      assignedTo: lead.assigned_to 
+    });
+    setTransferDialogOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="py-4 md:py-8 flex items-center justify-center">
@@ -200,6 +214,11 @@ export const Leads = () => {
                     Produto: {lead.product_name}
                   </div>
                 )}
+                {lead.assigned_user && (
+                  <div className="text-sm text-blue-600 mb-2">
+                    Atribuído para: {lead.assigned_user.full_name || 'Sem nome'}
+                  </div>
+                )}
                 <div className="flex flex-col sm:flex-row gap-2 text-sm text-gray-500">
                   {lead.email && (
                     <div className="flex items-center gap-1">
@@ -249,6 +268,17 @@ export const Leads = () => {
                     <Route className="w-4 h-4 mr-1" />
                     <span className="sm:hidden">Jornada</span>
                   </Button>
+                  {(userInfo?.role_name === 'Admin' || userInfo?.role_name === 'Gerente') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleTransferLead(lead)}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      <span className="sm:hidden">Atribuir</span>
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -325,6 +355,14 @@ export const Leads = () => {
         leadName={selectedLeadForJourney?.name || ''}
         open={journeyDialogOpen}
         onOpenChange={setJourneyDialogOpen}
+      />
+
+      <TransferLeadDialog
+        leadId={selectedLeadForTransfer?.id || null}
+        leadName={selectedLeadForTransfer?.name || ''}
+        currentAssignedTo={selectedLeadForTransfer?.assignedTo || null}
+        open={transferDialogOpen}
+        onOpenChange={setTransferDialogOpen}
       />
     </div>
   );
