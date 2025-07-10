@@ -107,13 +107,17 @@ const ScriptCard = ({ script, onEdit, onDelete, onView, canEdit }: {
   );
 };
 
-export const Scripts = () => {
+interface ScriptsProps {
+  addDialogOpen: boolean;
+  setAddDialogOpen: (open: boolean) => void;
+}
+
+export const Scripts = ({ addDialogOpen, setAddDialogOpen }: ScriptsProps) => {
   const { scripts, loading, isUpdating } = useRealtimeScripts();
   const { user } = useAuth();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
