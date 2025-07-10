@@ -188,7 +188,7 @@ export const LeadsPipeline = () => {
                                   </h3>
                                   <div className="flex gap-1 ml-2">
                                      <Button
-                                       variant="ghost"
+                                        variant="outline"
                                        size="sm"
                                        className="h-6 w-6 p-0"
                                        onClick={(e) => {
