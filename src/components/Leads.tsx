@@ -119,8 +119,10 @@ export const Leads = () => {
   };
 
   const handleEdit = (lead: any) => {
+    console.log('Handle edit clicked, lead:', lead);
     setEditingLead(lead);
     setEditDialogOpen(true);
+    console.log('Edit dialog state set to true');
   };
 
   const handleViewJourney = (lead: any) => {
