@@ -75,7 +75,7 @@ export const RescheduleAppointmentDialog = ({ open, onOpenChange, appointment }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Reagendar Agendamento</DialogTitle>
         </DialogHeader>

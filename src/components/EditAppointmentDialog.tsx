@@ -128,7 +128,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Editar Agendamento</DialogTitle>
         </DialogHeader>

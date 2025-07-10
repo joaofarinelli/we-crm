@@ -79,7 +79,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Editar Agendamento</DialogTitle>
         </DialogHeader>
