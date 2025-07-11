@@ -22,6 +22,7 @@ import { useRoles } from '@/hooks/useRoles';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 
 interface InviteUserDialogProps {
   onUserCreated?: () => void;
@@ -36,6 +37,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   
   const { roles } = useRoles();
   const { toast } = useToast();
+  const { company } = useCurrentCompany();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +68,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
           email,
           password,
           role_id: selectedRole,
+          company_id: company?.id,
           create_with_password: true,
           send_email: false
         }

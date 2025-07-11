@@ -64,6 +64,7 @@ export const InviteUserDialog = ({
         body: {
           email: data.email,
           role_id: data.role_id,
+          company_id: companyId,
           create_with_password: data.create_with_password,
           password: data.create_with_password ? data.password : undefined,
           send_email: !data.create_with_password
