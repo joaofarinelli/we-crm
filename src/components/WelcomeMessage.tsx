@@ -160,7 +160,7 @@ export const WelcomeMessage = () => {
       </div>
 
       <div ref={inviteDialogRef} style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-        <InviteUserDialog onInviteSent={() => console.log('Convite enviado!')} />
+        <InviteUserDialog onUserCreated={() => console.log('Usuário criado!')} />
       </div>
     </>
   );

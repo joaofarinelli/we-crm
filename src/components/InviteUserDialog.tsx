@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -20,37 +19,83 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useRoles } from '@/hooks/useRoles';
-import { useInvitations } from '@/hooks/useInvitations';
-import { useInvitationSettings } from '@/hooks/useInvitationSettings';
-import { UserPlus, Mail, Link2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { UserPlus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InviteUserDialogProps {
-  onInviteSent?: () => void;
+  onUserCreated?: () => void;
 }
 
-export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
+export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
-  const [sendEmail, setSendEmail] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { roles } = useRoles();
-  const { createN8nInvitation } = useInvitations();
-  const { settings } = useInvitationSettings();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !selectedRole) return;
+    if (!email || !password || !selectedRole) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     
     try {
-      await createN8nInvitation(email, selectedRole);
-      console.log('Convite enviado!');
-    } catch (error) {
-      console.error('Erro:', error);
+      const { data: result, error } = await supabase.functions.invoke('invite-user', {
+        body: {
+          email,
+          password,
+          role_id: selectedRole,
+          create_with_password: true,
+          send_email: false
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao criar usuário');
+      }
+
+      toast({
+        title: "Usuário criado com sucesso!",
+        description: `${email} foi criado diretamente no sistema`
+      });
+      
+      setEmail('');
+      setPassword('');
+      setSelectedRole('');
+      setDialogOpen(false);
+      onUserCreated?.();
+    } catch (error: any) {
+      console.error('Erro ao criar usuário:', error);
+      toast({
+        title: "Erro ao criar usuário",
+        description: error.message || "Ocorreu um erro inesperado",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -61,20 +106,20 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
       <DialogTrigger asChild>
         <Button>
           <UserPlus className="w-4 h-4 mr-2" />
-          Convidar Usuário
+          Criar Usuário
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Convidar Novo Usuário</DialogTitle>
+          <DialogTitle>Criar Novo Usuário</DialogTitle>
           <DialogDescription>
-            Envie um convite para um novo usuário se juntar à sua empresa
+            Crie um novo usuário diretamente no sistema
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
               type="email"
@@ -84,9 +129,21 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
               required
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Senha *</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Senha do usuário (mín. 6 caracteres)"
+              required
+            />
+          </div>
           
           <div className="space-y-2">
-            <Label htmlFor="role">Cargo</Label>
+            <Label htmlFor="role">Cargo *</Label>
             <Select value={selectedRole} onValueChange={setSelectedRole} required>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um cargo" />
@@ -100,46 +157,6 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {sendEmail ? (
-                  <Mail className="h-4 w-4 text-primary" />
-                ) : (
-                  <Link2 className="h-4 w-4 text-muted-foreground" />
-                )}
-                <Label htmlFor="sendEmail" className="font-medium">
-                  Enviar email automaticamente
-                </Label>
-              </div>
-              <Switch
-                id="sendEmail"
-                checked={sendEmail}
-                onCheckedChange={setSendEmail}
-              />
-            </div>
-            
-            <div className="text-sm text-muted-foreground">
-              {sendEmail ? (
-                <div className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Email automático</p>
-                    <p>O usuário receberá um email de convite do Supabase com um link direto para se registrar.</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-start gap-2">
-                  <Link2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Link manual</p>
-                    <p>Você precisará compartilhar um link de registro manualmente com o usuário.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
           
           <div className="flex justify-end gap-2">
             <Button 
@@ -151,7 +168,7 @@ export const InviteUserDialog = ({ onInviteSent }: InviteUserDialogProps) => {
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Processando...' : sendEmail ? 'Enviar Convite' : 'Criar Convite'}
+              {isSubmitting ? 'Criando...' : 'Criar Usuário'}
             </Button>
           </div>
         </form>
