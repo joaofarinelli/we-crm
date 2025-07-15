@@ -69,38 +69,59 @@ export const InviteUserDialog = ({
     
     setLoading(true);
     try {
-      const { data: result, error } = await supabase.functions.invoke('invite-user', {
-        body: {
-          email: data.email,
-          role_id: data.role_id,
-          company_id: companyId,
-          create_with_password: data.create_with_password,
-          password: data.create_with_password ? data.password : undefined,
-          send_email: !data.create_with_password
-        }
+      // Buscar nome do cargo
+      const selectedRole = roles.find(role => role.id === data.role_id);
+      const roleName = selectedRole?.name || 'Admin';
+
+      // URL fixa do N8N
+      const n8nUrl = 'https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
+
+      console.log('Enviando dados para N8N:', {
+        nome: data.email, // Usando email como nome se não tiver nome específico
+        email: data.email,
+        senha: data.password || '',
+        cargo: roleName
       });
 
-      if (error) {
-        throw error;
+      // Enviar para N8N
+      const response = await fetch(n8nUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+          nome: data.email, // Usando email como nome
+          email: data.email,
+          senha: data.password || '',
+          cargo: roleName
+        }),
+      });
+
+      console.log('Resposta do N8N:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro na resposta do N8N:', errorText);
+        throw new Error(`Erro do servidor N8N: ${response.status} - ${response.statusText}`);
       }
 
-      if (!result.success) {
-        throw new Error(result.error || 'Erro ao processar solicitação');
-      }
+      const responseData = await response.text();
+      console.log('Dados de resposta do N8N:', responseData);
 
       toast({
-        title: data.create_with_password ? "Usuário criado com sucesso!" : "Convite enviado com sucesso!",
-        description: result.message
+        title: "Dados enviados com sucesso!",
+        description: `Dados do usuário enviados para o N8N`
       });
       
       form.reset();
       setOpen(false);
       onSuccess?.();
     } catch (error: any) {
-      console.error('Erro ao processar usuário:', error);
+      console.error('Erro ao enviar dados para N8N:', error);
       toast({
-        title: data.create_with_password ? "Erro ao criar usuário" : "Erro ao enviar convite",
-        description: error.message || "Ocorreu um erro inesperado",
+        title: "Erro ao enviar dados",
+        description: error.message || "Ocorreu um erro inesperado ao enviar para N8N",
         variant: "destructive"
       });
     } finally {
