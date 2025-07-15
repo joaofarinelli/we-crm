@@ -76,18 +76,18 @@ export const InviteUserDialog = ({
       const selectedRole = roles.find(role => role.id === data.role_id);
       const roleName = selectedRole?.name || 'Admin';
 
-      // URL fixa do N8N
-      const n8nUrl = 'https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
+      // URL do webhook
+      const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
 
-      console.log('Enviando dados para N8N:', {
+      console.log('Enviando dados para webhook:', {
         nome: data.name,
         email: data.email,
         senha: data.password || '',
         cargo: roleName
       });
 
-      // Enviar para N8N
-      await fetch(n8nUrl, {
+      // Enviar para webhook
+      await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,21 +101,21 @@ export const InviteUserDialog = ({
         }),
       });
 
-      console.log('Dados enviados para N8N com sucesso');
+      console.log('Dados enviados para webhook com sucesso');
 
       toast({
         title: "Dados enviados com sucesso!",
-        description: `Dados do usuário enviados para o N8N`
+        description: `Dados do usuário enviados para o webhook`
       });
       
       form.reset();
       setOpen(false);
       onSuccess?.();
     } catch (error: any) {
-      console.error('Erro ao enviar dados para N8N:', error);
+      console.error('Erro ao enviar dados para webhook:', error);
       toast({
         title: "Erro ao enviar dados",
-        description: error.message || "Ocorreu um erro inesperado ao enviar para N8N",
+        description: error.message || "Ocorreu um erro inesperado ao enviar para webhook",
         variant: "destructive"
       });
     } finally {
