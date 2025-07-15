@@ -24,7 +24,8 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
     full_name: '',
     company_id: '',
     role_id: '',
-    is_super_admin: false
+    is_super_admin: false,
+    n8n_url: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -41,11 +42,11 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Para Super Admin, não é obrigatório ter company_id e role_id
-    if (!formData.email || !formData.password || (!formData.is_super_admin && (!formData.company_id || !formData.role_id))) {
+    // Validações básicas
+    if (!formData.email || !formData.password || !formData.full_name || !formData.n8n_url) {
       toast({
         title: "Erro",
-        description: formData.is_super_admin ? "Email e senha são obrigatórios" : "Preencha todos os campos obrigatórios",
+        description: "Preencha todos os campos obrigatórios",
         variant: "destructive"
       });
       return;
@@ -60,43 +61,46 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
       return;
     }
 
+    // Para usuários de empresa, company_id e role_id são obrigatórios
+    if (!formData.is_super_admin && (!formData.company_id || !formData.role_id)) {
+      toast({
+        title: "Erro",
+        description: "Selecione uma empresa e cargo",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data: result, error } = await supabase.functions.invoke('invite-user', {
-        body: {
+      // Buscar nome do cargo se não for super admin
+      let roleName = 'Super Admin';
+      if (!formData.is_super_admin && formData.role_id) {
+        const role = roles.find(r => r.id === formData.role_id);
+        roleName = role?.name || 'Admin';
+      }
+
+      // Enviar para N8N
+      const response = await fetch(formData.n8n_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: formData.full_name,
           email: formData.email,
-          password: formData.password,
-          role_id: formData.is_super_admin ? null : formData.role_id,
-          company_id: formData.is_super_admin ? null : formData.company_id,
-          is_super_admin: formData.is_super_admin,
-          create_with_password: true,
-          send_email: false
-        }
+          senha: formData.password,
+          cargo: roleName
+        }),
       });
 
-      if (error) {
-        throw error;
-      }
-
-      if (!result.success) {
-        throw new Error(result.error || 'Erro ao criar usuário');
-      }
-
-      // Atualizar o nome completo e is_super_admin se fornecido
-      if ((formData.full_name || formData.is_super_admin) && result.user_id) {
-        const updateData: any = {};
-        if (formData.full_name) updateData.full_name = formData.full_name;
-        if (formData.is_super_admin) updateData.is_super_admin = true;
-        
-        await supabase
-          .from('profiles')
-          .update(updateData)
-          .eq('id', result.user_id);
+      if (!response.ok) {
+        throw new Error('Erro ao enviar dados para N8N');
       }
 
       toast({
-        title: "Usuário criado com sucesso!",
-        description: `${formData.email} foi criado diretamente no sistema`
+        title: "Dados enviados com sucesso!",
+        description: `Informações de ${formData.email} foram enviadas para N8N`
       });
 
       onSuccess();
@@ -107,12 +111,13 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         full_name: '',
         company_id: '',
         role_id: '',
-        is_super_admin: false
+        is_super_admin: false,
+        n8n_url: ''
       });
     } catch (error: any) {
-      console.error('Erro ao criar usuário:', error);
+      console.error('Erro ao enviar dados:', error);
       toast({
-        title: "Erro ao criar usuário",
+        title: "Erro ao enviar dados",
         description: error.message || "Ocorreu um erro inesperado",
         variant: "destructive"
       });
@@ -154,12 +159,25 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="full_name">Nome Completo</Label>
+            <Label htmlFor="full_name">Nome Completo *</Label>
             <Input
               id="full_name"
               value={formData.full_name}
               onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
               placeholder="Nome do usuário"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="n8n_url">URL do N8N *</Label>
+            <Input
+              id="n8n_url"
+              type="url"
+              value={formData.n8n_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, n8n_url: e.target.value }))}
+              placeholder="https://sua-instancia.n8n.cloud/webhook/..."
+              required
             />
           </div>
 
@@ -230,7 +248,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
               Cancelar
             </Button>
             <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-              {loading ? 'Criando...' : 'Criar Usuário'}
+              {loading ? 'Enviando...' : 'Enviar para N8N'}
             </Button>
           </div>
         </form>
