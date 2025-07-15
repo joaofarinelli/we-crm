@@ -1,7 +1,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, Users } from 'lucide-react';
+import { Clock, User, Users, Shield } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
@@ -111,9 +111,10 @@ export const MonthView = ({
           return (
             <div
               key={day.toISOString()}
-              className={`min-h-[80px] md:min-h-[140px] p-1 md:p-2 border rounded-lg ${
-                isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
+              className={`min-h-[80px] md:min-h-[140px] p-1 md:p-2 border rounded-lg cursor-pointer ${
+                isToday ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 'bg-white border-gray-200 hover:bg-gray-50'
               }`}
+              onDoubleClick={() => onDateDoubleClick(day)}
             >
               <div className={`text-xs md:text-sm font-medium mb-1 md:mb-2 ${
                 isToday ? 'text-blue-600' : 'text-gray-900'
@@ -176,10 +177,42 @@ export const MonthView = ({
                   </div>
                 ))}
 
+                {/* Bloqueios de Horário */}
+                {dayBlocks.slice(0, 2).map((block) => (
+                  <div
+                    key={block.id}
+                    className="text-xs p-1 rounded bg-red-100 text-red-800 border border-red-200 cursor-pointer hover:bg-red-200 transition-colors"
+                    onClick={() => onBlockClick(block)}
+                    title={block.reason || 'Horário bloqueado'}
+                  >
+                    <div className="flex items-center gap-1 mb-1">
+                      <Shield className="w-2 h-2 md:w-3 md:h-3" />
+                      {block.block_type === 'full_day' ? (
+                        <span className="font-medium text-[10px] md:text-xs">Dia inteiro</span>
+                      ) : (
+                        <span className="font-medium text-[10px] md:text-xs">
+                          {block.start_time && formatTime(block.start_time)}
+                          {block.end_time && ` - ${formatTime(block.end_time)}`}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="font-medium truncate text-[10px] md:text-xs">
+                      Bloqueado
+                    </div>
+                    
+                    {block.reason && (
+                      <div className="text-[9px] md:text-[10px] text-red-600 truncate hidden md:block" title={block.reason}>
+                        {block.reason}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
                 {/* Indicador de mais eventos */}
-                {(dayAppointments.length + dayMeetings.length) > 2 && (
+                {(dayAppointments.length + dayMeetings.length + dayBlocks.length) > 2 && (
                   <div className="text-[10px] text-gray-500 font-medium">
-                    +{(dayAppointments.length + dayMeetings.length) - 2} mais
+                    +{(dayAppointments.length + dayMeetings.length + dayBlocks.length) - 2} mais
                   </div>
                 )}
               </div>
