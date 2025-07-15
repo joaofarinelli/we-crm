@@ -43,7 +43,11 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("🐛 [DEBUG] Iniciando criação de usuário");
+    console.log("🐛 [DEBUG] Dados do formulário:", { name, email, selectedRole, companyId: company?.id });
+    
     if (!name || !email || !password || !selectedRole || !company?.id) {
+      console.log("❌ [DEBUG] Erro: Campos obrigatórios faltando");
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -53,6 +57,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
     }
 
     if (password.length < 6) {
+      console.log("❌ [DEBUG] Erro: Senha muito curta");
       toast({
         title: "Erro",
         description: "A senha deve ter pelo menos 6 caracteres",
@@ -65,25 +70,36 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
     
     try {
       const roleData = roles.find(role => role.id === selectedRole);
+      const webhookUrl = 'https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
       
-      // Usando a URL correta do webhook N8N
-      const response = await fetch('https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292', {
+      console.log("🔗 [DEBUG] URL do webhook:", webhookUrl);
+      console.log("👤 [DEBUG] Dados do role encontrado:", roleData);
+      
+      const payload = {
+        nome: name,
+        email: email,
+        senha: password,
+        cargo: roleData?.name || '',
+        companyId: company?.id,
+        companyName: company?.name || '',
+        create_with_password: true,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log("📦 [DEBUG] Payload a ser enviado:", payload);
+      console.log("🚀 [DEBUG] Iniciando requisição para:", webhookUrl);
+      
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         mode: 'no-cors',
-        body: JSON.stringify({
-          nome: name,
-          email: email,
-          senha: password,
-          cargo: roleData?.name || '',
-          companyId: company?.id,
-          companyName: company?.name || '',
-          create_with_password: true,
-          timestamp: new Date().toISOString()
-        }),
+        body: JSON.stringify(payload),
       });
+
+      console.log("✅ [DEBUG] Requisição concluída sem erro");
+      console.log("📤 [DEBUG] Response object:", response);
 
       // Como estamos usando no-cors, não podemos verificar o status da resposta
       // Então assumimos sucesso se não houve erro na requisição
@@ -92,6 +108,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
         description: `A solicitação para criar ${name} foi enviada. Verifique se o usuário foi criado no sistema.`
       });
       
+      console.log("🧹 [DEBUG] Limpando formulário e fechando dialog");
       setName('');
       setEmail('');
       setPassword('');
@@ -99,16 +116,28 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
       setDialogOpen(false);
       onUserCreated?.();
     } catch (error: any) {
-      console.error('Erro ao enviar solicitação:', error);
+      console.error('❌ [DEBUG] Erro capturado:', error);
+      console.error('❌ [DEBUG] Tipo do erro:', error.constructor.name);
+      console.error('❌ [DEBUG] Mensagem do erro:', error.message);
+      console.error('❌ [DEBUG] Stack trace:', error.stack);
       
-      // Verificar se é erro de rede
-      if (error.message?.includes('fetch') || error.name === 'TypeError') {
+      // Verificar se é erro de rede DNS
+      if (error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+        console.error('🌐 [DEBUG] Erro DNS detectado - URL não pode ser resolvida');
+        toast({
+          title: "Erro de DNS",
+          description: "A URL do webhook não pode ser encontrada. Verifique se o domínio está correto e acessível.",
+          variant: "destructive"
+        });
+      } else if (error.message?.includes('fetch') || error.name === 'TypeError') {
+        console.error('🔌 [DEBUG] Erro de conexão detectado');
         toast({
           title: "Erro de conexão",
           description: "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
           variant: "destructive"
         });
       } else {
+        console.error('❓ [DEBUG] Erro desconhecido');
         toast({
           title: "Erro ao criar usuário",
           description: error.message || "Ocorreu um erro inesperado",
@@ -116,6 +145,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
         });
       }
     } finally {
+      console.log("🏁 [DEBUG] Finalizando requisição, isSubmitting = false");
       setIsSubmitting(false);
     }
   };
