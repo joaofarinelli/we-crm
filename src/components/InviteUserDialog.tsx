@@ -66,7 +66,8 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
     try {
       const roleData = roles.find(role => role.id === selectedRole);
       
-      const response = await fetch('https://cloud.levante.app.br/webhook/cf9d62ed-59cb-4cd3-a69e-c4a1e05de77d', {
+      // Usando webhook N8N alternativo
+      const response = await fetch('https://n8n.levante.app.br/webhook/cf9d62ed-59cb-4cd3-a69e-c4a1e05de77d', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,13 +80,16 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
           cargo: roleData?.name || '',
           companyId: company?.id,
           companyName: company?.name || '',
-          create_with_password: true
+          create_with_password: true,
+          timestamp: new Date().toISOString()
         }),
       });
 
+      // Como estamos usando no-cors, não podemos verificar o status da resposta
+      // Então assumimos sucesso se não houve erro na requisição
       toast({
-        title: "Usuário criado com sucesso!",
-        description: `${name} foi criado diretamente no sistema`
+        title: "Solicitação enviada!",
+        description: `A solicitação para criar ${name} foi enviada. Verifique se o usuário foi criado no sistema.`
       });
       
       setName('');
@@ -95,12 +99,22 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
       setDialogOpen(false);
       onUserCreated?.();
     } catch (error: any) {
-      console.error('Erro ao criar usuário:', error);
-      toast({
-        title: "Erro ao criar usuário",
-        description: error.message || "Ocorreu um erro inesperado",
-        variant: "destructive"
-      });
+      console.error('Erro ao enviar solicitação:', error);
+      
+      // Verificar se é erro de rede
+      if (error.message?.includes('fetch') || error.name === 'TypeError') {
+        toast({
+          title: "Erro de conexão",
+          description: "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro ao criar usuário",
+          description: error.message || "Ocorreu um erro inesperado",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
