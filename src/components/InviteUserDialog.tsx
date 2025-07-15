@@ -20,8 +20,7 @@ import {
 } from '@/components/ui/select';
 import { useRoles } from '@/hooks/useRoles';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 
 interface InviteUserDialogProps {
@@ -30,10 +29,12 @@ interface InviteUserDialogProps {
 
 export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const { roles } = useRoles();
   const { toast } = useToast();
@@ -42,7 +43,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !selectedRole || !company?.id) {
+    if (!name || !email || !password || !selectedRole || !company?.id) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -63,30 +64,31 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
     setIsSubmitting(true);
     
     try {
-      const { data: result, error } = await supabase.functions.invoke('invite-user', {
-        body: {
-          email,
-          password,
-          role_id: selectedRole,
-          company_id: company?.id,
-          create_with_password: true,
-          send_email: false
-        }
+      const roleData = roles.find(role => role.id === selectedRole);
+      
+      const response = await fetch('https://cloud.levante.app.br/webhook/cf9d62ed-59cb-4cd3-a69e-c4a1e05de77d', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors',
+        body: JSON.stringify({
+          nome: name,
+          email: email,
+          senha: password,
+          cargo: roleData?.name || '',
+          companyId: company?.id,
+          companyName: company?.name || '',
+          create_with_password: true
+        }),
       });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!result.success) {
-        throw new Error(result.error || 'Erro ao criar usuário');
-      }
 
       toast({
         title: "Usuário criado com sucesso!",
-        description: `${email} foi criado diretamente no sistema`
+        description: `${name} foi criado diretamente no sistema`
       });
       
+      setName('');
       setEmail('');
       setPassword('');
       setSelectedRole('');
@@ -122,6 +124,18 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="name">Nome *</Label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome completo do usuário"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
@@ -135,14 +149,30 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha *</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Senha do usuário (mín. 6 caracteres)"
-              required
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Senha do usuário (mín. 6 caracteres)"
+                required
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
           
           <div className="space-y-2">
