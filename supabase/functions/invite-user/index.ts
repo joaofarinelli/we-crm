@@ -8,11 +8,13 @@ const corsHeaders = {
 
 interface InviteUserRequest {
   email: string;
-  role_id: string;
+  role_id?: string;
+  company_id?: string;
   send_email?: boolean;
   redirect_to?: string;
   password?: string;
   create_with_password?: boolean;
+  is_super_admin?: boolean;
 }
 
 serve(async (req: Request) => {
@@ -59,22 +61,36 @@ serve(async (req: Request) => {
       throw new Error('Failed to get authenticated user');
     }
 
-    // Get user's company
+    // Get user's company (only required for non-super-admin creation)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('company_id')
+      .select('company_id, is_super_admin')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile?.company_id) {
-      throw new Error('User profile not found or no company associated');
+    if (profileError) {
+      throw new Error('User profile not found');
     }
 
     // Parse request body
-    const { email, role_id, send_email = true, redirect_to, password, create_with_password = false }: InviteUserRequest = await req.json();
+    const { 
+      email, 
+      role_id, 
+      company_id, 
+      send_email = true, 
+      redirect_to, 
+      password, 
+      create_with_password = false,
+      is_super_admin = false
+    }: InviteUserRequest = await req.json();
 
-    if (!email || !role_id) {
-      throw new Error('Email and role_id are required');
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    // For super admin, role_id and company_id are optional
+    if (!is_super_admin && (!role_id || (!company_id && !profile?.company_id))) {
+      throw new Error('For regular users, role_id and company_id are required');
     }
 
     if (create_with_password && !password) {
@@ -89,13 +105,17 @@ serve(async (req: Request) => {
     if (create_with_password) {
       console.log('👤 Creating user directly with password');
       
+      const final_company_id = is_super_admin ? null : (company_id || profile?.company_id);
+      const final_role_id = is_super_admin ? null : role_id;
+      
       const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
         user_metadata: {
-          role_id: role_id,
-          company_id: profile.company_id,
+          role_id: final_role_id,
+          company_id: final_company_id,
+          is_super_admin,
           created_via_admin: true
         }
       });
@@ -109,15 +129,24 @@ serve(async (req: Request) => {
       console.log('✅ User created successfully:', supabase_invite_id);
       
       // Create profile for the new user
-      const { error: profileCreateError } = await supabase
+      const profileData: any = {
+        id: userData.user.id,
+        email,
+        full_name: email.split('@')[0]
+      };
+
+      if (!is_super_admin) {
+        profileData.company_id = final_company_id;
+        profileData.role_id = final_role_id;
+      }
+
+      if (is_super_admin) {
+        profileData.is_super_admin = true;
+      }
+
+      const { error: profileCreateError } = await supabaseAdmin
         .from('profiles')
-        .insert({
-          id: userData.user.id,
-          email,
-          company_id: profile.company_id,
-          role_id,
-          full_name: email.split('@')[0]
-        });
+        .insert(profileData);
 
       if (profileCreateError) {
         console.error('❌ Failed to create profile:', profileCreateError);
@@ -129,13 +158,17 @@ serve(async (req: Request) => {
       const defaultRedirectTo = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.supabase.co/`;
       const inviteRedirectTo = redirect_to || defaultRedirectTo;
 
+      const final_company_id = is_super_admin ? null : (company_id || profile?.company_id);
+      const final_role_id = is_super_admin ? null : role_id;
+      
       const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
         email,
         {
           redirectTo: inviteRedirectTo,
           data: {
-            role_id: role_id,
-            company_id: profile.company_id,
+            role_id: final_role_id,
+            company_id: final_company_id,
+            is_super_admin,
             invited_via_function: true
           }
         }
@@ -153,12 +186,15 @@ serve(async (req: Request) => {
     // Save invitation record in our table for tracking (only if not creating user directly)
     let invitation = null;
     if (!create_with_password) {
+      const final_company_id = is_super_admin ? null : (company_id || profile?.company_id);
+      const final_role_id = is_super_admin ? null : role_id;
+      
       const { data: invitationData, error: insertError } = await supabase
         .from('user_invitations')
         .insert({
           email,
-          role_id,
-          company_id: profile.company_id,
+          role_id: final_role_id,
+          company_id: final_company_id,
           invited_by: user.id,
           sent_via_email: send_email,
           supabase_invite_id

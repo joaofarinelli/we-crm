@@ -20,44 +20,30 @@ export const useSaasAdmin = () => {
       console.log('useSaasAdmin: Checking admin status for user:', user.id);
 
       try {
-        // Use the secure function to check admin status
-        const { data, error } = await supabase.rpc('is_saas_admin_for_company_management');
+        // Use the updated function to check super admin status
+        const { data, error } = await supabase.rpc('is_saas_admin');
         
         if (error) {
-          console.error('useSaasAdmin: Error calling is_saas_admin_for_company_management RPC:', error);
+          console.error('useSaasAdmin: Error calling is_saas_admin RPC:', error);
           
-          // Fallback: try the original function
-          console.log('useSaasAdmin: Trying fallback is_saas_admin function...');
-          const { data: fallbackData, error: fallbackError } = await supabase.rpc('is_saas_admin');
-          
-          if (fallbackError) {
-            console.error('useSaasAdmin: Fallback method also failed:', fallbackError);
-            
-            // Last resort: direct query (this may fail due to RLS)
-            console.log('useSaasAdmin: Trying direct query fallback...');
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .select(`
-                role_id,
-                roles!inner(name)
-              `)
-              .eq('id', user.id)
-              .single();
+          // Fallback: direct query for is_super_admin
+          console.log('useSaasAdmin: Trying direct query fallback...');
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_super_admin')
+            .eq('id', user.id)
+            .single();
 
-            if (profileError) {
-              console.error('useSaasAdmin: All methods failed:', profileError);
-              throw profileError;
-            }
-
-            const isAdmin = profileData?.roles?.name === 'Administrador do Sistema';
+          if (profileError) {
+            console.error('useSaasAdmin: Direct query failed:', profileError);
+            setIsSaasAdmin(false);
+          } else {
+            const isAdmin = profileData?.is_super_admin || false;
             console.log('useSaasAdmin: Direct query result:', isAdmin);
             setIsSaasAdmin(isAdmin);
-          } else {
-            console.log('useSaasAdmin: Fallback RPC result:', fallbackData);
-            setIsSaasAdmin(fallbackData || false);
           }
         } else {
-          console.log('useSaasAdmin: Primary RPC result:', data);
+          console.log('useSaasAdmin: RPC result:', data);
           setIsSaasAdmin(data || false);
         }
         

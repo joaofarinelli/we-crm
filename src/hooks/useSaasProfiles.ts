@@ -8,6 +8,7 @@ interface SaasProfile {
   full_name: string | null;
   role_id: string | null;
   company_id: string | null;
+  is_super_admin: boolean | null;
   created_at: string;
   updated_at: string;
   roles?: {

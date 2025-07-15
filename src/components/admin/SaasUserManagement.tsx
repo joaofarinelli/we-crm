@@ -44,9 +44,9 @@ export const SaasUserManagement = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const getRoleType = (role: any) => {
+  const getRoleType = (role: any, isSuperAdmin: boolean) => {
+    if (isSuperAdmin) return 'destructive';
     if (!role) return 'default';
-    if (role.is_system_role) return 'destructive';
     if (role.name === 'Admin') return 'secondary';
     return 'default';
   };
@@ -148,9 +148,9 @@ export const SaasUserManagement = () => {
             </div>
             <div className="bg-muted/50 p-4 rounded-lg">
               <div className="text-2xl font-bold">
-                {profiles.filter(p => p.roles?.is_system_role).length}
+                {profiles.filter(p => p.is_super_admin).length}
               </div>
-              <div className="text-sm text-muted-foreground">Admins do sistema</div>
+              <div className="text-sm text-muted-foreground">Super Admins</div>
             </div>
           </div>
 
@@ -180,8 +180,13 @@ export const SaasUserManagement = () => {
                     <TableRow key={profile.id}>
                       <TableCell>
                         <div className="space-y-1 min-w-0">
-                          <div className="font-medium truncate">
+                          <div className="font-medium truncate flex items-center gap-2">
                             {profile.full_name || 'Nome não informado'}
+                            {profile.is_super_admin && (
+                              <Badge variant="destructive" className="text-xs">
+                                Super Admin
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-sm text-muted-foreground flex items-center gap-1 min-w-0">
                             <Mail className="w-3 h-3 flex-shrink-0" />
@@ -196,8 +201,8 @@ export const SaasUserManagement = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getRoleType(profile.roles)}>
-                          {profile.roles?.name || 'Sem cargo'}
+                        <Badge variant={getRoleType(profile.roles, profile.is_super_admin)}>
+                          {profile.is_super_admin ? 'Super Administrador' : (profile.roles?.name || 'Sem cargo')}
                         </Badge>
                       </TableCell>
                       <TableCell>

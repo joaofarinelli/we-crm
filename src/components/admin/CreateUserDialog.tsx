@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
 import { useSaasRoles } from '@/hooks/useSaasRoles';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,8 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
     password: '',
     full_name: '',
     company_id: '',
-    role_id: ''
+    role_id: '',
+    is_super_admin: false
   });
   const [loading, setLoading] = useState(false);
 
@@ -39,10 +41,11 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password || !formData.company_id || !formData.role_id) {
+    // Para Super Admin, não é obrigatório ter company_id e role_id
+    if (!formData.email || !formData.password || (!formData.is_super_admin && (!formData.company_id || !formData.role_id))) {
       toast({
         title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
+        description: formData.is_super_admin ? "Email e senha são obrigatórios" : "Preencha todos os campos obrigatórios",
         variant: "destructive"
       });
       return;
@@ -63,7 +66,9 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         body: {
           email: formData.email,
           password: formData.password,
-          role_id: formData.role_id,
+          role_id: formData.is_super_admin ? null : formData.role_id,
+          company_id: formData.is_super_admin ? null : formData.company_id,
+          is_super_admin: formData.is_super_admin,
           create_with_password: true,
           send_email: false
         }
@@ -77,11 +82,15 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         throw new Error(result.error || 'Erro ao criar usuário');
       }
 
-      // Atualizar o nome completo se fornecido
-      if (formData.full_name && result.user_id) {
+      // Atualizar o nome completo e is_super_admin se fornecido
+      if ((formData.full_name || formData.is_super_admin) && result.user_id) {
+        const updateData: any = {};
+        if (formData.full_name) updateData.full_name = formData.full_name;
+        if (formData.is_super_admin) updateData.is_super_admin = true;
+        
         await supabase
           .from('profiles')
-          .update({ full_name: formData.full_name })
+          .update(updateData)
           .eq('id', result.user_id);
       }
 
@@ -97,7 +106,8 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         password: '',
         full_name: '',
         company_id: '',
-        role_id: ''
+        role_id: '',
+        is_super_admin: false
       });
     } catch (error: any) {
       console.error('Erro ao criar usuário:', error);
@@ -153,43 +163,67 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="company">Empresa *</Label>
-            <Select 
-              value={formData.company_id} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, company_id: value, role_id: '' }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map(company => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_super_admin"
+                checked={formData.is_super_admin}
+                onCheckedChange={(checked) => 
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    is_super_admin: checked === true,
+                    company_id: checked === true ? '' : prev.company_id,
+                    role_id: checked === true ? '' : prev.role_id
+                  }))
+                }
+              />
+              <Label htmlFor="is_super_admin" className="text-sm font-medium">
+                Super Administrador (acesso total ao sistema)
+              </Label>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role">Cargo *</Label>
-            <Select 
-              value={formData.role_id} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, role_id: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um cargo" />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map(role => (
-                  <SelectItem key={role.id} value={role.id}>
-                    {role.name} {role.is_system_role && '(Sistema)'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!formData.is_super_admin && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="company">Empresa *</Label>
+                <Select 
+                  value={formData.company_id} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, company_id: value, role_id: '' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map(company => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="role">Cargo *</Label>
+                <Select 
+                  value={formData.role_id} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, role_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cargo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.filter(role => role.name !== 'Administrador do Sistema').map(role => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
           <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
