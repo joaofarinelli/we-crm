@@ -14,6 +14,7 @@ import { PipelineFilters } from '@/components/PipelineFilters';
 import { TagBadge } from '@/components/TagBadge';
 import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
+import { ViewAppointmentDialog } from '@/components/ViewAppointmentDialog';
 import { ViewLeadJourneyDialog } from '@/components/ViewLeadJourneyDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -35,6 +36,7 @@ export const LeadsPipeline = () => {
   const [addLeadDialogOpen, setAddLeadDialogOpen] = useState(false);
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
+  const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
   const [viewJourneyDialogOpen, setViewJourneyDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [showColumnManager, setShowColumnManager] = useState(false);
@@ -79,9 +81,15 @@ export const LeadsPipeline = () => {
     }
   };
 
-  const handleAddAppointment = (lead: any) => {
+  const handleAppointmentAction = (lead: any) => {
     setSelectedLead(lead);
-    setAddAppointmentDialogOpen(true);
+    // Se o lead tem agendamentos, mostra o agendamento existente
+    if (lead.appointments_count > 0 && lead.latest_appointment) {
+      setViewAppointmentDialogOpen(true);
+    } else {
+      // Se não tem agendamentos, abre dialog para criar novo
+      setAddAppointmentDialogOpen(true);
+    }
   };
 
   const handleViewJourney = (lead: any) => {
@@ -225,7 +233,7 @@ export const LeadsPipeline = () => {
                                       className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleAddAppointment(lead);
+                                        handleAppointmentAction(lead);
                                       }}
                                     >
                                       <Calendar className="w-3 h-3" />
@@ -365,7 +373,13 @@ export const LeadsPipeline = () => {
         onOpenChange={setAddAppointmentDialogOpen}
       />
 
-      <ViewLeadJourneyDialog 
+      <ViewAppointmentDialog 
+        open={viewAppointmentDialogOpen}
+        onOpenChange={setViewAppointmentDialogOpen}
+        appointment={selectedLead?.latest_appointment || null}
+      />
+
+      <ViewLeadJourneyDialog
         leadId={selectedLead?.id || null}
         leadName={selectedLead?.name || ''}
         open={viewJourneyDialogOpen}
