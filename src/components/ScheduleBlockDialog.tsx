@@ -22,7 +22,6 @@ import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
-import { format } from 'date-fns';
 
 interface ScheduleBlockDialogProps {
   open: boolean;
@@ -64,7 +63,8 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit, selectedD
       });
     } else {
       // Pre-fill with selected date if available
-      const defaultDate = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+      const defaultDate = selectedDate ? 
+        `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` : '';
       setFormData({
         block_type: 'time_slot',
         start_date: defaultDate,
