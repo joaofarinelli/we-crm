@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { filterLeadsByRole } from '@/lib/lead-filters';
 
 interface Lead {
   id: string;
@@ -22,6 +24,7 @@ export const useRealtimeLeads = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { userInfo } = useCurrentUser();
 
   const fetchLeads = async () => {
     if (!user) {
@@ -50,7 +53,9 @@ export const useRealtimeLeads = () => {
 
       if (error) throw error;
       
-      setLeads(data || []);
+      // Aplicar filtro baseado no role do usuário
+      const filteredLeads = filterLeadsByRole(data || [], user.id, userInfo?.role_name || null);
+      setLeads(filteredLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
       toast({

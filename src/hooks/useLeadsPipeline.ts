@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
+import { applyRoleBasedLeadFilter } from '@/lib/lead-filters';
 
 export interface PipelineFilterState {
   searchTerm: string;
@@ -72,7 +73,7 @@ export const useLeadsPipeline = () => {
         return;
       }
 
-      // Construir query com filtros
+      // Construir query base
       let query = supabase
         .from('leads')
         .select(`
@@ -86,8 +87,10 @@ export const useLeadsPipeline = () => {
             id, date, time, status, title,
             created_at
           )
-        `)
-        .eq('company_id', profileData.company_id);
+        `);
+
+      // Aplicar filtro baseado no role do usuário
+      query = await applyRoleBasedLeadFilter(query, user.id, profileData.company_id);
 
       // Aplicar filtros
       if (filters.searchTerm) {
