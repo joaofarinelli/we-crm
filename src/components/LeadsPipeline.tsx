@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone } from 'lucide-react';
+import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3 } from 'lucide-react';
 import { useLeadsPipeline } from '@/hooks/useLeadsPipeline';
 
 import { AddLeadDialog } from '@/components/AddLeadDialog';
@@ -14,6 +14,7 @@ import { PipelineFilters } from '@/components/PipelineFilters';
 import { TagBadge } from '@/components/TagBadge';
 import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
+import { ViewLeadJourneyDialog } from '@/components/ViewLeadJourneyDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -34,6 +35,7 @@ export const LeadsPipeline = () => {
   const [addLeadDialogOpen, setAddLeadDialogOpen] = useState(false);
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
+  const [viewJourneyDialogOpen, setViewJourneyDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [showColumnManager, setShowColumnManager] = useState(false);
   
@@ -80,6 +82,11 @@ export const LeadsPipeline = () => {
   const handleAddAppointment = (lead: any) => {
     setSelectedLead(lead);
     setAddAppointmentDialogOpen(true);
+  };
+
+  const handleViewJourney = (lead: any) => {
+    setSelectedLead(lead);
+    setViewJourneyDialogOpen(true);
   };
 
   const formatDateTime = (date: string, time: string) => {
@@ -186,7 +193,19 @@ export const LeadsPipeline = () => {
                                   <h3 className="font-medium text-sm line-clamp-2">
                                     {lead.name}
                                   </h3>
-                                  <div className="flex gap-1 ml-2">
+                                   <div className="flex gap-1 ml-2">
+                                     <Button
+                                       variant="ghost"
+                                       size="sm"
+                                       className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         handleViewJourney(lead);
+                                       }}
+                                       title="Ver Jornada"
+                                     >
+                                       <BarChart3 className="w-3 h-3" />
+                                     </Button>
                                      <Button
                                         variant="outline"
                                        size="sm"
@@ -344,6 +363,13 @@ export const LeadsPipeline = () => {
       <AddAppointmentDialog 
         open={addAppointmentDialogOpen} 
         onOpenChange={setAddAppointmentDialogOpen}
+      />
+
+      <ViewLeadJourneyDialog 
+        leadId={selectedLead?.id || null}
+        leadName={selectedLead?.name || ''}
+        open={viewJourneyDialogOpen}
+        onOpenChange={setViewJourneyDialogOpen}
       />
     </div>
   );
