@@ -1336,6 +1336,42 @@ export type Database = {
           },
         ]
       }
+      script_attachments: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          name: string
+          script_id: string
+          type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          name: string
+          script_id: string
+          type: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          name?: string
+          script_id?: string
+          type?: string
+          url?: string
+        }
+        Relationships: []
+      }
       scripts: {
         Row: {
           category: string | null

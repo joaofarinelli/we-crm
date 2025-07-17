@@ -30,14 +30,16 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      uploadFile.mutate(file);
+    if (file && scriptId) {
+      uploadFile.mutate({ file, scriptId });
     }
+    // Reset the input
+    event.target.value = '';
   };
 
   const handleAddLink = () => {
-    if (linkName && linkUrl) {
-      addLink.mutate({ name: linkName, url: linkUrl });
+    if (linkName.trim() && linkUrl.trim() && scriptId) {
+      addLink.mutate({ name: linkName, url: linkUrl, scriptId });
       setLinkName('');
       setLinkUrl('');
     }
@@ -124,6 +126,8 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
                     size="sm"
                     onClick={() => deleteAttachment.mutate(attachment)}
                     title="Remover anexo"
+                    disabled={deleteAttachment.isPending}
+                    className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -155,6 +159,7 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
                     type="file"
                     onChange={handleFileUpload}
                     className="hidden"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt"
                   />
                   <Button
                     variant="outline"
@@ -165,6 +170,9 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
                     <Upload className="w-4 h-4" />
                     {uploadFile.isPending ? 'Enviando...' : 'Selecionar Arquivo'}
                   </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF, TXT (máx. 10MB)
+                  </p>
                 </div>
               </div>
             </TabsContent>
@@ -199,7 +207,7 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
               <TabsContent value="link">
                 <Button 
                   onClick={handleAddLink}
-                  disabled={!linkName || !linkUrl || addLink.isPending}
+                  disabled={!linkName.trim() || !linkUrl.trim() || addLink.isPending}
                 >
                   {addLink.isPending ? 'Adicionando...' : 'Adicionar Link'}
                 </Button>
