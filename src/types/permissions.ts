@@ -60,6 +60,22 @@ export interface RolePermissions {
     advanced: boolean;
   };
   
+  // Schedule Blocks
+  scheduleBlocks: {
+    view: boolean;
+    create: boolean;
+    edit: boolean;
+    delete: boolean;
+  };
+  
+  // Partners
+  partners: {
+    view: boolean;
+    create: boolean;
+    edit: boolean;
+    delete: boolean;
+  };
+  
   // Administration
   admin: {
     manageUsers: boolean;
@@ -78,6 +94,8 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: true, edit: true, delete: true },
     scripts: { view: true, create: true, edit: true, delete: true },
     reports: { view: true, export: true, advanced: true },
+    scheduleBlocks: { view: true, create: true, edit: true, delete: true },
+    partners: { view: true, create: true, edit: true, delete: true },
     admin: { manageUsers: true, manageRoles: true, companySettings: true, systemSettings: true }
   },
   'Administrador': {
@@ -88,6 +106,8 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: true, edit: true, delete: true },
     scripts: { view: true, create: true, edit: true, delete: true },
     reports: { view: true, export: true, advanced: true },
+    scheduleBlocks: { view: true, create: true, edit: true, delete: true },
+    partners: { view: true, create: true, edit: true, delete: true },
     admin: { manageUsers: true, manageRoles: true, companySettings: true, systemSettings: true }
   },
   'SDR': {
@@ -98,6 +118,8 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: true, edit: true, delete: false },
     scripts: { view: true, create: false, edit: false, delete: false },
     reports: { view: true, export: false, advanced: false },
+    scheduleBlocks: { view: true, create: false, edit: false, delete: false },
+    partners: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
   'Closer': {
@@ -108,6 +130,8 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: false, edit: true, delete: false },
     scripts: { view: true, create: true, edit: true, delete: false },
     reports: { view: true, export: true, advanced: true },
+    scheduleBlocks: { view: true, create: true, edit: true, delete: true },
+    partners: { view: true, create: true, edit: true, delete: true },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   }
 };

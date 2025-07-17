@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { PermissionGuard } from '../PermissionGuard';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -23,6 +25,7 @@ export const CalendarHeader = ({
   onToday,
   onCreateBlock
 }: CalendarHeaderProps) => {
+  const { hasPermission } = usePermissions();
   const getDateTitle = () => {
     switch (viewMode) {
       case 'day':
@@ -77,15 +80,32 @@ export const CalendarHeader = ({
 
         {/* Controles de navegação */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onCreateBlock}
-            className="text-xs"
+          <PermissionGuard 
+            module="scheduleBlocks" 
+            action="create"
+            fallback={
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="text-xs opacity-50 cursor-not-allowed"
+                title="Você não tem permissão para bloquear horários"
+              >
+                <Clock className="w-3 h-3 mr-1" />
+                Visualizar Horários
+              </Button>
+            }
           >
-            <Clock className="w-3 h-3 mr-1" />
-            Bloquear Horário
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onCreateBlock}
+              className="text-xs"
+            >
+              <Clock className="w-3 h-3 mr-1" />
+              Bloquear Horário
+            </Button>
+          </PermissionGuard>
           
           <Button
             variant="outline"

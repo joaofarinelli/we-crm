@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 import { ScheduleBlockDialog } from './ScheduleBlockDialog';
+import { PermissionGuard } from './PermissionGuard';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -30,6 +32,7 @@ import { parseDateFromLocal } from '@/lib/date-utils';
 export const ScheduleBlockManagement = () => {
   const { scheduleBlocks, deleteBlock, isLoading } = useScheduleBlocks();
   const { toast } = useToast();
+  const { hasPermission } = usePermissions();
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [blockToEdit, setBlockToEdit] = useState(null);
@@ -109,10 +112,21 @@ export const ScheduleBlockManagement = () => {
           </p>
         </div>
         
-        <Button onClick={handleCreateNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Bloqueio
-        </Button>
+        <PermissionGuard 
+          module="scheduleBlocks" 
+          action="create"
+          fallback={
+            <Button disabled className="opacity-50 cursor-not-allowed" title="Você não tem permissão para criar bloqueios">
+              <Plus className="mr-2 h-4 w-4" />
+              Visualizar Horários
+            </Button>
+          }
+        >
+          <Button onClick={handleCreateNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Bloqueio
+          </Button>
+        </PermissionGuard>
       </div>
 
       {/* Filtros */}
@@ -235,21 +249,42 @@ export const ScheduleBlockManagement = () => {
                   </div>
                   
                   <div className="flex items-center gap-2 ml-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleEdit(block)}
+                    <PermissionGuard 
+                      module="scheduleBlocks" 
+                      action="edit"
+                      fallback={
+                        <Button variant="outline" size="sm" disabled className="opacity-50 cursor-not-allowed" title="Sem permissão para editar">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      }
                     >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDelete(block.id)}
-                      className="text-red-600 hover:text-red-700"
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEdit(block)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </PermissionGuard>
+                    
+                    <PermissionGuard 
+                      module="scheduleBlocks" 
+                      action="delete"
+                      fallback={
+                        <Button variant="outline" size="sm" disabled className="opacity-50 cursor-not-allowed" title="Sem permissão para deletar">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      }
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDelete(block.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </PermissionGuard>
                   </div>
                 </div>
               </CardContent>

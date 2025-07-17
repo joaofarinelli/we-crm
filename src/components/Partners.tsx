@@ -7,6 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { usePartners } from '@/hooks/usePartners';
 import { AddPartnerDialog } from './AddPartnerDialog';
 import { EditPartnerDialog } from './EditPartnerDialog';
+import { PermissionGuard } from './PermissionGuard';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export const Partners = () => {
   const [editingPartner, setEditingPartner] = useState(null);
@@ -14,6 +16,7 @@ export const Partners = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   
   const { partners, loading, deletePartner, createPartner } = usePartners();
+  const { hasPermission } = usePermissions();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,13 +57,28 @@ export const Partners = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Parceiros</h1>
           <p className="text-gray-600 mt-1">Gerencie seus parceiros de negócio</p>
         </div>
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-          onClick={() => setAddDialogOpen(true)}
+        <PermissionGuard 
+          module="partners" 
+          action="create"
+          fallback={
+            <Button 
+              disabled
+              className="bg-gray-400 cursor-not-allowed w-full sm:w-auto"
+              title="Você não tem permissão para criar parceiros"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Parceiro
+            </Button>
+          }
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Parceiro
-        </Button>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Parceiro
+          </Button>
+        </PermissionGuard>
       </div>
 
       <div className="grid gap-4 px-4 md:px-8">
@@ -107,41 +125,76 @@ export const Partners = () => {
                 </div>
                 
                 <div className="flex gap-2 w-full sm:w-auto">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(partner)}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Edit2 className="w-4 h-4 mr-1" />
-                    <span className="sm:hidden">Editar</span>
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
+                  <PermissionGuard 
+                    module="partners" 
+                    action="edit"
+                    fallback={
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-red-600 hover:text-red-700 flex-1 sm:flex-none"
+                        disabled
+                        className="flex-1 sm:flex-none opacity-50 cursor-not-allowed"
+                        title="Você não tem permissão para editar parceiros"
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />
+                        <span className="sm:hidden">Editar</span>
+                      </Button>
+                    }
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(partner)}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <Edit2 className="w-4 h-4 mr-1" />
+                      <span className="sm:hidden">Editar</span>
+                    </Button>
+                  </PermissionGuard>
+                  
+                  <PermissionGuard 
+                    module="partners" 
+                    action="delete"
+                    fallback={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="text-gray-400 flex-1 sm:flex-none opacity-50 cursor-not-allowed"
+                        title="Você não tem permissão para excluir parceiros"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         <span className="sm:hidden">Excluir</span>
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tem certeza que deseja excluir o parceiro "{partner.name}"? Esta ação não pode ser desfeita.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(partner.id)}>
-                          Excluir
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                    }
+                  >
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 flex-1 sm:flex-none"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          <span className="sm:hidden">Excluir</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir o parceiro "{partner.name}"? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(partner.id)}>
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </PermissionGuard>
                 </div>
               </div>
             </div>

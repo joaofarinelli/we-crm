@@ -14,6 +14,8 @@ import { WeekView } from './calendar/WeekView';
 import { MonthView } from './calendar/MonthView';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
+import { PermissionGuard } from './PermissionGuard';
+import { usePermissions } from '@/hooks/usePermissions';
 
 type ViewMode = 'day' | 'week' | 'month';
 
@@ -21,6 +23,7 @@ export const CalendarView = () => {
   const { appointments, loading: appointmentsLoading } = useAppointments();
   const { meetings, isLoading: meetingsLoading } = useMeetingsForCalendar();
   const { scheduleBlocks, isLoading: blocksLoading } = useScheduleBlocks();
+  const { hasPermission } = usePermissions();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -74,18 +77,26 @@ export const CalendarView = () => {
   };
 
   const handleCreateBlock = (date?: Date) => {
+    if (!hasPermission('scheduleBlocks', 'create')) {
+      return;
+    }
     setSelectedDate(date || currentDate);
     setBlockToEdit(null);
     setScheduleBlockDialogOpen(true);
   };
 
   const handleBlockClick = (block: any) => {
+    if (!hasPermission('scheduleBlocks', 'edit')) {
+      return;
+    }
     setBlockToEdit(block);
     setScheduleBlockDialogOpen(true);
   };
 
   const handleDateDoubleClick = (date: Date) => {
-    handleCreateBlock(date);
+    if (hasPermission('scheduleBlocks', 'create')) {
+      handleCreateBlock(date);
+    }
   };
 
   const loading = appointmentsLoading || meetingsLoading || blocksLoading;
