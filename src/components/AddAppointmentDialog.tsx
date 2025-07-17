@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { LeadSelector } from '@/components/LeadSelector';
 import { useAppointments } from '@/hooks/useAppointments';
-import { useLeads } from '@/hooks/useLeads';
+import { useRealtimeLeads } from '@/hooks/useRealtimeLeads';
 import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +34,7 @@ interface AddAppointmentDialogProps {
 
 export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialogProps) => {
   const { createAppointment } = useAppointments();
-  const { leads } = useLeads();
+  const { leads } = useRealtimeLeads();
   const { closers, loading: closersLoading } = useClosers();
   const { user } = useAuth();
   const { toast } = useToast();

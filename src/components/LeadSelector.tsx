@@ -63,10 +63,10 @@ export const LeadSelector = ({
       <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput placeholder="Buscar lead..." />
-          <CommandList className="max-h-[200px]">
+          <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>Nenhum lead encontrado.</CommandEmpty>
             <CommandGroup>
-              {sortedLeads.slice(0, 50).map((lead) => (
+              {sortedLeads.map((lead) => (
                 <CommandItem
                   key={lead.id}
                   value={lead.name}
