@@ -25,6 +25,7 @@ import { ScheduleBlockDialog } from './ScheduleBlockDialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { parseDateFromLocal } from '@/lib/date-utils';
 
 export const ScheduleBlockManagement = () => {
   const { scheduleBlocks, deleteBlock, isLoading } = useScheduleBlocks();
@@ -83,7 +84,7 @@ export const ScheduleBlockManagement = () => {
   });
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    return format(parseDateFromLocal(dateString), 'dd/MM/yyyy', { locale: ptBR });
   };
 
   const formatTime = (timeString: string) => {

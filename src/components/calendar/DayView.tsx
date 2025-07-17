@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, User, Users } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { isSameLocalDay } from '@/lib/date-utils';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
 
@@ -46,15 +47,15 @@ export const DayView = ({
   onDateDoubleClick
 }: DayViewProps) => {
   const dayAppointments = appointments.filter(appointment => 
-    isSameDay(new Date(appointment.date), currentDate)
+    isSameLocalDay(appointment.date, currentDate)
   );
 
   const dayMeetings = meetings.filter(meeting => 
-    isSameDay(new Date(meeting.date), currentDate)
+    isSameLocalDay(meeting.date, currentDate)
   );
 
   const dayScheduleBlocks = scheduleBlocks.filter(block => 
-    isSameDay(new Date(block.start_date), currentDate)
+    isSameLocalDay(block.start_date, currentDate)
   );
 
   const allEvents = [

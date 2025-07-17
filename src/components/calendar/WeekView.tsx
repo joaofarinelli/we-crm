@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, User, Users } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { isSameLocalDay } from '@/lib/date-utils';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
 
@@ -50,13 +51,13 @@ export const WeekView = ({
 
   const getEventsForDay = (date: Date) => {
     const dayAppointments = appointments.filter(appointment => 
-      isSameDay(new Date(appointment.date), date)
+      isSameLocalDay(appointment.date, date)
     );
     const dayMeetings = meetings.filter(meeting => 
-      isSameDay(new Date(meeting.date), date)
+      isSameLocalDay(meeting.date, date)
     );
     const dayScheduleBlocks = scheduleBlocks.filter(block => 
-      isSameDay(new Date(block.start_date), date)
+      isSameLocalDay(block.start_date, date)
     );
     
     return [
