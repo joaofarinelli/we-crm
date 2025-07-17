@@ -6,7 +6,7 @@ export interface Appointment {
   date: string;
   time: string;
   duration: number;
-  lead_id: string | null;
+  lead_id: string;
   scheduled_by: string;
   assigned_to: string;
   status: string;

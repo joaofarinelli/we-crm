@@ -100,7 +100,7 @@ export type Database = {
           description: string | null
           duration: number | null
           id: string
-          lead_id: string | null
+          lead_id: string
           meeting_url: string | null
           reschedule_reason: string | null
           rescheduled_from_id: string | null
@@ -118,7 +118,7 @@ export type Database = {
           description?: string | null
           duration?: number | null
           id?: string
-          lead_id?: string | null
+          lead_id: string
           meeting_url?: string | null
           reschedule_reason?: string | null
           rescheduled_from_id?: string | null
@@ -136,7 +136,7 @@ export type Database = {
           description?: string | null
           duration?: number | null
           id?: string
-          lead_id?: string | null
+          lead_id?: string
           meeting_url?: string | null
           reschedule_reason?: string | null
           rescheduled_from_id?: string | null

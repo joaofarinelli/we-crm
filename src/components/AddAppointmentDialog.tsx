@@ -89,6 +89,15 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
       return;
     }
 
+    if (!formData.lead_id) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um lead para o agendamento",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!formData.assigned_to) {
       toast({
         title: "Erro",
@@ -117,7 +126,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
       const appointmentData = {
         ...formData,
         scheduled_by: user.id,
-        lead_id: formData.lead_id || null,
+        lead_id: formData.lead_id,
         assigned_to: formData.assigned_to,
         meeting_url: formData.meeting_url || null,
       };
@@ -229,13 +238,16 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
           </div>
 
           <div className="space-y-2">
-            <Label>Lead</Label>
+            <Label>Lead <span className="text-destructive">*</span></Label>
             <LeadSelector
               leads={leads}
               value={formData.lead_id}
               onValueChange={(value) => setFormData(prev => ({ ...prev, lead_id: value }))}
               placeholder="Selecione um lead"
             />
+            {!formData.lead_id && (
+              <p className="text-sm text-destructive">Lead é obrigatório para criar um agendamento</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -303,7 +315,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
             </Button>
             <Button 
               type="submit" 
-              disabled={!formData.assigned_to || isSubmitting || closersLoading || !hasPermission('appointments', 'create')}
+              disabled={!formData.lead_id || !formData.assigned_to || isSubmitting || closersLoading || !hasPermission('appointments', 'create')}
             >
               {isSubmitting ? "Criando..." : "Criar Agendamento"}
             </Button>
