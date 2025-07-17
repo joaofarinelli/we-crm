@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Paperclip, Link, Trash2, Download, ExternalLink, Upload } from 'lucide-react';
+import { Paperclip, Link, Trash2, Download, ExternalLink, Upload, Eye } from 'lucide-react';
 import { useScriptAttachments, ScriptAttachment } from '@/hooks/useScriptAttachments';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -54,6 +54,23 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const downloadFile = async (attachment: ScriptAttachment) => {
+    try {
+      const response = await fetch(attachment.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = attachment.name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erro ao baixar arquivo:', error);
+    }
   };
 
   if (attachments.length === 0 && !showManageButton) {
@@ -102,14 +119,24 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
               </div>
               <div className="flex items-center gap-1">
                 {attachment.type === 'file' ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(attachment.url, '_blank')}
-                    title="Baixar arquivo"
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => window.open(attachment.url, '_blank')}
+                      title="Visualizar arquivo"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => downloadFile(attachment)}
+                      title="Baixar arquivo"
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </>
                 ) : (
                   <Button
                     variant="ghost"
