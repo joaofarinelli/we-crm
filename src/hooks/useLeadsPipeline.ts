@@ -8,6 +8,7 @@ export interface PipelineFilterState {
   searchTerm: string;
   temperature: string;
   partner_id: string;
+  tags: string[];
   dateRange: { from: string; to: string };
 }
 
@@ -46,6 +47,7 @@ export const useLeadsPipeline = () => {
     searchTerm: '',
     temperature: 'todos',
     partner_id: 'todos',
+    tags: [],
     dateRange: { from: '', to: '' }
   });
   const { user } = useAuth();
@@ -133,6 +135,16 @@ export const useLeadsPipeline = () => {
       
       console.log('Pipeline leads before filtering:', processedLeads.length);
       
+      // Aplicar filtro por tags se selecionadas
+      let filteredByTags = processedLeads;
+      if (filters.tags && filters.tags.length > 0) {
+        filteredByTags = processedLeads.filter(lead => {
+          const leadTagIds = lead.tags?.map(tag => tag.id) || [];
+          return filters.tags.some(tagId => leadTagIds.includes(tagId));
+        });
+        console.log('Pipeline filtering by tags - showing leads with selected tags:', filteredByTags.length);
+      }
+      
       // Aplicar filtro por role após buscar os dados
       const { data: userProfile } = await supabase
         .from('profiles')
@@ -146,10 +158,10 @@ export const useLeadsPipeline = () => {
       const userRole = userProfile?.roles?.name;
       console.log('Pipeline user role for filtering:', userRole);
 
-      let filteredLeads = processedLeads;
+      let filteredLeads = filteredByTags;
       if (userRole === 'Closer') {
         // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
-        filteredLeads = processedLeads.filter(lead => 
+        filteredLeads = filteredByTags.filter(lead => 
           lead.assigned_to === user.id || lead.assigned_to === null
         );
         console.log('Pipeline filtering for Closer - showing assigned + unassigned leads:', filteredLeads.length);
