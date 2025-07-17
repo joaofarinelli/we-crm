@@ -112,41 +112,44 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto mx-4 sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Novo Lead</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Basic Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="name">Nome *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            />
-          </div>
-          
-          
+          {/* Source Selection */}
           <div className="space-y-2">
             <Label htmlFor="source">Origem</Label>
             <Select
@@ -172,6 +175,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             </Select>
           </div>
           
+          {/* Partner Selection (conditional) */}
           {formData.source === 'Parceiro' && (
             <div className="space-y-2">
               <Label htmlFor="partner">Parceiro *</Label>
@@ -203,6 +207,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             </div>
           )}
           
+          {/* Temperature Selection */}
           <div className="space-y-2">
             <Label htmlFor="temperature">Temperatura</Label>
             <Select
@@ -220,6 +225,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             </Select>
           </div>
           
+          {/* Product Selection */}
           <div className="space-y-2">
             <Label htmlFor="product">Produto/Serviço</Label>
             <Select
@@ -247,29 +253,33 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="product_name">Nome do Produto (Personalizado)</Label>
-            <Input
-              id="product_name"
-              value={formData.product_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
-              placeholder="Ou digite um produto personalizado"
-            />
-          </div>
+          {/* Custom Product Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="product_name">Nome do Produto (Personalizado)</Label>
+              <Input
+                id="product_name"
+                value={formData.product_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
+                placeholder="Ou digite um produto personalizado"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="product_value">Valor do Produto (R$)</Label>
-            <Input
-              id="product_value"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.product_value}
-              onChange={(e) => setFormData(prev => ({ ...prev, product_value: e.target.value }))}
-              placeholder="0,00"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="product_value">Valor do Produto (R$)</Label>
+              <Input
+                id="product_value"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.product_value}
+                onChange={(e) => setFormData(prev => ({ ...prev, product_value: e.target.value }))}
+                placeholder="0,00"
+              />
+            </div>
           </div>
           
+          {/* Tags */}
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
             <TagSelector
@@ -279,13 +289,14 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             />
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
               Cancelar
             </Button>
             <Button 
               type="submit" 
               disabled={formData.source === 'Parceiro' && !formData.partner_id}
+              className="w-full sm:w-auto"
             >
               Criar Lead
             </Button>
