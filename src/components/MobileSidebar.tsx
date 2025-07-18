@@ -1,18 +1,17 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useAuth } from '@/hooks/useAuth';
 import { useCompanySettings } from '@/hooks/useCompanySettings';
 import { useSaasAdmin } from '@/hooks/useSaasAdmin';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import {
   LayoutDashboard,
   Users,
   CheckSquare,
   BarChart3,
   Settings,
-  LogOut,
   UserPlus,
   Kanban,
   FileText,
@@ -22,6 +21,7 @@ import {
   Shield,
   Package,
   Handshake,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,7 +32,6 @@ interface MobileSidebarProps {
 
 export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { signOut } = useAuth();
   const { company, isLoading } = useCompanySettings();
   const { isSaasAdmin } = useSaasAdmin();
 
@@ -44,6 +43,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
     { id: 'appointments', label: 'Agendamentos', icon: Calendar },
     { id: 'meetings', label: 'Reuniões', icon: Video },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },
+    { id: 'scheduleBlocks', label: 'Gerenciar Horários', icon: Clock },
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'scripts', label: 'Materiais', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
@@ -122,17 +122,6 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
               </>
             )}
           </nav>
-
-          <div className="p-4 border-t">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={signOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
-            </Button>
-          </div>
         </div>
       </SheetContent>
     </Sheet>
