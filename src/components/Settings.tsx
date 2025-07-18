@@ -7,8 +7,7 @@ import {
   Users, 
   Settings as SettingsIcon, 
   Shield,
-  Mail,
-  Lock
+  Mail
 } from 'lucide-react';
 import { CompanyInfoSettings } from './settings/CompanyInfoSettings';
 import { SystemSettings } from './settings/SystemSettings';
@@ -16,7 +15,6 @@ import { UserRoleManagement } from './settings/UserRoleManagement';
 import { AdvancedSettings } from './settings/AdvancedSettings';
 import { InvitationSettings } from './settings/InvitationSettings';
 import { UserGoalsSettings } from './settings/UserGoalsSettings';
-import { CompanyRolePermissionsManager } from './settings/CompanyRolePermissionsManager';
 import { usePermissions } from '@/hooks/usePermissions';
 
 export const Settings = () => {
@@ -35,13 +33,6 @@ export const Settings = () => {
       label: 'Usuários & Cargos',
       icon: Users,
       component: UserRoleManagement,
-    },
-    {
-      id: 'permissions',
-      label: 'Permissões',
-      icon: Lock,
-      component: CompanyRolePermissionsManager,
-      adminOnly: true,
     },
     {
       id: 'invitations',

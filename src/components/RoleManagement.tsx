@@ -1,13 +1,41 @@
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useRoles } from '@/hooks/useRoles';
-import { Shield } from 'lucide-react';
+import { useCompanyRolePermissions } from '@/hooks/useCompanyRolePermissions';
+import { Shield, Settings } from 'lucide-react';
+import { RolePermissionsDialog } from './settings/RolePermissionsDialog';
 
 export const RoleManagement = () => {
   const { roles, loading } = useRoles();
+  const { updateRolePermissions, getRolePermissions } = useCompanyRolePermissions();
   const { toast } = useToast();
+  const [selectedRole, setSelectedRole] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleEditPermissions = (role: any) => {
+    setSelectedRole(role);
+    setDialogOpen(true);
+  };
+
+  const handleSavePermissions = async (roleId: string, permissions: any) => {
+    try {
+      await updateRolePermissions(roleId, permissions);
+      toast({
+        title: "Sucesso",
+        description: "Permissões atualizadas com sucesso"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro", 
+        description: "Erro ao atualizar permissões",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (loading) {
     return <div className="p-6">Carregando cargos...</div>;
@@ -17,14 +45,16 @@ export const RoleManagement = () => {
   const systemRoles = roles;
 
   const getPermissionsSummary = (role: any) => {
-    if (!role.permissions || Object.keys(role.permissions).length === 0) {
+    const customPermissions = getRolePermissions(role.id);
+    
+    if (!customPermissions) {
       return 'Permissões padrão';
     }
     
     let totalPermissions = 0;
     let enabledPermissions = 0;
     
-    Object.values(role.permissions).forEach((category: any) => {
+    Object.values(customPermissions).forEach((category: any) => {
       Object.values(category).forEach((permission: any) => {
         totalPermissions++;
         if (permission === true) {
@@ -41,7 +71,7 @@ export const RoleManagement = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Cargos do Sistema</h1>
-          <p className="text-gray-600">Visualize os cargos disponíveis para sua empresa</p>
+          <p className="text-gray-600">Gerencie os cargos e suas permissões para sua empresa</p>
         </div>
       </div>
 
@@ -56,6 +86,15 @@ export const RoleManagement = () => {
                     Sistema
                   </Badge>
                 </div>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditPermissions(role)}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
               </div>
             </CardHeader>
             
@@ -78,6 +117,14 @@ export const RoleManagement = () => {
           <p className="text-gray-400 mt-2">Entre em contato com o administrador</p>
         </Card>
       )}
+
+      <RolePermissionsDialog
+        role={selectedRole}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSave={handleSavePermissions}
+        getRolePermissions={getRolePermissions}
+      />
     </div>
   );
 };
