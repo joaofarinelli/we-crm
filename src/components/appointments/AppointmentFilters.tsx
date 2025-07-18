@@ -42,10 +42,10 @@ export const AppointmentFiltersComponent = ({
     try {
       onFiltersChange({
         search: '',
-        status: '',
+        status: 'all',
         dateFrom: '',
         dateTo: '',
-        closer: ''
+        closer: 'all'
       });
       setShowAdvancedFilters(false);
     } catch (error) {
@@ -112,7 +112,7 @@ export const AppointmentFiltersComponent = ({
                     <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os status</SelectItem>
+                    <SelectItem value="all">Todos os status</SelectItem>
                     <SelectItem value="Scheduled">Agendado</SelectItem>
                     <SelectItem value="Confirmed">Confirmado</SelectItem>
                     <SelectItem value="Completed">Realizado</SelectItem>
@@ -131,7 +131,7 @@ export const AppointmentFiltersComponent = ({
                     <SelectValue placeholder="Todos os responsáveis" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os responsáveis</SelectItem>
+                    <SelectItem value="all">Todos os responsáveis</SelectItem>
                     {closers && closers.length > 0 ? (
                       closers.map((closer) => (
                         <SelectItem key={closer.id} value={closer.id}>
@@ -139,7 +139,7 @@ export const AppointmentFiltersComponent = ({
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="no-closers" disabled>
                         Nenhum responsável encontrado
                       </SelectItem>
                     )}
