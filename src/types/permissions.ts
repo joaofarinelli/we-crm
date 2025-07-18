@@ -1,3 +1,4 @@
+
 export interface RolePermissions {
   // Leads
   leads: {
@@ -106,7 +107,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: true, edit: true, delete: false },
     scripts: { view: true, create: false, edit: false, delete: false },
     reports: { view: true, export: false, advanced: false },
-    scheduleBlocks: { view: true, create: true, edit: true, delete: true },
+    scheduleBlocks: { view: true, create: false, edit: true, delete: false },
     partners: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
@@ -154,7 +155,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: true, edit: true, delete: false },
     scripts: { view: true, create: true, edit: true, delete: false },
     reports: { view: true, export: true, advanced: false },
-    scheduleBlocks: { view: true, create: true, edit: true, delete: true },
+    scheduleBlocks: { view: true, create: false, edit: true, delete: false },
     partners: { view: true, create: true, edit: true, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
@@ -166,7 +167,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     contacts: { view: true, create: true, edit: true, delete: false },
     scripts: { view: true, create: true, edit: true, delete: false },
     reports: { view: true, export: true, advanced: false },
-    scheduleBlocks: { view: true, create: true, edit: true, delete: true },
+    scheduleBlocks: { view: true, create: false, edit: true, delete: false },
     partners: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   }
