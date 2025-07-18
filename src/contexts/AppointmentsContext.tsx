@@ -42,6 +42,7 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
   const fetchAppointments = async () => {
     try {
       if (!user) {
+        setAppointments([]);
         setLoading(false);
         return;
       }
@@ -59,8 +60,19 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .eq('id', user.id)
         .single();
 
-      if (profileError || !profileData) {
-        throw profileError || new Error('Profile not found');
+      if (profileError) {
+        console.warn('Erro ao buscar perfil:', profileError);
+        setAppointments([]);
+        setLoading(false);
+        return;
+      }
+
+      // Verificação defensiva: se não há empresa, retornar array vazio
+      if (!profileData || !profileData.company_id) {
+        console.log('Usuário sem empresa configurada');
+        setAppointments([]);
+        setLoading(false);
+        return;
       }
 
       const userRole = profileData.roles?.name;
@@ -81,6 +93,7 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
             email
           )
         `)
+        .eq('company_id', profileData.company_id)
         .order('date', { ascending: true })
         .order('time', { ascending: true });
 
@@ -90,7 +103,10 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro na query de agendamentos:', error);
+        throw error;
+      }
       
       // Processar dados para incluir tags do lead de forma estruturada
       const processedAppointments = (data || []).map(appointment => ({
@@ -105,11 +121,15 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
       setAppointments(processedAppointments);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os agendamentos",
-        variant: "destructive"
-      });
+      setAppointments([]);
+      // Não mostrar toast de erro se for problema de empresa não configurada
+      if (error?.message && !error.message.includes('Profile not found')) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os agendamentos",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -123,8 +143,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .eq('id', user?.id)
         .single();
 
-      if (profileError || !profileData) {
-        throw profileError || new Error('Profile not found');
+      if (profileError || !profileData?.company_id) {
+        throw new Error('Empresa não configurada');
       }
 
       const { data, error } = await supabase
@@ -166,13 +186,12 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         description: "Agendamento criado com sucesso"
       });
       
-      // Realtime will handle the update automatically
       return processedData;
     } catch (error) {
       console.error('Erro ao criar agendamento:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível criar o agendamento",
+        description: error?.message || "Não foi possível criar o agendamento",
         variant: "destructive"
       });
       throw error;
@@ -218,7 +237,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         description: "Agendamento atualizado com sucesso"
       });
       
-      // Realtime will handle the update automatically
       return processedData;
     } catch (error) {
       console.error('Erro ao atualizar agendamento:', error);
@@ -249,7 +267,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
 
       if (error) throw error;
       
-      // Realtime will handle the final update
     } catch (error) {
       console.error('Erro ao atualizar agendamento via drag & drop:', error);
       // Rollback on error
@@ -279,7 +296,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         description: "Agendamento removido com sucesso"
       });
       
-      // Realtime will handle the update automatically
     } catch (error) {
       console.error('Erro ao deletar agendamento:', error);
       toast({
@@ -291,7 +307,11 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setAppointments([]);
+      setLoading(false);
+      return;
+    }
 
     fetchAppointments();
 
@@ -326,7 +346,6 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
           console.log('Appointment change detected in context:', payload);
           setIsUpdating(true);
           
-          // Remove artificial delay - fetch immediately
           fetchAppointments().finally(() => {
             setIsUpdating(false);
           });

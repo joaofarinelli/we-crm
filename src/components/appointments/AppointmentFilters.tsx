@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Search, Calendar, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -24,27 +25,35 @@ interface AppointmentFiltersProps {
 export const AppointmentFiltersComponent = ({ 
   filters, 
   onFiltersChange, 
-  closers,
-  resultsCount 
+  closers = [], // Verificação defensiva: garantir que closers nunca seja undefined
+  resultsCount = 0 // Verificação defensiva: garantir que resultsCount nunca seja undefined
 }: AppointmentFiltersProps) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const updateFilter = (key: keyof AppointmentFilters, value: string) => {
-    onFiltersChange({ ...filters, [key]: value });
+    try {
+      onFiltersChange({ ...filters, [key]: value });
+    } catch (error) {
+      console.error('Erro ao atualizar filtro:', error);
+    }
   };
 
   const clearFilters = () => {
-    onFiltersChange({
-      search: '',
-      status: '',
-      dateFrom: '',
-      dateTo: '',
-      closer: ''
-    });
-    setShowAdvancedFilters(false);
+    try {
+      onFiltersChange({
+        search: '',
+        status: '',
+        dateFrom: '',
+        dateTo: '',
+        closer: ''
+      });
+      setShowAdvancedFilters(false);
+    } catch (error) {
+      console.error('Erro ao limpar filtros:', error);
+    }
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const hasActiveFilters = Object.values(filters || {}).some(value => value !== '');
 
   return (
     <Card className="mb-6">
@@ -54,7 +63,7 @@ export const AppointmentFiltersComponent = ({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Buscar por nome do lead, título do agendamento ou telefone..."
-            value={filters.search}
+            value={filters?.search || ''}
             onChange={(e) => updateFilter('search', e.target.value)}
             className="pl-10"
           />
@@ -98,7 +107,7 @@ export const AppointmentFiltersComponent = ({
               {/* Status Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Status</label>
-                <Select value={filters.status} onValueChange={(value) => updateFilter('status', value)}>
+                <Select value={filters?.status || ''} onValueChange={(value) => updateFilter('status', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
@@ -117,17 +126,23 @@ export const AppointmentFiltersComponent = ({
               {/* Closer Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Responsável</label>
-                <Select value={filters.closer} onValueChange={(value) => updateFilter('closer', value)}>
+                <Select value={filters?.closer || ''} onValueChange={(value) => updateFilter('closer', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Todos os responsáveis" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Todos os responsáveis</SelectItem>
-                    {closers.map((closer) => (
-                      <SelectItem key={closer.id} value={closer.id}>
-                        {closer.name}
+                    {closers && closers.length > 0 ? (
+                      closers.map((closer) => (
+                        <SelectItem key={closer.id} value={closer.id}>
+                          {closer.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>
+                        Nenhum responsável encontrado
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -139,7 +154,7 @@ export const AppointmentFiltersComponent = ({
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     type="date"
-                    value={filters.dateFrom}
+                    value={filters?.dateFrom || ''}
                     onChange={(e) => updateFilter('dateFrom', e.target.value)}
                     className="pl-10"
                   />
@@ -153,7 +168,7 @@ export const AppointmentFiltersComponent = ({
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     type="date"
-                    value={filters.dateTo}
+                    value={filters?.dateTo || ''}
                     onChange={(e) => updateFilter('dateTo', e.target.value)}
                     className="pl-10"
                   />

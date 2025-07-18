@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -14,6 +15,7 @@ export const OnboardingCheck = ({ children }: OnboardingCheckProps) => {
   useEffect(() => {
     if (!loading && userInfo && !userInfo.has_company) {
       // Usuário está logado mas não tem empresa, redirecionar para registro
+      console.log('Redirecionando usuário sem empresa para configuração');
       navigate('/company-registration');
     }
   }, [userInfo, loading, navigate]);
