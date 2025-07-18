@@ -58,7 +58,7 @@ export const Settings = () => {
       icon: Shield,
       component: AdvancedSettings,
     },
-  ].filter(tab => !tab.adminOnly || isAdmin());
+  ];
 
   return (
     <div className="p-6">
