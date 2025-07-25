@@ -17,6 +17,7 @@ import { TagBadge } from './TagBadge';
 import { WhatsAppLeadButton } from './WhatsAppLeadButton';
 import { useExportLeads } from '@/hooks/useExportLeads';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { PermissionGuard } from '@/components/PermissionGuard';
 
 export const Leads = () => {
   console.log('🔍 Leads component rendering');
@@ -190,30 +191,36 @@ export const Leads = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex gap-2 w-full sm:w-auto">
-           <Button 
-            variant="outline"
-            onClick={() => setImportDialogOpen(true)}
-            className="flex-1 sm:flex-none"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Importar Excel
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => exportFilteredLeads(filteredLeads, filters)}
-            className="flex-1 sm:flex-none"
-            disabled={filteredLeads.length === 0}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Exportar Excel
-          </Button>
-          <Button 
-            className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
-            onClick={() => setAddDialogOpen(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Lead
-          </Button>
+            <PermissionGuard module="leads" action="import">
+              <Button 
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+                className="flex-1 sm:flex-none"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Importar Excel
+              </Button>
+            </PermissionGuard>
+            <PermissionGuard module="leads" action="export">
+              <Button 
+                variant="outline"
+                onClick={() => exportFilteredLeads(filteredLeads, filters)}
+                className="flex-1 sm:flex-none"
+                disabled={filteredLeads.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar Excel
+              </Button>
+            </PermissionGuard>
+            <PermissionGuard module="leads" action="create">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
+                onClick={() => setAddDialogOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Lead
+              </Button>
+            </PermissionGuard>
           </div>
         </div>
       </div>
@@ -304,7 +311,7 @@ export const Leads = () => {
                     <Route className="w-4 h-4 mr-1" />
                     <span className="sm:hidden">Jornada</span>
                   </Button>
-                  {(userInfo?.role_name === 'Admin' || userInfo?.role_name === 'Gerente') && (
+                  <PermissionGuard module="leads" action="assign">
                     <Button
                       variant="outline"
                       size="sm"
@@ -314,46 +321,50 @@ export const Leads = () => {
                       <UserPlus className="w-4 h-4 mr-1" />
                       <span className="sm:hidden">Atribuir</span>
                     </Button>
-                  )}
-                   <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={() => {
-                       console.log('🔥 LEADS EDIT BUTTON CLICKED for lead:', lead.id);
-                       handleEdit(lead);
-                     }}
-                     className="flex-1 sm:flex-none"
-                     title="Editar Lead"
-                   >
-                     <Edit2 className="w-4 h-4 mr-1" />
-                     <span className="sm:hidden">Editar</span>
-                   </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 flex-1 sm:flex-none"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        <span className="sm:hidden">Excluir</span>
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tem certeza que deseja excluir o lead "{lead.name}"? Esta ação não pode ser desfeita.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(lead.id)}>
-                          Excluir
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  </PermissionGuard>
+                  <PermissionGuard module="leads" action="edit">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        console.log('🔥 LEADS EDIT BUTTON CLICKED for lead:', lead.id);
+                        handleEdit(lead);
+                      }}
+                      className="flex-1 sm:flex-none"
+                      title="Editar Lead"
+                    >
+                      <Edit2 className="w-4 h-4 mr-1" />
+                      <span className="sm:hidden">Editar</span>
+                    </Button>
+                  </PermissionGuard>
+                  <PermissionGuard module="leads" action="delete">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 flex-1 sm:flex-none"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          <span className="sm:hidden">Excluir</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir o lead "{lead.name}"? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(lead.id)}>
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </PermissionGuard>
                 </div>
               </div>
             </div>

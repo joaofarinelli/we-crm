@@ -11,6 +11,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Plus, Building2 } from 'lucide-react';
 import { Appointment } from '@/types/appointment';
 import { Card, CardContent } from '@/components/ui/card';
+import { PermissionGuard } from '@/components/PermissionGuard';
 
 export const Appointments = () => {
   const { appointments, loading, isUpdating } = useAppointments();
@@ -143,15 +144,17 @@ export const Appointments = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-          <Button
-            onClick={handleCreateNew}
-            className="w-full sm:w-auto"
-            size="lg"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Novo Agendamento</span>
-            <span className="sm:hidden">Novo</span>
-          </Button>
+          <PermissionGuard module="appointments" action="create">
+            <Button
+              onClick={handleCreateNew}
+              className="w-full sm:w-auto"
+              size="lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Novo Agendamento</span>
+              <span className="sm:hidden">Novo</span>
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 

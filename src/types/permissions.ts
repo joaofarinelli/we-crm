@@ -77,6 +77,14 @@ export interface RolePermissions {
     delete: boolean;
   };
   
+  // Products
+  products: {
+    view: boolean;
+    create: boolean;
+    edit: boolean;
+    delete: boolean;
+  };
+  
   // Administration
   admin: {
     manageUsers: boolean;
@@ -97,6 +105,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: true, advanced: true },
     scheduleBlocks: { view: true, create: true, edit: true, delete: true },
     partners: { view: true, create: true, edit: true, delete: true },
+    products: { view: true, create: true, edit: true, delete: true },
     admin: { manageUsers: true, manageRoles: true, companySettings: true, systemSettings: false }
   },
   'SDR': {
@@ -109,6 +118,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: false, advanced: false },
     scheduleBlocks: { view: true, create: false, edit: true, delete: false },
     partners: { view: true, create: false, edit: false, delete: false },
+    products: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
   'Closer': {
@@ -121,6 +131,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: true, advanced: true },
     scheduleBlocks: { view: true, create: true, edit: true, delete: true },
     partners: { view: true, create: false, edit: false, delete: false },
+    products: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
   'Visitante': {
@@ -133,6 +144,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: false, advanced: false },
     scheduleBlocks: { view: false, create: false, edit: false, delete: false },
     partners: { view: true, create: false, edit: false, delete: false },
+    products: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
   'Supervisor': {
@@ -145,6 +157,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: true, advanced: true },
     scheduleBlocks: { view: true, create: true, edit: true, delete: true },
     partners: { view: true, create: true, edit: true, delete: true },
+    products: { view: true, create: true, edit: true, delete: true },
     admin: { manageUsers: true, manageRoles: false, companySettings: false, systemSettings: false }
   },
   'Social Seller': {
@@ -157,6 +170,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: true, advanced: false },
     scheduleBlocks: { view: true, create: false, edit: true, delete: false },
     partners: { view: true, create: true, edit: true, delete: false },
+    products: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   },
   'Vendedor': {
@@ -169,6 +183,7 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: true, advanced: false },
     scheduleBlocks: { view: true, create: false, edit: true, delete: false },
     partners: { view: true, create: false, edit: false, delete: false },
+    products: { view: true, create: false, edit: false, delete: false },
     admin: { manageUsers: false, manageRoles: false, companySettings: false, systemSettings: false }
   }
 };

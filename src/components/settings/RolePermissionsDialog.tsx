@@ -14,7 +14,8 @@ import {
   ContactRound, 
   FileText, 
   BarChart3, 
-  Settings 
+  Settings,
+  Package
 } from 'lucide-react';
 import { RolePermissions, DEFAULT_PERMISSIONS, PermissionModule } from '@/types/permissions';
 
@@ -26,6 +27,7 @@ const MODULE_LABELS: Record<PermissionModule, string> = {
   contacts: 'Contatos',
   scripts: 'Scripts',
   partners: 'Parceiros',
+  products: 'Produtos',
   reports: 'Relatórios',
   scheduleBlocks: 'Bloqueios de Agenda',
   admin: 'Administração'
@@ -39,6 +41,7 @@ const MODULE_ICONS = {
   contacts: ContactRound,
   scripts: FileText,
   partners: Users,
+  products: Package,
   reports: BarChart3,
   scheduleBlocks: Calendar,
   admin: Settings

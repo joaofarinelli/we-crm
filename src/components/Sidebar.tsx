@@ -22,6 +22,8 @@ import {
   Handshake,
   Clock,
 } from "lucide-react";
+import { PermissionGuard } from "@/components/PermissionGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SidebarProps {
   activeTab: string;
@@ -31,23 +33,24 @@ interface SidebarProps {
 export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { company, loading } = useCurrentCompany();
   const { isSaasAdmin } = useSaasAdmin();
+  const { canAccess } = usePermissions();
   const navigate = useNavigate();
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'leads', label: 'Leads', icon: UserPlus },
-    { id: 'leadsPipeline', label: 'Pipeline de Leads', icon: Kanban },
-    { id: 'products', label: 'Produtos', icon: Package },
-    { id: 'appointments', label: 'Agendamentos', icon: Calendar },
-    { id: 'meetings', label: 'Reuniões', icon: Video },
-    { id: 'calendar', label: 'Calendário', icon: CalendarDays },
-    { id: 'scheduleBlocks', label: 'Gerenciar Horários', icon: Clock },
-    { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
-    { id: 'scripts', label: 'Materiais', icon: FileText },
-    { id: 'reports', label: 'Relatórios', icon: BarChart3 },
-    { id: 'partners', label: 'Parceiros', icon: Handshake },
-    { id: 'users', label: 'Usuários', icon: Users },
-    { id: 'settings', label: 'Configurações', icon: Settings },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null },
+    { id: 'leads', label: 'Leads', icon: UserPlus, permission: 'leads' },
+    { id: 'leadsPipeline', label: 'Pipeline de Leads', icon: Kanban, permission: 'leads' },
+    { id: 'products', label: 'Produtos', icon: Package, permission: 'products' },
+    { id: 'appointments', label: 'Agendamentos', icon: Calendar, permission: 'appointments' },
+    { id: 'meetings', label: 'Reuniões', icon: Video, permission: 'meetings' },
+    { id: 'calendar', label: 'Calendário', icon: CalendarDays, permission: 'appointments' },
+    { id: 'scheduleBlocks', label: 'Gerenciar Horários', icon: Clock, permission: 'scheduleBlocks' },
+    { id: 'tasks', label: 'Tarefas', icon: CheckSquare, permission: 'tasks' },
+    { id: 'scripts', label: 'Materiais', icon: FileText, permission: 'scripts' },
+    { id: 'reports', label: 'Relatórios', icon: BarChart3, permission: 'reports' },
+    { id: 'partners', label: 'Parceiros', icon: Handshake, permission: 'partners' },
+    { id: 'users', label: 'Usuários', icon: Users, permission: 'user-management' },
+    { id: 'settings', label: 'Configurações', icon: Settings, permission: 'settings' },
   ];
 
   const handleAdminSaasClick = () => {
@@ -76,6 +79,12 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          
+          // Se o item tem permissão e o usuário não tem acesso, não mostrar
+          if (item.permission && !canAccess(item.permission)) {
+            return null;
+          }
+          
           return (
             <Button
               key={item.id}

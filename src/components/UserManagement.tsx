@@ -37,6 +37,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { InviteUserDialog } from '@/components/InviteUserDialog';
 import { InvitationsTable } from '@/components/InvitationsTable';
+import { PermissionGuard } from '@/components/PermissionGuard';
 
 export const UserManagement = () => {
   const { profiles, loading, updateProfile, deleteProfile } = useProfiles();
@@ -115,14 +116,16 @@ export const UserManagement = () => {
           <p className="text-gray-600 mt-1">Gerencie os usuários e seus cargos na sua empresa</p>
         </div>
         
-        {isAdmin && <InviteUserDialog />}
+        <PermissionGuard module="admin" action="manageUsers">
+          <InviteUserDialog />
+        </PermissionGuard>
       </div>
 
-      {isAdmin && (
+      <PermissionGuard module="admin" action="manageUsers">
         <div className="mb-6">
           <InvitationsTable />
         </div>
-      )}
+      </PermissionGuard>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {profiles.map((profile) => (
@@ -141,84 +144,86 @@ export const UserManagement = () => {
                   </div>
                 </div>
                 
-                {isAdmin && profile.id !== user?.id && (
-                  <div className="flex items-center gap-1">
-                    <Dialog open={dialogOpen && editingUser?.id === profile.id} onOpenChange={setDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingUser(profile);
-                            setSelectedRole(profile.role_id || '');
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Alterar Cargo</DialogTitle>
-                          <DialogDescription>
-                            Altere o cargo de {profile.full_name || profile.email}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <Select value={selectedRole} onValueChange={setSelectedRole}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um cargo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {roles.map((role) => (
-                                <SelectItem key={role.id} value={role.id}>
-                                  {role.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                              Cancelar
-                            </Button>
-                            <Button onClick={handleRoleChange}>
-                              Salvar
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash className="w-4 h-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja excluir o usuário <strong>{profile.full_name || profile.email}</strong>? 
-                            Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => deleteProfile(profile.id)}
-                            className="bg-red-600 hover:bg-red-700"
+                <PermissionGuard module="admin" action="manageUsers">
+                  {profile.id !== user?.id && (
+                    <div className="flex items-center gap-1">
+                      <Dialog open={dialogOpen && editingUser?.id === profile.id} onOpenChange={setDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingUser(profile);
+                              setSelectedRole(profile.role_id || '');
+                            }}
                           >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                )}
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Alterar Cargo</DialogTitle>
+                            <DialogDescription>
+                              Altere o cargo de {profile.full_name || profile.email}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <Select value={selectedRole} onValueChange={setSelectedRole}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um cargo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {roles.map((role) => (
+                                  <SelectItem key={role.id} value={role.id}>
+                                    {role.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                                Cancelar
+                              </Button>
+                              <Button onClick={handleRoleChange}>
+                                Salvar
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir o usuário <strong>{profile.full_name || profile.email}</strong>? 
+                              Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteProfile(profile.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
+                </PermissionGuard>
               </div>
             </CardHeader>
             

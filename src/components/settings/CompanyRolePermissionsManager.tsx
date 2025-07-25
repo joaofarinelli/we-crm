@@ -19,6 +19,7 @@ const MODULE_LABELS: Record<PermissionModule, string> = {
   contacts: 'Contatos',
   scripts: 'Scripts',
   partners: 'Parceiros',
+  products: 'Produtos',
   reports: 'Relatórios',
   scheduleBlocks: 'Bloqueios de Agenda',
   admin: 'Administração'
