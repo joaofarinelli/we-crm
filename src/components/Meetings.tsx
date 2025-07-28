@@ -18,6 +18,7 @@ import { RescheduleMeetingDialog } from './RescheduleMeetingDialog';
 import { ExportMeetingButton } from './ExportMeetingButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { parseDateFromLocal } from '@/lib/date-utils';
 import { Meeting } from '@/types/meeting';
 
 export const Meetings = () => {
@@ -162,7 +163,7 @@ export const Meetings = () => {
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {format(new Date(meeting.date), 'dd/MM/yyyy', { locale: ptBR })}
+                        {format(parseDateFromLocal(meeting.date), 'dd/MM/yyyy', { locale: ptBR })}
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
