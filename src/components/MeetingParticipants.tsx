@@ -44,8 +44,12 @@ export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => 
   const handleAddParticipant = async () => {
     if (!selectedUserId) return;
     
-    await addParticipant.mutateAsync({ userId: selectedUserId });
-    setSelectedUserId('');
+    try {
+      await addParticipant.mutateAsync({ userId: selectedUserId });
+      setSelectedUserId('');
+    } catch (error) {
+      console.error('Erro ao adicionar participante:', error);
+    }
   };
 
   const handleRemoveParticipant = async (participantId: string) => {

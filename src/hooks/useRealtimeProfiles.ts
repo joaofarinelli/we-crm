@@ -42,14 +42,14 @@ export const useRealtimeProfiles = () => {
         .eq('id', user?.id)
         .single();
 
-      if (profileError || !currentUserProfile?.company_id) {
+      if (profileError) {
         console.error('Erro ao buscar company_id do usuário:', profileError);
         setProfiles([]);
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('profiles')
         .select(`
           *,
@@ -64,9 +64,15 @@ export const useRealtimeProfiles = () => {
             domain,
             plan
           )
-        `)
-        .eq('company_id', currentUserProfile.company_id)
-        .order('created_at', { ascending: false });
+        `);
+
+      // Se o usuário tem company_id, filtrar por empresa
+      // Caso contrário, buscar todos os usuários
+      if (currentUserProfile?.company_id) {
+        query = query.eq('company_id', currentUserProfile.company_id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       setProfiles(data || []);

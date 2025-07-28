@@ -22,23 +22,56 @@ export const useMeetingParticipants = (meetingId: string) => {
   const { data: participants = [], isLoading } = useQuery({
     queryKey: ['meeting-participants', meetingId],
     queryFn: async () => {
-      // Simplified stub - return empty array for now
-      return [] as MeetingParticipantWithProfile[];
+      const { data, error } = await supabase
+        .from('meeting_participants')
+        .select(`
+          *,
+          profiles (
+            full_name,
+            email
+          )
+        `)
+        .eq('meeting_id', meetingId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Erro ao buscar participantes:', error);
+        throw error;
+      }
+
+      return data as MeetingParticipantWithProfile[];
     },
     enabled: !!meetingId,
   });
 
   const addParticipant = useMutation({
     mutationFn: async ({ userId, role = 'participant' }: { userId: string; role?: 'organizer' | 'participant' }) => {
-      console.log('Would add participant:', { userId, role, meetingId });
-      return Promise.resolve();
+      const { data, error } = await supabase
+        .from('meeting_participants')
+        .insert({
+          meeting_id: meetingId,
+          user_id: userId,
+          role
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao adicionar participante:', error);
+        throw error;
+      }
+
+      return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meeting-participants', meetingId] });
       toast({ title: 'Participante adicionado com sucesso!' });
     },
     onError: (error: any) => {
+      console.error('Erro ao adicionar participante:', error);
       toast({ 
         title: 'Erro ao adicionar participante', 
+        description: error.message || 'Ocorreu um erro inesperado',
         variant: 'destructive' 
       });
     },
@@ -46,15 +79,25 @@ export const useMeetingParticipants = (meetingId: string) => {
 
   const removeParticipant = useMutation({
     mutationFn: async (participantId: string) => {
-      console.log('Would remove participant:', participantId);
-      return Promise.resolve();
+      const { error } = await supabase
+        .from('meeting_participants')
+        .delete()
+        .eq('id', participantId);
+
+      if (error) {
+        console.error('Erro ao remover participante:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meeting-participants', meetingId] });
       toast({ title: 'Participante removido com sucesso!' });
     },
     onError: (error: any) => {
+      console.error('Erro ao remover participante:', error);
       toast({ 
         title: 'Erro ao remover participante', 
+        description: error.message || 'Ocorreu um erro inesperado',
         variant: 'destructive' 
       });
     },
@@ -62,15 +105,29 @@ export const useMeetingParticipants = (meetingId: string) => {
 
   const updateParticipantRole = useMutation({
     mutationFn: async ({ participantId, role }: { participantId: string; role: 'organizer' | 'participant' }) => {
-      console.log('Would update participant role:', { participantId, role });
-      return Promise.resolve();
+      const { data, error } = await supabase
+        .from('meeting_participants')
+        .update({ role })
+        .eq('id', participantId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao atualizar papel do participante:', error);
+        throw error;
+      }
+
+      return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meeting-participants', meetingId] });
       toast({ title: 'Papel do participante atualizado!' });
     },
     onError: (error: any) => {
+      console.error('Erro ao atualizar participante:', error);
       toast({ 
         title: 'Erro ao atualizar participante', 
+        description: error.message || 'Ocorreu um erro inesperado',
         variant: 'destructive' 
       });
     },
