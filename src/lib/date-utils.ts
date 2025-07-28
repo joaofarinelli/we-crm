@@ -35,12 +35,13 @@ export const isSameLocalDay = (date1: Date | string, date2: Date | string): bool
 /**
  * Compara uma data em string (YYYY-MM-DD) com uma Date object
  * Útil para filtrar eventos por data no calendário
- * CORRIGIDO: trata timezone corretamente evitando conversões UTC
+ * DEFINITIVO: compara diretamente os componentes de data sem criar objetos Date intermediários
  */
 export const compareLocalDateString = (dateString: string, date: Date): boolean => {
-  // Criar uma data local a partir da string para garantir comparação correta
-  const eventDate = parseDateFromLocal(dateString);
-  return isSameLocalDay(eventDate, date);
+  const [year, month, day] = dateString.split('-').map(Number);
+  return date.getFullYear() === year &&
+         date.getMonth() === (month - 1) &&
+         date.getDate() === day;
 };
 
 /**
