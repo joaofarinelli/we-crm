@@ -15,6 +15,7 @@ import { ExternalLink } from 'lucide-react';
 import { MeetingDialog } from './MeetingDialog';
 import { MeetingDetails } from './MeetingDetails';
 import { RescheduleMeetingDialog } from './RescheduleMeetingDialog';
+import { ExportMeetingButton } from './ExportMeetingButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Meeting } from '@/types/meeting';
@@ -186,6 +187,12 @@ export const Meetings = () => {
                   
                    <div className="flex flex-col items-end gap-2">
                      <div className="flex items-center gap-2">
+                       <ExportMeetingButton 
+                         meetingId={meeting.id} 
+                         variant="outline" 
+                         size="sm" 
+                         showIcon={false}
+                       />
                        {(meeting.status === 'Cancelada' || meeting.status === 'Agendada') && (
                          <Button 
                            variant="outline" 

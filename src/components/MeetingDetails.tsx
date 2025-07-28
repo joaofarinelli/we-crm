@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AgendaItem } from './AgendaItem';
 import { MeetingStatusSelector } from './MeetingStatusSelector';
 import { MeetingParticipants } from './MeetingParticipants';
+import { ExportMeetingButton } from './ExportMeetingButton';
 
 interface MeetingDetailsProps {
   meetingId: string;
@@ -181,6 +182,9 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
               </div>
             )}
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <ExportMeetingButton meetingId={meetingId} />
         </div>
       </div>
 

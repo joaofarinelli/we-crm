@@ -11,6 +11,7 @@ import { Calendar, Clock, Users, FileText, ExternalLink } from 'lucide-react';
 import { Meeting } from '@/types/meeting';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ExportMeetingButton } from '@/components/ExportMeetingButton';
 
 interface ViewMeetingDialogProps {
   open: boolean;
@@ -49,7 +50,7 @@ export const ViewMeetingDialog = ({ open, onOpenChange, meeting }: ViewMeetingDi
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Título e Status */}
+          {/* Título, Status e Exportação */}
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -58,6 +59,9 @@ export const ViewMeetingDialog = ({ open, onOpenChange, meeting }: ViewMeetingDi
               <Badge className={getStatusColor(meeting.status)}>
                 {meeting.status}
               </Badge>
+            </div>
+            <div className="ml-4">
+              <ExportMeetingButton meetingId={meeting.id} />
             </div>
           </div>
 
