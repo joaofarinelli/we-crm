@@ -1018,6 +1018,7 @@ export type Database = {
       }
       partners: {
         Row: {
+          company_id: string | null
           contact_person: string | null
           created_at: string
           description: string | null
@@ -1029,6 +1030,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           contact_person?: string | null
           created_at?: string
           description?: string | null
@@ -1040,6 +1042,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           contact_person?: string | null
           created_at?: string
           description?: string | null
@@ -1050,7 +1053,22 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {

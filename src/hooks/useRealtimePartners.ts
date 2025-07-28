@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface Partner {
   id: string;
@@ -11,6 +12,7 @@ interface Partner {
   contact_person: string | null;
   description: string | null;
   status: string;
+  company_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -20,6 +22,7 @@ export const useRealtimePartners = () => {
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
+  const { userInfo } = useCurrentUser();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
@@ -56,10 +59,10 @@ export const useRealtimePartners = () => {
   };
 
   const createPartner = async (partnerData: Omit<Partner, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user) {
+    if (!user || !userInfo?.company_id) {
       toast({
         title: "Erro",
-        description: "Usuário não autenticado",
+        description: "Usuário não autenticado ou sem empresa",
         variant: "destructive"
       });
       return;
@@ -68,7 +71,7 @@ export const useRealtimePartners = () => {
     try {
       const { data, error } = await supabase
         .from('partners')
-        .insert([partnerData])
+        .insert([{ ...partnerData, company_id: userInfo.company_id }])
         .select()
         .single();
 
