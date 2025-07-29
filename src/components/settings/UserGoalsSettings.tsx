@@ -175,10 +175,7 @@ export const UserGoalsSettings = () => {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      <span>
-                        {format(new Date(goal.start_date), 'dd/MM/yyyy', { locale: ptBR })} - {' '}
-                        {format(new Date(goal.end_date), 'dd/MM/yyyy', { locale: ptBR })}
-                      </span>
+                      <span>Período: {getPeriodLabel(goal.period)}</span>
                     </div>
                   </div>
                 </CardContent>

@@ -63,6 +63,15 @@ export const GoalsWidget = () => {
     return types[type] || type;
   };
 
+  const getPeriodLabel = (period: string) => {
+    const periods = {
+      mensal: 'Mensal',
+      trimestral: 'Trimestral',
+      anual: 'Anual'
+    };
+    return periods[period] || period;
+  };
+
   const formatValue = (value: number, type: string) => {
     if (type === 'receita') {
       return new Intl.NumberFormat('pt-BR', {
@@ -129,7 +138,7 @@ export const GoalsWidget = () => {
               </div>
               
               <div className="text-xs text-muted-foreground">
-                Até {format(new Date(goal.end_date), 'dd/MM/yyyy', { locale: ptBR })}
+                {getPeriodLabel(goal.period)}
               </div>
             </div>
           );
