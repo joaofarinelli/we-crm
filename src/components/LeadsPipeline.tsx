@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,6 +39,7 @@ export const LeadsPipeline = () => {
   const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
   const [viewJourneyDialogOpen, setViewJourneyDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [appointmentLead, setAppointmentLead] = useState<any>(null);
   const [showColumnManager, setShowColumnManager] = useState(false);
   
   // Debug logs importantes para o pipeline
@@ -81,16 +82,20 @@ export const LeadsPipeline = () => {
     }
   };
 
-  const handleAppointmentAction = (lead: any) => {
-    setSelectedLead(lead);
+  const handleAppointmentAction = useCallback((lead: any) => {
+    console.log('🔥 [DEBUG] handleAppointmentAction chamado com lead:', lead?.id, lead?.name);
+    
     // Se o lead tem agendamentos, mostra o agendamento existente
     if (lead.appointments_count > 0 && lead.latest_appointment) {
+      setSelectedLead(lead);
       setViewAppointmentDialogOpen(true);
     } else {
       // Se não tem agendamentos, abre dialog para criar novo
+      console.log('🔥 [DEBUG] Definindo appointmentLead e abrindo dialog de criação');
+      setAppointmentLead(lead);
       setAddAppointmentDialogOpen(true);
     }
-  };
+  }, []);
 
   const handleViewJourney = (lead: any) => {
     setSelectedLead(lead);
@@ -370,8 +375,13 @@ export const LeadsPipeline = () => {
 
       <AddAppointmentDialog 
         open={addAppointmentDialogOpen} 
-        onOpenChange={setAddAppointmentDialogOpen}
-        preselectedLead={selectedLead}
+        onOpenChange={(open) => {
+          setAddAppointmentDialogOpen(open);
+          if (!open) {
+            setAppointmentLead(null);
+          }
+        }}
+        preselectedLead={appointmentLead}
       />
 
       <ViewAppointmentDialog 
