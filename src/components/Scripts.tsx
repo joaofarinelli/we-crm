@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeScripts } from '@/hooks/useRealtimeScripts';
 import { useScriptAttachments } from '@/hooks/useScriptAttachments';
+import { ScriptAttachmentsCompact } from '@/components/ScriptAttachmentsCompact';
 import { AddScriptDialog } from '@/components/AddScriptDialog';
 import { EditScriptDialog } from '@/components/EditScriptDialog';
 import { ViewScriptDialog } from '@/components/ViewScriptDialog';
@@ -99,6 +100,10 @@ const ScriptCard = ({ script, onEdit, onDelete, onView, canEdit }: {
             {script.content}
           </p>
         </div>
+        
+        {/* Anexos compactos */}
+        <ScriptAttachmentsCompact scriptId={script.id} />
+        
         <div className="mt-3 text-xs text-gray-500">
           Criado em: {new Date(script.created_at).toLocaleDateString('pt-BR')}
         </div>
