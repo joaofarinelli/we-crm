@@ -2,7 +2,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, User, Users, Shield } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
@@ -48,7 +48,11 @@ export const MonthView = ({
 }: MonthViewProps) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  
+  // Gerar o grid completo do calendário com padding para mostrar semanas completas
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0, locale: ptBR });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0, locale: ptBR });
+  const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
   const getAppointmentsForDay = (date: Date) => {
     return appointments.filter(appointment => 
@@ -104,26 +108,32 @@ export const MonthView = ({
 
       {/* Grid do calendário */}
       <div className="grid grid-cols-7 gap-1 md:gap-4">
-        {daysInMonth.map((day) => {
-              const dayAppointments = getAppointmentsForDay(day);
-              const dayMeetings = getMeetingsForDay(day);
-              const dayBlocks = getScheduleBlocksForDay(day);
+        {calendarDays.map((day) => {
+          const dayAppointments = getAppointmentsForDay(day);
+          const dayMeetings = getMeetingsForDay(day);
+          const dayBlocks = getScheduleBlocksForDay(day);
           const isToday = isSameDay(day, new Date());
+          const isCurrentMonth = day.getMonth() === currentDate.getMonth();
 
           return (
             <div
               key={day.toISOString()}
               className={`min-h-[80px] md:min-h-[140px] p-1 md:p-2 border rounded-lg cursor-pointer ${
-                isToday ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 'bg-white border-gray-200 hover:bg-gray-50'
+                isToday ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 
+                isCurrentMonth ? 'bg-white border-gray-200 hover:bg-gray-50' : 
+                'bg-gray-50 border-gray-100 hover:bg-gray-100'
               }`}
               onDoubleClick={() => onDateDoubleClick(day)}
             >
               <div className={`text-xs md:text-sm font-medium mb-1 md:mb-2 ${
-                isToday ? 'text-blue-600' : 'text-gray-900'
+                isToday ? 'text-blue-600' : 
+                isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
               }`}>
                 {format(day, 'd', { locale: ptBR })}
               </div>
 
+              {/* Só mostrar eventos se for do mês atual */}
+              {isCurrentMonth && (
               <div className="space-y-1">
                 {/* Agendamentos */}
                 {dayAppointments.slice(0, 2).map((appointment) => (
@@ -218,6 +228,7 @@ export const MonthView = ({
                   </div>
                 )}
               </div>
+              )}
             </div>
           );
         })}
