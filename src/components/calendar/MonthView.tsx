@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, User, Users, Shield } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
 import { compareLocalDateString } from '@/lib/date-utils';
@@ -120,7 +121,7 @@ export const MonthView = ({
               <div className={`text-xs md:text-sm font-medium mb-1 md:mb-2 ${
                 isToday ? 'text-blue-600' : 'text-gray-900'
               }`}>
-                {format(day, 'd')}
+                {format(day, 'd', { locale: ptBR })}
               </div>
 
               <div className="space-y-1">

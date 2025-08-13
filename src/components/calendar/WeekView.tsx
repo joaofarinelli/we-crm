@@ -46,7 +46,7 @@ export const WeekView = ({
   onBlockClick,
   onDateDoubleClick
 }: WeekViewProps) => {
-  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0, locale: ptBR });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getEventsForDay = (date: Date) => {
