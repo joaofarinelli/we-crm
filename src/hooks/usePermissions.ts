@@ -13,7 +13,18 @@ export const usePermissions = () => {
   // Buscar permissões customizadas da empresa
   useEffect(() => {
     const fetchCustomPermissions = async () => {
-      if (!userInfo?.company_id || !userInfo?.role_name) {
+      // Se não tem userInfo ou não tem role_name, usar permissões padrão
+      if (!userInfo?.role_name) {
+        console.log('ℹ️ [DEBUG] Usuário sem role_name, usando permissões padrão');
+        setCustomPermissions(null);
+        setLoading(false);
+        return;
+      }
+
+      // Se não tem empresa, usar permissões padrão (usuário ainda não configurou empresa)
+      if (!userInfo?.company_id) {
+        console.log('ℹ️ [DEBUG] Usuário sem empresa, usando permissões padrão para:', userInfo.role_name);
+        setCustomPermissions(null);
         setLoading(false);
         return;
       }
@@ -27,8 +38,16 @@ export const usePermissions = () => {
           .eq('is_system_role', true)
           .single();
 
-        if (roleError || !roleData) {
-          console.log('❌ [DEBUG] Role não encontrado:', userInfo.role_name);
+        if (roleError) {
+          console.log('ℹ️ [DEBUG] Role não encontrado na tabela roles:', userInfo.role_name, 'Usando permissões padrão');
+          setCustomPermissions(null);
+          setLoading(false);
+          return;
+        }
+
+        if (!roleData) {
+          console.log('ℹ️ [DEBUG] Role não encontrado:', userInfo.role_name, 'Usando permissões padrão');
+          setCustomPermissions(null);
           setLoading(false);
           return;
         }
@@ -42,7 +61,8 @@ export const usePermissions = () => {
           .maybeSingle();
 
         if (permError) {
-          console.error('❌ [DEBUG] Erro ao buscar permissões customizadas:', permError);
+          console.log('ℹ️ [DEBUG] Tabela company_role_permissions não existe ou erro de acesso. Usando permissões padrão:', permError.message);
+          setCustomPermissions(null);
           setLoading(false);
           return;
         }
@@ -55,7 +75,8 @@ export const usePermissions = () => {
           setCustomPermissions(null);
         }
       } catch (error) {
-        console.error('❌ [DEBUG] Erro ao buscar permissões:', error);
+        console.log('ℹ️ [DEBUG] Erro ao buscar permissões customizadas, usando padrão:', error);
+        setCustomPermissions(null);
       } finally {
         setLoading(false);
       }
