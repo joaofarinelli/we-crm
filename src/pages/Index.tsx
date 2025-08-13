@@ -7,6 +7,7 @@ import { Dashboard } from '@/components/Dashboard';
 import { Leads } from '@/components/Leads';
 import { Kanban } from '@/components/Kanban';
 import { LeadsPipeline } from '@/components/LeadsPipeline';
+import { LeadTagsManagement } from '@/components/LeadTagsManagement';
 import { Products } from '@/components/Products';
 import { Appointments } from '@/components/Appointments';
 import { Meetings } from '@/components/Meetings';
@@ -55,6 +56,8 @@ const Index = () => {
         return <Leads />;
       case 'leadsPipeline':
         return <LeadsPipeline />;
+      case 'leadTags':
+        return <LeadTagsManagement />;
       case 'products':
         return <Products />;
       case 'kanban':

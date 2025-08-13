@@ -21,6 +21,7 @@ import {
   Package,
   Handshake,
   Clock,
+  Tag,
 } from "lucide-react";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -40,6 +41,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null },
     { id: 'leads', label: 'Leads', icon: UserPlus, permission: 'leads' },
     { id: 'leadsPipeline', label: 'Pipeline de Leads', icon: Kanban, permission: 'leads' },
+    { id: 'leadTags', label: 'Tags de Leads', icon: Tag, permission: 'leads' },
     { id: 'products', label: 'Produtos', icon: Package, permission: 'products' },
     { id: 'appointments', label: 'Agendamentos', icon: Calendar, permission: 'appointments' },
     { id: 'meetings', label: 'Reuniões', icon: Video, permission: 'meetings' },
