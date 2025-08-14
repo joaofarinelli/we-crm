@@ -18,13 +18,14 @@ import { WhatsAppLeadButton } from './WhatsAppLeadButton';
 import { useExportLeads } from '@/hooks/useExportLeads';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { PermissionGuard } from '@/components/PermissionGuard';
+import { useLeadDialog } from '@/contexts/LeadDialogContext';
 
 export const Leads = () => {
   console.log('🔍 Leads component rendering');
   
   const [editingLead, setEditingLead] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const { state: leadDialogState, openDialog: openLeadDialog, closeDialog: closeLeadDialog } = useLeadDialog();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [journeyDialogOpen, setJourneyDialogOpen] = useState(false);
   const [selectedLeadForJourney, setSelectedLeadForJourney] = useState<{id: string, name: string} | null>(null);
@@ -215,7 +216,7 @@ export const Leads = () => {
             <PermissionGuard module="leads" action="create">
               <Button 
                 className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
-                onClick={() => setAddDialogOpen(true)}
+                onClick={openLeadDialog}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Lead
@@ -391,8 +392,12 @@ export const Leads = () => {
       />
 
       <AddLeadDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
+        open={leadDialogState.isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeLeadDialog();
+          }
+        }}
         onCreateLead={createLead}
       />
 

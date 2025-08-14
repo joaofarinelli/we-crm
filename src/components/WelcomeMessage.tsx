@@ -11,6 +11,7 @@ import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
 import { InviteUserDialog } from '@/components/InviteUserDialog';
+import { useLeadDialog } from '@/contexts/LeadDialogContext';
 
 export const WelcomeMessage = () => {
   const { userInfo } = useCurrentUser();
@@ -19,7 +20,7 @@ export const WelcomeMessage = () => {
   const { createLead } = useLeads();
   
   // Estados para controlar os diálogos
-  const [leadDialogOpen, setLeadDialogOpen] = useState(false);
+  const { state: leadDialogState, openDialog: openLeadDialog, closeDialog: closeLeadDialog } = useLeadDialog();
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -54,7 +55,7 @@ export const WelcomeMessage = () => {
   const handleAction = (action: string) => {
     switch (action) {
       case 'add-lead':
-        setLeadDialogOpen(true);
+        openLeadDialog();
         break;
       case 'add-appointment':
         setAppointmentDialogOpen(true);
@@ -144,8 +145,12 @@ export const WelcomeMessage = () => {
 
       {/* Diálogos */}
       <AddLeadDialog 
-        open={leadDialogOpen} 
-        onOpenChange={setLeadDialogOpen} 
+        open={leadDialogState.isOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            closeLeadDialog();
+          }
+        }}
         onCreateLead={createLead}
       />
       
