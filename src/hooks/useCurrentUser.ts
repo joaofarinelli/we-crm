@@ -16,6 +16,7 @@ interface CurrentUserInfo {
 export const useCurrentUser = () => {
   const [userInfo, setUserInfo] = useState<CurrentUserInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -26,7 +27,13 @@ export const useCurrentUser = () => {
       return;
     }
 
+    // Evitar múltiplas chamadas simultâneas
+    if (isLoading) {
+      return;
+    }
+
     try {
+      setIsLoading(true);
       setLoading(true);
       
       // Usar a função do banco para obter informações completas
@@ -77,13 +84,17 @@ export const useCurrentUser = () => {
       }
     } catch (error) {
       console.error('Erro ao buscar informações do usuário:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar informações do usuário",
-        variant: "destructive"
-      });
+      // Só mostrar toast se for um erro crítico, não para usuários sem empresa
+      if (error && !error.message?.includes('company_id')) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar informações do usuário",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
+      setIsLoading(false);
     }
   };
 

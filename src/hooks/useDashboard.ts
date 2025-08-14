@@ -47,24 +47,34 @@ export const useDashboard = (closerId?: string) => {
     avgDealValue: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
   const fetchDashboardData = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // Evitar múltiplas chamadas simultâneas
+    if (isLoading) {
+      return;
+    }
 
     try {
+      setIsLoading(true);
       setLoading(true);
       
       // Verificar se o usuário tem company_id
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
         .single();
 
-      if (!profile?.company_id) {
-        // Se não tem empresa, retornar dados vazios
-        setStats({
+      if (profileError || !profile?.company_id) {
+        // Se não tem empresa, retornar dados vazios sem erro
+        const emptyStats = {
           totalLeads: 0,
           totalContacts: 0,
           totalTasks: 0,
@@ -84,8 +94,10 @@ export const useDashboard = (closerId?: string) => {
           },
           conversionRate: 0,
           avgDealValue: 0,
-        });
+        };
+        setStats(emptyStats);
         setLoading(false);
+        setIsLoading(false);
         return;
       }
       const now = new Date();
@@ -361,8 +373,10 @@ export const useDashboard = (closerId?: string) => {
       });
     } catch (error) {
       console.error('Erro ao buscar dados do dashboard:', error);
+      // Não mostrar toast, apenas logar o erro
     } finally {
       setLoading(false);
+      setIsLoading(false);
     }
   };
 

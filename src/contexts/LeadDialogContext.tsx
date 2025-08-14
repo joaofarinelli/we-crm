@@ -63,7 +63,12 @@ export const LeadDialogProvider = ({ children }: { children: ReactNode }) => {
   // Save state to sessionStorage whenever it changes
   React.useEffect(() => {
     try {
-      sessionStorage.setItem('leadDialogState', JSON.stringify(state));
+      // Só salvar se o dialog estiver aberto ou tiver dados no formulário
+      if (state.isOpen || Object.values(state.formData).some(value => 
+        Array.isArray(value) ? value.length > 0 : value !== '' && value !== initialFormData[value as keyof typeof initialFormData]
+      )) {
+        sessionStorage.setItem('leadDialogState', JSON.stringify(state));
+      }
     } catch (error) {
       console.error('Error saving lead dialog state:', error);
     }
@@ -87,6 +92,7 @@ export const LeadDialogProvider = ({ children }: { children: ReactNode }) => {
   const resetFormData = () => {
     setState(prev => ({
       ...prev,
+      isOpen: false,
       formData: initialFormData
     }));
     // Clear from sessionStorage when resetting

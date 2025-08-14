@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 
@@ -11,14 +11,17 @@ interface OnboardingCheckProps {
 export const OnboardingCheck = ({ children }: OnboardingCheckProps) => {
   const { userInfo, loading } = useCurrentUser();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading && userInfo && !userInfo.has_company) {
-      // Usuário está logado mas não tem empresa, redirecionar para registro
-      console.log('Redirecionando usuário sem empresa para configuração');
-      navigate('/company-registration');
+      // Só redirecionar se não estiver já na página de registro de empresa
+      if (location.pathname !== '/company-registration') {
+        console.log('Redirecionando usuário sem empresa para configuração');
+        navigate('/company-registration');
+      }
     }
-  }, [userInfo, loading, navigate]);
+  }, [userInfo, loading, navigate, location.pathname]);
 
   if (loading) {
     return (
