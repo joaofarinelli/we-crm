@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1895,7 +1895,7 @@ export type Database = {
       get_advanced_saas_analytics: {
         Args:
           | Record<PropertyKey, never>
-          | { period_days?: number; company_filter?: string }
+          | { company_filter?: string; period_days?: number }
         Returns: Json
       }
       get_current_user_company_id: {
@@ -1905,23 +1905,23 @@ export type Database = {
       get_current_user_info: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
-          email: string
-          full_name: string
           company_id: string
           company_name: string
-          role_name: string
+          email: string
+          full_name: string
           has_company: boolean
+          role_name: string
+          user_id: string
         }[]
       }
       get_saas_metrics: {
         Args: Record<PropertyKey, never>
         Returns: {
-          total_companies: number
-          total_users: number
-          total_leads: number
-          total_appointments: number
           active_companies: number
+          total_appointments: number
+          total_companies: number
+          total_leads: number
+          total_users: number
         }[]
       }
       is_current_user_admin: {
@@ -1937,7 +1937,7 @@ export type Database = {
         Returns: boolean
       }
       setup_company_admin: {
-        Args: { user_id: string; company_id: string }
+        Args: { company_id: string; user_id: string }
         Returns: undefined
       }
       sync_appointment_status_with_pipeline: {
