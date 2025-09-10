@@ -246,20 +246,8 @@ export const useLeadsPipeline = () => {
 
     setDragLoading(leadId);
     
-    // Desativar temporariamente o realtime para evitar conflitos
-    setIsUpdating(true);
-    
     try {
       console.log('🔄 Updating lead status:', leadId, 'to:', newStatus);
-
-      // Atualização otimística mais robusta
-      setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { 
-          ...lead, 
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        } : lead
-      ));
 
       const { data, error } = await supabase
         .from('leads')
@@ -278,10 +266,14 @@ export const useLeadsPipeline = () => {
 
       console.log('✅ Lead status updated successfully:', data);
       
-      // Aguardar um pouco antes de reativar o realtime
-      setTimeout(() => {
-        setIsUpdating(false);
-      }, 1000);
+      // Atualização local imediata após confirmação do banco
+      setLeads(prev => prev.map(lead => 
+        lead.id === leadId ? { 
+          ...lead, 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        } : lead
+      ));
       
       toast({
         title: "Sucesso",
@@ -289,8 +281,7 @@ export const useLeadsPipeline = () => {
       });
     } catch (error) {
       console.error('❌ Error updating lead status:', error);
-      // Reverter mudança otimística e reativar realtime
-      setIsUpdating(false);
+      // Refetch para garantir consistência
       await fetchLeads();
       toast({
         title: "Erro",
@@ -367,14 +358,10 @@ export const useLeadsPipeline = () => {
           (payload) => {
             console.log('Lead pipeline change detected:', payload);
             
-            // Evitar refetch automático durante drag and drop
-            if (!dragLoading && !isUpdating) {
-              setIsUpdating(true);
-              
+            // Evitar refetch durante drag and drop
+            if (!dragLoading) {
               setTimeout(() => {
-                fetchLeads().finally(() => {
-                  setIsUpdating(false);
-                });
+                fetchLeads();
               }, 500);
             }
           }
