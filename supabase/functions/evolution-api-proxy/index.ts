@@ -67,6 +67,34 @@ serve(async (req) => {
             integration: 'WHATSAPP-BAILEYS',
           }),
         });
+
+        // Configurar webhook automaticamente após criar a instância
+        if (evolutionResponse.ok) {
+          const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/evolution-webhook`;
+          
+          console.log('Configurando webhook para instância:', instanceName);
+          
+          await fetch(`${evolutionApiUrl}/webhook/set/${instanceName}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': evolutionApiKey,
+            },
+            body: JSON.stringify({
+              enabled: true,
+              url: webhookUrl,
+              webhookByEvents: false,
+              events: [
+                'QRCODE_UPDATED',
+                'MESSAGES_UPSERT',
+                'MESSAGES_UPDATE',
+                'MESSAGES_DELETE',
+                'CONNECTION_UPDATE',
+                'SEND_MESSAGE'
+              ]
+            }),
+          });
+        }
         break;
       }
 

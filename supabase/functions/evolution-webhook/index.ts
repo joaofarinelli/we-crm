@@ -39,6 +39,7 @@ serve(async (req) => {
 
     // Processar eventos
     switch (event) {
+      case 'MESSAGES_UPSERT':
       case 'messages.upsert': {
         const message = data.messages?.[0];
         if (!message) break;
@@ -148,6 +149,7 @@ serve(async (req) => {
         break;
       }
 
+      case 'MESSAGES_UPDATE':
       case 'messages.update': {
         const updates = data;
         for (const update of updates) {
@@ -166,6 +168,7 @@ serve(async (req) => {
         break;
       }
 
+      case 'CONNECTION_UPDATE':
       case 'connection.update': {
         const connectionState = data.state;
         let status = 'disconnected';
@@ -184,6 +187,7 @@ serve(async (req) => {
         break;
       }
 
+      case 'QRCODE_UPDATED':
       case 'qrcode.updated': {
         const qrcode = data.qrcode;
         await supabaseAdmin
