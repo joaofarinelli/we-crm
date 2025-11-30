@@ -133,19 +133,23 @@ const Index = () => {
             
             <main className="flex-1 flex flex-col overflow-hidden">
               {/* Mobile Header */}
-              <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
-                <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-                <h1 className="font-semibold text-lg">We CRM</h1>
-                <div className="w-10"></div> {/* Spacer for balance */}
-              </div>
+              {activeTab !== 'whatsapp' && (
+                <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
+                  <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+                  <h1 className="font-semibold text-lg">We CRM</h1>
+                  <div className="w-10"></div> {/* Spacer for balance */}
+                </div>
+              )}
               
-              {/* TopBar - visível apenas no desktop */}
-              <div className="hidden md:block">
-                <TopBar />
-              </div>
+              {/* TopBar - visível apenas no desktop e quando não estiver no WhatsApp */}
+              {activeTab !== 'whatsapp' && (
+                <div className="hidden md:block">
+                  <TopBar />
+                </div>
+              )}
               
               {/* Main Content */}
-              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden p-4' : 'overflow-auto'}`}>
+              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-auto'}`}>
                 <div className={activeTab === 'whatsapp' ? 'h-full' : ''}>
                   {renderContent()}
                 </div>
