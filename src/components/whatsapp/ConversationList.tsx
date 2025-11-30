@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { WhatsAppConversation } from '@/types/whatsapp';
 import { ConversationItem } from './ConversationItem';
 import { ConversationFilters, ConversationFilterType } from './ConversationFilters';
+import { TransferConversationDialog } from './TransferConversationDialog';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useState } from 'react';
 
@@ -11,12 +12,20 @@ interface ConversationListProps {
   conversations: WhatsAppConversation[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  companyId: string;
 }
 
-export const ConversationList = ({ conversations, selectedId, onSelect }: ConversationListProps) => {
+export const ConversationList = ({ conversations, selectedId, onSelect, companyId }: ConversationListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<ConversationFilterType>('all');
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [conversationToTransfer, setConversationToTransfer] = useState<WhatsAppConversation | null>(null);
   const { userInfo } = useCurrentUser();
+
+  const handleTransfer = (conversation: WhatsAppConversation) => {
+    setConversationToTransfer(conversation);
+    setTransferDialogOpen(true);
+  };
 
   const filteredConversations = conversations.filter(conv => {
     // Filtro de busca
@@ -73,12 +82,27 @@ export const ConversationList = ({ conversations, selectedId, onSelect }: Conver
                   conversation={conversation}
                   isSelected={conversation.id === selectedId}
                   onClick={() => onSelect(conversation.id)}
+                  onTransfer={handleTransfer}
                 />
               ))}
             </div>
           )}
         </ScrollArea>
       </div>
+
+      <TransferConversationDialog
+        conversationId={conversationToTransfer?.id || null}
+        contactName={conversationToTransfer?.contact?.name || conversationToTransfer?.contact?.phone || 'Desconhecido'}
+        currentAssignedTo={conversationToTransfer?.assigned_to || null}
+        companyId={companyId}
+        open={transferDialogOpen}
+        onOpenChange={(open) => {
+          setTransferDialogOpen(open);
+          if (!open) {
+            setConversationToTransfer(null);
+          }
+        }}
+      />
     </div>
   );
 };

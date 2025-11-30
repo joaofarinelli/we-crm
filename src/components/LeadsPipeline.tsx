@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3 } from 'lucide-react';
+import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft } from 'lucide-react';
 import { useLeadsPipeline } from '@/hooks/useLeadsPipeline';
 
 import { AddLeadDialog } from '@/components/AddLeadDialog';
@@ -17,6 +17,7 @@ import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
 import { ViewAppointmentDialog } from '@/components/ViewAppointmentDialog';
 import { ViewLeadJourneyDialog } from '@/components/ViewLeadJourneyDialog';
+import { TransferLeadDialog } from '@/components/TransferLeadDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -42,6 +43,8 @@ export const LeadsPipeline = () => {
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [appointmentLead, setAppointmentLead] = useState<any>(null);
   const [showColumnManager, setShowColumnManager] = useState(false);
+  const [transferLeadDialogOpen, setTransferLeadDialogOpen] = useState(false);
+  const [transferLead, setTransferLead] = useState<any>(null);
   
   // Debug logs importantes para o pipeline
   console.log('🔍 LeadsPipeline component state:', {
@@ -101,6 +104,11 @@ export const LeadsPipeline = () => {
   const handleViewJourney = (lead: any) => {
     setSelectedLead(lead);
     setViewJourneyDialogOpen(true);
+  };
+
+  const handleTransferLead = (lead: any) => {
+    setTransferLead(lead);
+    setTransferLeadDialogOpen(true);
   };
 
   const formatDateTime = (date: string, time: string) => {
@@ -204,9 +212,9 @@ export const LeadsPipeline = () => {
                             <CardContent className="p-4">
                               <div className="space-y-3">
                                 <div className="flex justify-between items-start">
-                                  <h3 className="font-medium text-sm line-clamp-2">
+                                   <h3 className="font-medium text-sm line-clamp-2">
                                     {lead.name}
-                                  </h3>
+                                   </h3>
                                    <div className="flex gap-1 ml-2">
                                      <Button
                                        variant="ghost"
@@ -219,6 +227,18 @@ export const LeadsPipeline = () => {
                                        title="Ver Jornada"
                                      >
                                        <BarChart3 className="w-3 h-3" />
+                                     </Button>
+                                     <Button
+                                       variant="ghost"
+                                       size="sm"
+                                       className="h-6 w-6 p-0 text-purple-600 hover:text-purple-700"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         handleTransferLead(lead);
+                                       }}
+                                       title="Transferir Lead"
+                                     >
+                                       <ArrowRightLeft className="w-3 h-3" />
                                      </Button>
                                      <Button
                                         variant="outline"
@@ -400,6 +420,19 @@ export const LeadsPipeline = () => {
         leadName={selectedLead?.name || ''}
         open={viewJourneyDialogOpen}
         onOpenChange={setViewJourneyDialogOpen}
+      />
+
+      <TransferLeadDialog
+        leadId={transferLead?.id || null}
+        leadName={transferLead?.name || ''}
+        currentAssignedTo={transferLead?.assigned_to || null}
+        open={transferLeadDialogOpen}
+        onOpenChange={(open) => {
+          setTransferLeadDialogOpen(open);
+          if (!open) {
+            setTransferLead(null);
+          }
+        }}
       />
     </div>
   );
