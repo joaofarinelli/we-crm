@@ -6,6 +6,81 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Função para normalizar número de telefone (remover caracteres especiais)
+function normalizePhoneNumber(phone: string): string {
+  if (!phone) return '';
+  // Remove todos os caracteres que não são números
+  return phone.replace(/\D/g, '');
+}
+
+// Função para buscar lead por telefone e vincular automaticamente
+async function autoLinkLeadByPhone(
+  supabaseAdmin: any,
+  contactId: string,
+  contactPhone: string,
+  companyId: string
+) {
+  try {
+    if (!contactPhone) {
+      console.log('Contact has no phone number, skipping auto-link');
+      return;
+    }
+
+    // Normalizar o telefone do contato
+    const normalizedContactPhone = normalizePhoneNumber(contactPhone);
+    console.log(`Searching for lead with normalized phone: ${normalizedContactPhone}`);
+
+    // Buscar leads da empresa que possuem telefone
+    const { data: leads, error: leadsError } = await supabaseAdmin
+      .from('leads')
+      .select('id, phone, name')
+      .eq('company_id', companyId)
+      .not('phone', 'is', null);
+
+    if (leadsError) {
+      console.error('Error fetching leads:', leadsError);
+      return;
+    }
+
+    if (!leads || leads.length === 0) {
+      console.log('No leads with phone numbers found');
+      return;
+    }
+
+    // Buscar lead com telefone correspondente
+    const matchingLead = leads.find(lead => {
+      if (!lead.phone) return false;
+      const normalizedLeadPhone = normalizePhoneNumber(lead.phone);
+      
+      // Comparar os últimos 9 dígitos (número sem código de área/país)
+      const contactLastDigits = normalizedContactPhone.slice(-9);
+      const leadLastDigits = normalizedLeadPhone.slice(-9);
+      
+      return contactLastDigits === leadLastDigits && contactLastDigits.length === 9;
+    });
+
+    if (matchingLead) {
+      console.log(`Found matching lead: ${matchingLead.name} (${matchingLead.id})`);
+      
+      // Vincular o contato ao lead
+      const { error: updateError } = await supabaseAdmin
+        .from('whatsapp_contacts')
+        .update({ lead_id: matchingLead.id })
+        .eq('id', contactId);
+
+      if (updateError) {
+        console.error('Error linking contact to lead:', updateError);
+      } else {
+        console.log(`Contact ${contactId} automatically linked to lead ${matchingLead.id}`);
+      }
+    } else {
+      console.log('No matching lead found for phone:', normalizedContactPhone);
+    }
+  } catch (error) {
+    console.error('Error in autoLinkLeadByPhone:', error);
+  }
+}
+
 // Função para buscar e salvar foto de perfil do contato
 async function fetchAndSaveProfilePicture(
   supabaseAdmin: any,
@@ -163,6 +238,17 @@ serve(async (req) => {
         }
         
         console.log('Contact created/updated:', contact.id, contact.name);
+
+        // Vincular automaticamente ao lead se houver um com o mesmo telefone
+        if (!contact.lead_id && contact.phone) {
+          console.log('Attempting auto-link to lead by phone...');
+          await autoLinkLeadByPhone(
+            supabaseAdmin,
+            contact.id,
+            contact.phone,
+            instanceData.company_id
+          );
+        }
 
         // Buscar foto de perfil se o contato não tiver uma
         if (!contact.profile_picture_url) {
