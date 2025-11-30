@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useCompanySettings } from '@/hooks/useCompanySettings';
 import { useSaasAdmin } from '@/hooks/useSaasAdmin';
 import { useNavigate } from 'react-router-dom';
+import { SidebarGroup } from '@/components/SidebarGroup';
 import { Menu } from 'lucide-react';
 import {
   LayoutDashboard,
@@ -25,51 +26,111 @@ import {
   Clock,
   Tag,
   MessageCircle,
+  LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface MobileSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
+// Mesma estrutura hierárquica do Sidebar.tsx
+const menuStructure = [
+  {
+    type: 'item' as const,
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    permission: null,
+  },
+  {
+    type: 'group' as const,
+    id: 'crm',
+    label: 'CRM',
+    icon: UserPlus,
+    items: [
+      { id: 'leads', label: 'Leads', icon: UserPlus, permission: 'leads' },
+      { id: 'leadsPipeline', label: 'Pipeline', icon: Kanban, permission: 'leads' },
+      { id: 'leadTags', label: 'Tags', icon: Tag, permission: 'leads' },
+      { id: 'products', label: 'Produtos', icon: Package, permission: 'products' },
+    ],
+  },
+  {
+    type: 'group' as const,
+    id: 'agenda',
+    label: 'Agenda',
+    icon: CalendarDays,
+    items: [
+      { id: 'appointments', label: 'Agendamentos', icon: Calendar, permission: 'appointments' },
+      { id: 'meetings', label: 'Reuniões', icon: Video, permission: 'meetings' },
+      { id: 'calendar', label: 'Calendário', icon: CalendarDays, permission: 'appointments' },
+      { id: 'scheduleBlocks', label: 'Horários', icon: Clock, permission: 'scheduleBlocks' },
+    ],
+  },
+  {
+    type: 'item' as const,
+    id: 'whatsapp',
+    label: 'WhatsApp',
+    icon: MessageCircle,
+    permission: null,
+    route: '/whatsapp',
+  },
+  {
+    type: 'group' as const,
+    id: 'operational',
+    label: 'Operacional',
+    icon: CheckSquare,
+    items: [
+      { id: 'tasks', label: 'Tarefas', icon: CheckSquare, permission: 'tasks' },
+      { id: 'scripts', label: 'Materiais', icon: FileText, permission: 'scripts' },
+    ],
+  },
+  {
+    type: 'item' as const,
+    id: 'reports',
+    label: 'Relatórios',
+    icon: BarChart3,
+    permission: 'reports',
+  },
+  {
+    type: 'item' as const,
+    id: 'partners',
+    label: 'Parceiros',
+    icon: Handshake,
+    permission: 'partners',
+  },
+  {
+    type: 'group' as const,
+    id: 'admin',
+    label: 'Administração',
+    icon: Settings,
+    items: [
+      { id: 'users', label: 'Usuários', icon: Users, permission: 'user-management' },
+      { id: 'settings', label: 'Configurações', icon: Settings, permission: 'settings' },
+    ],
+  },
+];
+
 export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { company, isLoading } = useCompanySettings();
   const { isSaasAdmin } = useSaasAdmin();
+  const { canAccess } = usePermissions();
   const navigate = useNavigate();
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'leads', label: 'Leads', icon: UserPlus },
-    { id: 'leadsPipeline', label: 'Pipeline de Leads', icon: Kanban },
-    { id: 'leadTags', label: 'Tags de Leads', icon: Tag },
-    { id: 'products', label: 'Produtos', icon: Package },
-    { id: 'appointments', label: 'Agendamentos', icon: Calendar },
-    { id: 'meetings', label: 'Reuniões', icon: Video },
-    { id: 'calendar', label: 'Calendário', icon: CalendarDays },
-    { id: 'scheduleBlocks', label: 'Gerenciar Horários', icon: Clock },
-    { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
-    { id: 'scripts', label: 'Materiais', icon: FileText },
-    { id: 'reports', label: 'Relatórios', icon: BarChart3 },
-    { id: 'partners', label: 'Parceiros', icon: Handshake },
-    { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, route: '/whatsapp' },
-    { id: 'users', label: 'Usuários', icon: Users },
-    { id: 'settings', label: 'Configurações', icon: Settings },
-  ];
-
-  const handleItemClick = (item: any) => {
-    if (item.route) {
-      navigate(item.route);
-    } else {
-      setActiveTab(item.id);
-    }
+  const handleNavigate = (route: string) => {
+    navigate(route);
     setIsOpen(false);
   };
 
-  const handleAdminSaasClick = () => {
-    // Use react-router navigation instead of window.location
-    setActiveTab('admin');
+  const handleItemClick = (itemId: string, route?: string) => {
+    if (route) {
+      navigate(route);
+    } else {
+      setActiveTab(itemId);
+    }
     setIsOpen(false);
   };
 
@@ -98,8 +159,32 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
             </div>
           </div>
           
-          <nav className="flex-1 p-4 space-y-2">
-            {menuItems.map((item) => {
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {menuStructure.map((item) => {
+              if (item.type === 'group') {
+                return (
+                  <SidebarGroup
+                    key={item.id}
+                    id={item.id}
+                    label={item.label}
+                    icon={item.icon}
+                    items={item.items}
+                    activeTab={activeTab}
+                    setActiveTab={(id) => {
+                      setActiveTab(id);
+                      setIsOpen(false);
+                    }}
+                    canAccess={canAccess}
+                    onNavigate={handleNavigate}
+                  />
+                );
+              }
+
+              // Item único
+              if (item.permission && !canAccess(item.permission)) {
+                return null;
+              }
+
               const Icon = item.icon;
               return (
                 <Button
@@ -109,7 +194,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
                     "w-full justify-start",
                     activeTab === item.id && "bg-primary text-primary-foreground"
                   )}
-                  onClick={() => handleItemClick(item)}
+                  onClick={() => handleItemClick(item.id, item.route)}
                 >
                   <Icon className="mr-2 h-4 w-4" />
                   {item.label}
@@ -118,19 +203,20 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
             })}
 
             {isSaasAdmin && (
-              <>
-                <div className="border-t pt-2 mt-2">
-                  <p className="text-xs text-gray-500 px-3 pb-2">Administração SaaS</p>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={handleAdminSaasClick}
-                  >
-                    <Shield className="mr-2 h-4 w-4" />
-                    Admin SaaS
-                  </Button>
-                </div>
-              </>
+              <div className="border-t pt-2 mt-2">
+                <p className="text-xs text-gray-500 px-3 pb-2">Administração SaaS</p>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  onClick={() => {
+                    navigate('/admin');
+                    setIsOpen(false);
+                  }}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Admin SaaS
+                </Button>
+              </div>
             )}
           </nav>
         </div>
