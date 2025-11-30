@@ -69,6 +69,7 @@ export const WhatsAppChat = () => {
             conversations={conversations || []}
             selectedId={selectedConversationId}
             onSelect={setSelectedConversationId}
+            companyId={company.id}
           />
         )}
       </div>

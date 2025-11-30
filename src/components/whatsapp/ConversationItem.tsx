@@ -1,21 +1,26 @@
+import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { WhatsAppConversation } from '@/types/whatsapp';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { TagBadge } from '@/components/TagBadge';
 import { useWhatsAppConversationTags } from '@/hooks/useWhatsAppConversationTags';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConversationItemProps {
   conversation: WhatsAppConversation;
   isSelected: boolean;
   onClick: () => void;
+  onTransfer: (conversation: WhatsAppConversation) => void;
 }
 
-export const ConversationItem = ({ conversation, isSelected, onClick }: ConversationItemProps) => {
+export const ConversationItem = ({ conversation, isSelected, onClick, onTransfer }: ConversationItemProps) => {
+  const [isHovered, setIsHovered] = useState(false);
   const contactName = conversation.contact?.name || conversation.contact?.phone || 'Desconhecido';
   const initials = contactName.substring(0, 2).toUpperCase();
   const { assignedTags } = useWhatsAppConversationTags(conversation.id);
@@ -27,11 +32,27 @@ export const ConversationItem = ({ conversation, isSelected, onClick }: Conversa
   return (
     <div
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        'p-4 cursor-pointer hover:bg-accent/50 transition-colors',
+        'p-4 cursor-pointer hover:bg-accent/50 transition-colors relative',
         isSelected && 'bg-accent'
       )}
     >
+      {isHovered && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 h-8 w-8 p-0 text-purple-600 hover:text-purple-700"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTransfer(conversation);
+          }}
+          title="Transferir Conversa"
+        >
+          <ArrowRightLeft className="w-4 h-4" />
+        </Button>
+      )}
       <div className="flex items-start gap-3">
         <div className="relative">
           <Avatar>
