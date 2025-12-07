@@ -36,8 +36,30 @@ import { TransferLeadDialog } from '@/components/TransferLeadDialog';
 import { ImportLeadsDialog } from '@/components/ImportLeadsDialog';
 import { useExportLeads } from '@/hooks/useExportLeads';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+// Formatar data relativa (Ontem, Hoje, etc.)
+const formatRelativeDate = (dateString: string) => {
+  const date = new Date(dateString);
+  
+  if (isToday(date)) {
+    return `Hoje ${format(date, 'HH:mm')}`;
+  } else if (isYesterday(date)) {
+    return `Ontem ${format(date, 'HH:mm')}`;
+  }
+  return format(date, 'dd/MM HH:mm');
+};
+
+// Formatar valor monetário
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', { 
+    style: 'currency', 
+    currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value);
+};
 
 export const LeadsPipeline = () => {
   console.log('🔍 LeadsPipeline component rendering');
@@ -401,20 +423,20 @@ export const LeadsPipeline = () => {
               
               return (
               <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col">
-              <Card className="shrink-0 mb-4">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: column.color }} 
-                    />
-                    {column.name}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {leadsCount} {leadsCount === 1 ? 'lead' : 'leads'}: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}
-                  </p>
-                </CardHeader>
-              </Card>
+                {/* Header da coluna com borda superior colorida */}
+                <div 
+                  className="bg-white border rounded-lg shadow-sm mb-3"
+                  style={{ borderTopWidth: '4px', borderTopColor: column.color }}
+                >
+                  <div className="p-3 text-center">
+                    <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-700">
+                      {column.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {leadsCount} leads: {formatCurrency(totalValue)}
+                    </p>
+                  </div>
+                </div>
 
               <Droppable droppableId={column.name}>
                 {(provided, snapshot) => (
@@ -437,7 +459,7 @@ export const LeadsPipeline = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`cursor-move transition-all duration-200 shrink-0 ${
+                            className={`cursor-move transition-all duration-200 shrink-0 border-l-4 ${
                               snapshot.isDragging 
                                 ? 'shadow-lg rotate-2 scale-105' 
                                 : 'hover:shadow-md'
@@ -446,166 +468,111 @@ export const LeadsPipeline = () => {
                                 ? 'opacity-50 pointer-events-none' 
                                 : ''
                             }`}
+                            style={{ 
+                              borderLeftColor: column.color,
+                              ...provided.draggableProps.style 
+                            }}
                           >
-                            <CardContent className="p-4">
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-start">
-                                   <h3 className="font-medium text-sm line-clamp-2">
-                                    {lead.name}
-                                   </h3>
-                                   <div className="flex gap-1 ml-2">
-                                     <Button
-                                       variant="ghost"
-                                       size="sm"
-                                       className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         handleViewJourney(lead);
-                                       }}
-                                       title="Ver Jornada"
-                                     >
-                                       <BarChart3 className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                       variant="ghost"
-                                       size="sm"
-                                       className="h-6 w-6 p-0 text-purple-600 hover:text-purple-700"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         handleTransferLead(lead);
-                                       }}
-                                       title="Transferir Lead"
-                                     >
-                                       <ArrowRightLeft className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                        variant="outline"
-                                       size="sm"
-                                       className="h-6 w-6 p-0"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         console.log('🔥 PIPELINE EDIT BUTTON CLICKED for lead:', lead.id);
-                                         handleEditLead(lead);
-                                       }}
-                                       title="Editar Lead"
-                                     >
-                                       <Edit className="w-3 h-3" />
-                                     </Button>
+                            <CardContent className="p-3">
+                              {/* Header: Avatar + Nome/Empresa + Data */}
+                              <div className="flex items-start gap-3">
+                                {/* Avatar */}
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                  <User className="w-5 h-5 text-gray-400" />
+                                </div>
+                                
+                                {/* Info principal */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm text-gray-500 truncate">
+                                        {lead.product_name || lead.source || 'Lead'}
+                                      </p>
+                                      <p className="text-sm font-medium text-blue-600 truncate">
+                                        {lead.name}
+                                      </p>
+                                    </div>
+                                    <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
+                                      {formatRelativeDate(lead.created_at)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Footer: Valor + Indicador de tarefas */}
+                              <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-700">
+                                    {formatCurrency(lead.product_value || 0)}
+                                  </span>
+                                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  {lead.appointments_count > 0 ? (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <span>{lead.appointments_count} agend.</span>
+                                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <span>Sem Tarefas</span>
+                                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Botões de ação em dropdown */}
+                              <div className="flex justify-end mt-2 pt-2 border-t border-gray-100">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleAppointmentAction(lead);
-                                      }}
+                                      className="h-7 px-2 text-gray-500"
+                                      onClick={(e) => e.stopPropagation()}
                                     >
-                                      <Calendar className="w-3 h-3" />
+                                      <MoreVertical className="w-4 h-4" />
                                     </Button>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2 text-xs text-gray-600">
-                                  {lead.email && (
-                                    <div className="flex items-center gap-2">
-                                      <User className="w-3 h-3" />
-                                      <span className="truncate">{lead.email}</span>
-                                    </div>
-                                  )}
-
-                                  {lead.phone && (
-                                    <div className="flex items-center gap-2">
-                                      <Phone className="w-3 h-3" />
-                                      <span>{lead.phone}</span>
-                                      <WhatsAppLeadButton 
-                                        phone={lead.phone} 
-                                        leadName={lead.name} 
-                                        size="sm" 
-                                      />
-                                    </div>
-                                  )}
-
-                                   {(lead.source || lead.temperature) && (
-                                     <div className="flex items-center gap-2 flex-wrap">
-                                       {lead.source && (
-                                         <Badge variant="outline" className="text-xs">
-                                           {lead.source}
-                                         </Badge>
-                                       )}
-                                       {lead.temperature && (
-                                         <Badge 
-                                           variant="outline" 
-                                           className={`text-xs ${
-                                             lead.temperature === 'Quente' 
-                                               ? 'border-red-300 text-red-700 bg-red-50' 
-                                               : lead.temperature === 'Morno'
-                                               ? 'border-yellow-300 text-yellow-700 bg-yellow-50'
-                                               : 'border-blue-300 text-blue-700 bg-blue-50'
-                                           }`}
-                                         >
-                                           {lead.temperature}
-                                         </Badge>
-                                       )}
-                                     </div>
-                                   )}
-
-                                  {lead.latest_appointment && (
-                                    <div className="flex items-center gap-2 text-blue-600">
-                                      <Calendar className="w-3 h-3" />
-                                      <span className="text-xs">
-                                        {formatDateTime(
-                                          lead.latest_appointment.date, 
-                                          lead.latest_appointment.time
-                                        )}
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {lead.assigned_to && (
-                                    <div className="flex items-center gap-2">
-                                      <User className="w-3 h-3" />
-                                      <span>{lead.assigned_to.full_name}</span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Tags do Lead */}
-                                {lead.tags && lead.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {lead.tags.map(tag => (
-                                      <TagBadge 
-                                        key={tag.id} 
-                                        name={tag.name} 
-                                        color={tag.color} 
-                                        size="sm" 
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-
-                                {/* Indicadores de atividade */}
-                                {(lead.appointments_count > 0 || lead.follow_ups_count > 0) && (
-                                  <div className="flex gap-2 text-xs">
-                                    {lead.appointments_count > 0 && (
-                                      <Badge variant="secondary" className="text-xs">
-                                        {lead.appointments_count} agend.
-                                      </Badge>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-background border w-48">
+                                    <DropdownMenuItem onClick={() => handleEditLead(lead)}>
+                                      <Edit className="w-4 h-4 mr-2" />
+                                      Editar Lead
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleViewJourney(lead)}>
+                                      <BarChart3 className="w-4 h-4 mr-2" />
+                                      Ver Jornada
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleAppointmentAction(lead)}>
+                                      <Calendar className="w-4 h-4 mr-2" />
+                                      {lead.appointments_count > 0 ? 'Ver Agendamento' : 'Agendar'}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleTransferLead(lead)}>
+                                      <ArrowRightLeft className="w-4 h-4 mr-2" />
+                                      Transferir
+                                    </DropdownMenuItem>
+                                    {lead.phone && (
+                                      <DropdownMenuItem>
+                                        <WhatsAppLeadButton 
+                                          phone={lead.phone} 
+                                          leadName={lead.name} 
+                                          size="sm"
+                                        />
+                                        <span className="ml-2">WhatsApp</span>
+                                      </DropdownMenuItem>
                                     )}
-                                    {lead.follow_ups_count > 0 && (
-                                      <Badge variant="secondary" className="text-xs">
-                                        {lead.follow_ups_count} follow-ups
-                                      </Badge>
-                                    )}
-                                  </div>
-                                )}
-
-                                {dragLoading === lead.id && (
-                                  <div className="flex items-center gap-2 text-xs text-blue-600">
-                                    <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                    Movendo...
-                                  </div>
-                                )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
+
+                              {dragLoading === lead.id && (
+                                <div className="flex items-center gap-2 text-xs text-blue-600 mt-2">
+                                  <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                  Movendo...
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         )}
