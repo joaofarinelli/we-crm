@@ -131,38 +131,43 @@ export const LeadsPipeline = () => {
   }
 
   return (
-    <div className="p-6 space-y-4 h-full flex flex-col min-h-0 overflow-hidden">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pipeline de Leads</h1>
-          <p className="text-gray-600 mt-1">Acompanhe a jornada completa dos seus leads</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowColumnManager(!showColumnManager)}
-            >
-              Gerenciar Colunas
-            </Button>
-            <Button onClick={openLeadDialog}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Lead
-            </Button>
+    <div className="p-6 h-full flex flex-col overflow-hidden">
+      {/* Header fixo */}
+      <div className="shrink-0 space-y-4 pb-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Pipeline de Leads</h1>
+            <p className="text-gray-600 mt-1">Acompanhe a jornada completa dos seus leads</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowColumnManager(!showColumnManager)}
+              >
+                Gerenciar Colunas
+              </Button>
+              <Button onClick={openLeadDialog}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Lead
+              </Button>
+            </div>
           </div>
         </div>
+
+        <PipelineStatusIndicator />
+
+        <PipelineFilters filters={filters} onFiltersChange={setFilters} />
+
+        {showColumnManager && <PipelineColumnManager />}
       </div>
 
-      <PipelineStatusIndicator />
-
-      <PipelineFilters filters={filters} onFiltersChange={setFilters} />
-
-      {showColumnManager && <PipelineColumnManager />}
-
+      {/* Área scrollável das colunas */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto overflow-y-hidden pb-4 flex-1 min-h-0">
-          {columns.map(column => (
-            <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col h-full">
+        <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+          <div className="flex gap-6 h-full pb-4">
+            {columns.map(column => (
+              <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col">
               <Card className="shrink-0 mb-4">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
@@ -377,8 +382,9 @@ export const LeadsPipeline = () => {
                   </div>
                 )}
               </Droppable>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       </DragDropContext>
 
