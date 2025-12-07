@@ -4,7 +4,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap, MoreVertical, Settings2, Download, Upload, Copy, ArrowDownAZ, Check, Filter, Search, X } from 'lucide-react';
+import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap, MoreVertical, Settings2, Download, Upload, Copy, ArrowDownAZ, Check, Filter, X } from 'lucide-react';
 import { useLeadsPipeline, SortOrder } from '@/hooks/useLeadsPipeline';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AddLeadDialog } from '@/components/AddLeadDialog';
@@ -238,7 +238,7 @@ export const LeadsPipeline = () => {
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              
               
             </div>
             
@@ -541,13 +541,8 @@ export const LeadsPipeline = () => {
 
       <ImportLeadsDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
 
-      <ViewLeadDetailDialog 
-        open={viewLeadDetailOpen} 
-        onOpenChange={setViewLeadDetailOpen} 
-        lead={selectedLeadForDetail}
-        onLeadUpdated={() => {
-          // Refresh will happen automatically via realtime
-        }}
-      />
+      <ViewLeadDetailDialog open={viewLeadDetailOpen} onOpenChange={setViewLeadDetailOpen} lead={selectedLeadForDetail} onLeadUpdated={() => {
+      // Refresh will happen automatically via realtime
+    }} />
     </div>;
 };
