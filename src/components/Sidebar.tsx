@@ -8,7 +8,7 @@ import { SidebarGroup } from "@/components/SidebarGroup";
 import { 
   LayoutDashboard, Users, CheckSquare, BarChart3, Settings, UserPlus, 
   Kanban, FileText, Calendar, CalendarDays, Video, Shield, Package, 
-  Handshake, Clock, Tag, MessageCircle, LucideIcon 
+  Handshake, Clock, Tag, MessageCircle, LucideIcon, Zap 
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -54,6 +54,12 @@ const menuStructure = [{
     icon: Package,
     permission: 'products',
     route: '/products'
+  }, {
+    id: 'automation',
+    label: 'Automação',
+    icon: Zap,
+    permission: 'leads',
+    route: '/automation'
   }]
 }, {
   type: 'group' as const,

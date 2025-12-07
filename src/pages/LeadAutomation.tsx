@@ -66,20 +66,14 @@ const LeadAutomation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Automação de Captação</h1>
-            <p className="text-muted-foreground mt-1">
-              Configure fontes automáticas para capturar leads
-            </p>
-          </div>
-        </div>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Automação de Captação</h1>
+        <p className="text-muted-foreground mt-1">
+          Configure fontes automáticas para capturar leads
+        </p>
+      </div>
 
         {/* Sources Section */}
         <div className="grid gap-6">
@@ -208,8 +202,6 @@ const LeadAutomation = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-
       {/* Form Editor Dialog */}
       <FormEditorDialog
         open={editorOpen}
