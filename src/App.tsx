@@ -57,10 +57,10 @@ function App() {
                     <Route path="/users" element={<Home />} />
                     <Route path="/settings" element={<Home />} />
                     <Route path="/whatsapp" element={<Home />} />
+                    <Route path="/automation" element={<Home />} />
                     
                     {/* Other routes */}
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/automation" element={<LeadAutomation />} />
                     <Route path="/form/:slug" element={<PublicLeadForm />} />
                     <Route path="/admin" element={<AdminSaas />} />
                     <Route path="/admin/companies/:id/edit" element={<CompanyEditPage />} />

@@ -24,6 +24,7 @@ import { WhatsAppChat } from '@/components/whatsapp/WhatsAppChat';
 import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
 import { LeadDialogProvider } from '@/contexts/LeadDialogContext';
+import LeadAutomation from '@/pages/LeadAutomation';
 
 // Mapeamento de rota para tab ID
 const pathToTab: Record<string, string> = {
@@ -43,6 +44,7 @@ const pathToTab: Record<string, string> = {
   '/users': 'users',
   '/settings': 'settings',
   '/whatsapp': 'whatsapp',
+  '/automation': 'automation',
 };
 
 // Mapeamento inverso: tab ID para rota
@@ -63,6 +65,7 @@ const tabToPath: Record<string, string> = {
   'users': '/users',
   'settings': '/settings',
   'whatsapp': '/whatsapp',
+  'automation': '/automation',
 };
 
 const Index = () => {
@@ -145,6 +148,8 @@ const Index = () => {
         return <UserManagement />;
       case 'settings':
         return <Settings />;
+      case 'automation':
+        return <LeadAutomation />;
       default:
         return <Dashboard />;
     }
