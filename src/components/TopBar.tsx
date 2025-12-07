@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +18,7 @@ export const TopBar = () => {
 
   if (loading) {
     return (
-      <div className="h-[75px] bg-white border-b shadow-sm flex items-center justify-end px-6">
+      <div className="h-[65px] bg-white border-b shadow-sm flex items-center justify-end px-6">
         <div className="animate-pulse flex items-center space-x-3">
           <div className="rounded-full bg-gray-200 h-8 w-8"></div>
           <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -30,38 +29,29 @@ export const TopBar = () => {
 
   const displayName = userInfo?.full_name || userInfo?.email || "Usuário";
   const initials = displayName
-    .split(' ')
-    .map(name => name.charAt(0))
-    .join('')
+    .split(" ")
+    .map((name) => name.charAt(0))
+    .join("")
     .toUpperCase()
     .slice(0, 2);
 
   return (
-    <div className="h-[75px] bg-white border-b shadow-sm flex items-center justify-end px-6">
+    <div className="h-[65px] bg-white border-b shadow-sm flex items-center justify-end px-6">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2"
-          >
+          <Button variant="ghost" className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2">
             <Avatar className="h-8 w-8">
               <AvatarImage src="" alt={displayName} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                {initials}
-              </AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm">{initials}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium text-gray-700 hidden sm:block">
-              {displayName}
-            </span>
+            <span className="text-sm font-medium text-gray-700 hidden sm:block">{displayName}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {userInfo?.email}
-              </p>
+              <p className="text-xs leading-none text-muted-foreground">{userInfo?.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
