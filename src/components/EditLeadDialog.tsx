@@ -106,6 +106,11 @@ const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps
 
   useEffect(() => {
     if (lead) {
+      // Handle assigned_to which might be an object from join query or a string UUID
+      const assignedToValue = typeof lead.assigned_to === 'object' && lead.assigned_to !== null
+        ? (lead.assigned_to as { id: string }).id
+        : lead.assigned_to || '';
+      
       setFormData({
         name: lead.name || '',
         email: lead.email || '',
@@ -113,7 +118,7 @@ const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps
         status: lead.status || 'Novo Lead',
         source: lead.source || '',
         partner_id: lead.partner_id || '',
-        assigned_to: lead.assigned_to || '',
+        assigned_to: assignedToValue,
         temperature: lead.temperature || 'Frio',
         tags: [],
         product_id: '',
