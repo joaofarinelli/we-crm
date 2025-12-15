@@ -311,6 +311,156 @@ export const useDuplicateLeads = () => {
     }
   }, [user, toast, logDelete]);
 
+  // Mesclar todos os grupos de duplicados
+  const mergeAllDuplicates = useCallback(async (
+    primarySelections: Record<string, string> // groupKey -> primaryLeadId
+  ) => {
+    if (!user || duplicateGroups.length === 0) return;
+
+    setMerging(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      for (const group of duplicateGroups) {
+        const primaryId = primarySelections[group.key];
+        if (!primaryId) continue;
+
+        const secondaryIds = group.leads
+          .filter(l => l.id !== primaryId)
+          .map(l => l.id);
+
+        try {
+          // Buscar dados de todos os leads
+          const { data: allLeads, error: fetchError } = await supabase
+            .from('leads')
+            .select('*')
+            .in('id', [primaryId, ...secondaryIds]);
+
+          if (fetchError) throw fetchError;
+
+          const primaryLead = allLeads?.find(l => l.id === primaryId);
+          const secondaryLeads = allLeads?.filter(l => secondaryIds.includes(l.id)) || [];
+
+          if (!primaryLead) continue;
+
+          // Mesclar dados
+          const mergedData: Partial<DuplicateLead> = {
+            name: primaryLead.name,
+            email: primaryLead.email,
+            phone: primaryLead.phone,
+            status: primaryLead.status,
+            source: primaryLead.source,
+            temperature: primaryLead.temperature,
+            product_name: primaryLead.product_name,
+            product_value: primaryLead.product_value,
+            assigned_to: primaryLead.assigned_to,
+            partner_id: primaryLead.partner_id
+          };
+
+          for (const secondary of secondaryLeads) {
+            if (!mergedData.email && secondary.email) mergedData.email = secondary.email;
+            if (!mergedData.phone && secondary.phone) mergedData.phone = secondary.phone;
+            if (!mergedData.source && secondary.source) mergedData.source = secondary.source;
+            if (!mergedData.product_name && secondary.product_name) mergedData.product_name = secondary.product_name;
+            if (!mergedData.product_value && secondary.product_value) mergedData.product_value = secondary.product_value;
+            if (!mergedData.assigned_to && secondary.assigned_to) mergedData.assigned_to = secondary.assigned_to;
+            if (!mergedData.partner_id && secondary.partner_id) mergedData.partner_id = secondary.partner_id;
+            if (secondary.temperature === 'Quente' && mergedData.temperature !== 'Quente') {
+              mergedData.temperature = 'Quente';
+            } else if (secondary.temperature === 'Morno' && mergedData.temperature === 'Frio') {
+              mergedData.temperature = 'Morno';
+            }
+            if (secondary.product_value && mergedData.product_value) {
+              mergedData.product_value = (mergedData.product_value || 0) + secondary.product_value;
+            }
+          }
+
+          // Atualizar lead principal
+          await supabase
+            .from('leads')
+            .update({ ...mergedData, updated_at: new Date().toISOString() })
+            .eq('id', primaryId);
+
+          // Transferir appointments
+          for (const secondaryId of secondaryIds) {
+            await supabase
+              .from('appointments')
+              .update({ lead_id: primaryId })
+              .eq('lead_id', secondaryId);
+          }
+
+          // Transferir tags
+          for (const secondaryId of secondaryIds) {
+            const { data: secondaryTags } = await supabase
+              .from('lead_tag_assignments')
+              .select('tag_id')
+              .eq('lead_id', secondaryId);
+
+            if (secondaryTags && secondaryTags.length > 0) {
+              const { data: existingTags } = await supabase
+                .from('lead_tag_assignments')
+                .select('tag_id')
+                .eq('lead_id', primaryId);
+
+              const existingTagIds = new Set(existingTags?.map(t => t.tag_id) || []);
+
+              for (const tag of secondaryTags) {
+                if (!existingTagIds.has(tag.tag_id)) {
+                  await supabase
+                    .from('lead_tag_assignments')
+                    .insert({ lead_id: primaryId, tag_id: tag.tag_id });
+                }
+              }
+            }
+          }
+
+          // Registrar logs e deletar leads secundários
+          for (const secondaryId of secondaryIds) {
+            const secondaryLead = secondaryLeads.find(l => l.id === secondaryId);
+            if (secondaryLead) {
+              await logDelete(secondaryId, primaryLead.company_id, secondaryLead, `Mesclado com lead ${primaryLead.name}`);
+            }
+          }
+
+          await supabase
+            .from('leads')
+            .delete()
+            .in('id', secondaryIds);
+
+          successCount++;
+        } catch (error) {
+          console.error('Erro ao mesclar grupo:', group.key, error);
+          errorCount++;
+        }
+      }
+
+      setDuplicateGroups([]);
+
+      if (errorCount === 0) {
+        toast({
+          title: "Todos os leads mesclados",
+          description: `${successCount} grupo(s) de duplicatas foram mesclados com sucesso.`
+        });
+      } else {
+        toast({
+          title: "Mesclagem parcial",
+          description: `${successCount} grupo(s) mesclados, ${errorCount} erro(s).`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao mesclar todos:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível mesclar todos os leads",
+        variant: "destructive"
+      });
+    } finally {
+      setMerging(false);
+    }
+  }, [user, toast, logDelete, duplicateGroups]);
+
   // Ignorar grupo de duplicatas
   const ignoreGroup = useCallback((groupKey: string) => {
     setDuplicateGroups(prev => prev.filter(g => g.key !== groupKey));
@@ -322,6 +472,7 @@ export const useDuplicateLeads = () => {
     duplicateGroups,
     findDuplicates,
     mergeLeads,
+    mergeAllDuplicates,
     ignoreGroup
   };
 };

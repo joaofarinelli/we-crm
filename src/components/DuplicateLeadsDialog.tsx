@@ -33,7 +33,8 @@ import {
   Merge,
   X,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Layers
 } from 'lucide-react';
 import { useDuplicateLeads, DuplicateGroup } from '@/hooks/useDuplicateLeads';
 import { format } from 'date-fns';
@@ -79,11 +80,13 @@ export const DuplicateLeadsDialog = ({ open, onOpenChange }: DuplicateLeadsDialo
     duplicateGroups, 
     findDuplicates, 
     mergeLeads, 
+    mergeAllDuplicates,
     ignoreGroup 
   } = useDuplicateLeads();
 
   const [selectedPrimary, setSelectedPrimary] = useState<Record<string, string>>({});
   const [confirmMerge, setConfirmMerge] = useState<DuplicateGroup | null>(null);
+  const [confirmMergeAll, setConfirmMergeAll] = useState(false);
 
   // Buscar duplicatas ao abrir o dialog
   useEffect(() => {
@@ -114,6 +117,10 @@ export const DuplicateLeadsDialog = ({ open, onOpenChange }: DuplicateLeadsDialo
     setConfirmMerge(group);
   };
 
+  const handleMergeAll = () => {
+    setConfirmMergeAll(true);
+  };
+
   const confirmMergeAction = async () => {
     if (!confirmMerge) return;
     
@@ -125,6 +132,13 @@ export const DuplicateLeadsDialog = ({ open, onOpenChange }: DuplicateLeadsDialo
     await mergeLeads(primaryId, secondaryIds, confirmMerge.key);
     setConfirmMerge(null);
   };
+
+  const confirmMergeAllAction = async () => {
+    await mergeAllDuplicates(selectedPrimary);
+    setConfirmMergeAll(false);
+  };
+
+  const totalLeadsToMerge = duplicateGroups.reduce((sum, g) => sum + g.leads.length - 1, 0);
 
   return (
     <>
@@ -274,19 +288,37 @@ export const DuplicateLeadsDialog = ({ open, onOpenChange }: DuplicateLeadsDialo
                 Fechar
               </Button>
               {duplicateGroups.length > 0 && (
-                <Button onClick={() => findDuplicates()} disabled={loading}>
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : null}
-                  Reescanear
-                </Button>
+                <>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => findDuplicates()} 
+                    disabled={loading || merging}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : null}
+                    Reescanear
+                  </Button>
+                  <Button 
+                    onClick={handleMergeAll} 
+                    disabled={loading || merging}
+                    className="bg-primary"
+                  >
+                    {merging ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Layers className="w-4 h-4 mr-2" />
+                    )}
+                    Mesclar Todos ({totalLeadsToMerge} leads)
+                  </Button>
+                </>
               )}
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de confirmação */}
+      {/* Dialog de confirmação para um grupo */}
       <AlertDialog open={!!confirmMerge} onOpenChange={() => setConfirmMerge(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -316,6 +348,41 @@ export const DuplicateLeadsDialog = ({ open, onOpenChange }: DuplicateLeadsDialo
                 <Merge className="w-4 h-4 mr-2" />
               )}
               Confirmar Mesclagem
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog de confirmação para mesclar todos */}
+      <AlertDialog open={confirmMergeAll} onOpenChange={setConfirmMergeAll}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-500" />
+              Mesclar Todos os Duplicados
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação irá processar <strong>{duplicateGroups.length} grupo(s)</strong> de duplicatas:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Manter o lead selecionado como principal em cada grupo</li>
+                <li>Transferir agendamentos e tags para os leads principais</li>
+                <li>Preencher campos vazios com dados dos leads secundários</li>
+                <li>
+                  <strong>Excluir permanentemente {totalLeadsToMerge} lead(s)</strong>
+                </li>
+              </ul>
+              <p className="mt-3 font-medium text-destructive">Esta ação não pode ser desfeita!</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmMergeAllAction} disabled={merging}>
+              {merging ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Layers className="w-4 h-4 mr-2" />
+              )}
+              Mesclar Todos
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
