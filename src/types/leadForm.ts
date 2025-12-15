@@ -8,6 +8,11 @@ export interface LeadFormSettings {
   subtitle: string;
   logoUrl?: string;
   backgroundImage?: string;
+  // Step-by-step form settings
+  welcomeMessage?: string;
+  startButtonText?: string;
+  nextButtonText?: string;
+  backButtonText?: string;
 }
 
 export interface LeadFormField {

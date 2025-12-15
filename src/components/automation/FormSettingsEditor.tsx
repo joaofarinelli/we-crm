@@ -15,9 +15,36 @@ export const FormSettingsEditor = ({ settings, onSettingsChange }: FormSettingsE
 
   return (
     <div className="space-y-4">
+      {/* Welcome Screen */}
+      <div className="space-y-3">
+        <h3 className="font-medium text-sm">Tela de Boas-vindas</h3>
+        
+        <div>
+          <Label className="text-xs">Mensagem de boas-vindas</Label>
+          <Textarea
+            value={settings.welcomeMessage || ''}
+            onChange={(e) => updateSetting('welcomeMessage', e.target.value)}
+            placeholder="Ex: Bem-vindo(a) ao nosso formulário de contato..."
+            rows={3}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Se vazio, usará o título e subtítulo como mensagem
+          </p>
+        </div>
+
+        <div>
+          <Label className="text-xs">Texto do botão "Começar"</Label>
+          <Input
+            value={settings.startButtonText || ''}
+            onChange={(e) => updateSetting('startButtonText', e.target.value)}
+            placeholder="Ex: Começar"
+          />
+        </div>
+      </div>
+
       {/* Texts */}
       <div className="space-y-3">
-        <h3 className="font-medium text-sm">Textos</h3>
+        <h3 className="font-medium text-sm">Textos do formulário</h3>
         
         <div>
           <Label className="text-xs">Título</Label>
@@ -37,8 +64,27 @@ export const FormSettingsEditor = ({ settings, onSettingsChange }: FormSettingsE
           />
         </div>
 
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs">Texto do botão "Próximo"</Label>
+            <Input
+              value={settings.nextButtonText || ''}
+              onChange={(e) => updateSetting('nextButtonText', e.target.value)}
+              placeholder="Próximo"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Texto do botão "Voltar"</Label>
+            <Input
+              value={settings.backButtonText || ''}
+              onChange={(e) => updateSetting('backButtonText', e.target.value)}
+              placeholder="Voltar"
+            />
+          </div>
+        </div>
+
         <div>
-          <Label className="text-xs">Texto do Botão</Label>
+          <Label className="text-xs">Texto do Botão de Envio</Label>
           <Input
             value={settings.buttonText}
             onChange={(e) => updateSetting('buttonText', e.target.value)}
